@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class Room
-{
+public class Room {
 
-    public Dictionary<string, Room> neighbourRooms;
+    public Dictionary<Direction, Room> neighbourRooms;
 
     public Vector2Int roomPos;
     public Vector2Int roomSize;
@@ -14,32 +13,35 @@ public class Room
     public Room(Vector2Int roomSize, Vector2Int roomPos) {
         this.roomSize = roomSize;
         this.roomPos = roomPos;
-        neighbourRooms = new Dictionary<string, Room>();
+        neighbourRooms = new Dictionary<Direction, Room>();
     }
 
     public List<Vector2Int> GetNeighbourPositions() {
-        List<Vector2Int> neighbourPositions = new List<Vector2Int>();
-        neighbourPositions.Add(new Vector2Int(roomPos.x - roomSize.x - 1, roomPos.y));
-        neighbourPositions.Add(new Vector2Int(roomPos.x + roomSize.x + 1, roomPos.y));
-        neighbourPositions.Add(new Vector2Int(roomPos.x, roomPos.y + roomSize.y + 1));
-        neighbourPositions.Add(new Vector2Int(roomPos.x, roomPos.y - roomSize.y - 1));
+        List<Vector2Int> neighbourPositions = new List<Vector2Int>
+        {
+            new Vector2Int(roomPos.x - roomSize.x - 1, roomPos.y),
+            new Vector2Int(roomPos.x + roomSize.x + 1, roomPos.y),
+            new Vector2Int(roomPos.x, roomPos.y + roomSize.y + 1),
+            new Vector2Int(roomPos.x, roomPos.y - roomSize.y - 1)
+        };
         return neighbourPositions;
     }
 
     public void Connect(Room neighborRoom) {
-        string direction = "";
+        Direction direction = Direction.North;
+
         if(neighborRoom.roomPos.y < roomPos.y) {
-            direction = "N";
+            direction = Direction.North;
+        } else if(neighborRoom.roomPos.x > roomPos.x) {
+            direction = Direction.East;
+        } else if(neighborRoom.roomPos.y > roomPos.y) {
+            direction = Direction.South;
+        } else if(neighborRoom.roomPos.x < roomPos.x) {
+            direction = Direction.West;
         }
-        if(neighborRoom.roomPos.x > roomPos.x) {
-            direction = "E";
+
+        if(!neighbourRooms.ContainsKey(direction)) {
+            neighbourRooms.Add(direction, neighborRoom);
         }
-        if(neighborRoom.roomPos.y > roomPos.y) {
-            direction = "S";
-        }
-        if(neighborRoom.roomPos.x < roomPos.x) {
-            direction = "W";
-        }
-        neighbourRooms.Add(direction, neighborRoom);
     }
 }
