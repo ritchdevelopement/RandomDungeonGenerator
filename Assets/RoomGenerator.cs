@@ -11,81 +11,60 @@ public class RoomGenerator : MonoBehaviour {
 
     private void DrawWalls(Room room, GameObject roomGameObject) {
         GameObject wallGameObject = new GameObject("Wall");
+
+        float left = -room.roomSize.x / 2f + room.roomPos.x;
+        float right = room.roomSize.x / 2f + room.roomPos.x;
+        float top = room.roomSize.y / 2f + room.roomPos.y;
+        float bottom = -room.roomSize.y / 2f + room.roomPos.y;
+
         for(int i = 0; i <= room.roomSize.x; i++) {
             for(int j = 0; j <= room.roomSize.y; j++) {
-                float leftBoundary = -room.roomSize.x / 2 + room.roomPos.x;
-                float topBoundary = room.roomSize.y / 2 + room.roomPos.y;
-                float rightBoundary = room.roomSize.x / 2 + room.roomPos.x;
-                float bottomBoundary = -room.roomSize.y / 2 + room.roomPos.y;
-
-                Vector2 tilePos = new Vector2(leftBoundary + i, topBoundary - j);
+                Vector2 tilePos = new Vector2(left + i, top - j);
+                Vector2Int tile = Vector2Int.RoundToInt(tilePos);
 
                 bool isEdgeTile =
-                    tilePos.x == leftBoundary ||
-                    tilePos.x == rightBoundary ||
-                    tilePos.y == topBoundary ||
-                    tilePos.y == bottomBoundary;
+                    Mathf.Approximately(tilePos.x, left) ||
+                    Mathf.Approximately(tilePos.x, right) ||
+                    Mathf.Approximately(tilePos.y, top) ||
+                    Mathf.Approximately(tilePos.y, bottom);
 
-                if(isEdgeTile && !isDoor(room, tilePos)) {
+                if(isEdgeTile && !IsDoorTile(room, tile)) {
                     Instantiate(wallTile, tilePos, Quaternion.identity).transform.parent = wallGameObject.transform;
                 }
             }
         }
+
         wallGameObject.transform.parent = roomGameObject.transform;
     }
 
-    private bool isDoor(Room room, Vector2 tilePosition) {
-        Vector2Int tile = Vector2Int.RoundToInt(tilePosition);
-        Dictionary<Direction, Room> neighbourRooms = room.neighbourRooms;
+    private bool IsDoorTile(Room room, Vector2Int tile) {
+        int x = room.roomPos.x;
+        int y = room.roomPos.y;
+        int halfWidth = room.roomSize.x / 2;
+        int halfHeight = room.roomSize.y / 2;
 
-        foreach(KeyValuePair<Direction, Room> neighbour in neighbourRooms) {
-            switch(neighbour.Key) {
-                case Direction.North: {
-                    int y = room.roomPos.y - room.roomSize.y / 2;
-                    Vector2Int[] doors = {
-                        new(room.roomPos.x, y),
-                        new(room.roomPos.x + 1, y),
-                        new(room.roomPos.x - 1, y)
-                    };
-                    if(System.Array.Exists(doors, d => d == tile))
-                        return true;
-                    break;
-                }
-                case Direction.East: {
-                    int x = room.roomPos.x + room.roomSize.x / 2;
-                    Vector2Int[] doors = {
-                        new(x, room.roomPos.y),
-                        new(x, room.roomPos.y + 1),
-                        new(x, room.roomPos.y - 1)
-                    };
-                    if(System.Array.Exists(doors, d => d == tile))
-                        return true;
-                    break;
-                }
-                case Direction.South: {
-                    int y = room.roomPos.y + room.roomSize.y / 2;
-                    Vector2Int[] doors = {
-                        new(room.roomPos.x, y),
-                        new(room.roomPos.x + 1, y),
-                        new(room.roomPos.x - 1, y)
-                    };
-                    if(System.Array.Exists(doors, d => d == tile))
-                        return true;
-                    break;
-                }
-                case Direction.West: {
-                    int x = room.roomPos.x - room.roomSize.x / 2;
-                    Vector2Int[] doors = {
-                        new(x, room.roomPos.y),
-                        new(x, room.roomPos.y + 1),
-                        new(x, room.roomPos.y - 1)
-                    };
-                    if(System.Array.Exists(doors, d => d == tile))
-                        return true;
-                    break;
-                }
+        var doorOffsets = new Dictionary<Direction, (bool isOpen, Vector2Int center)> {
+            { Direction.North, (room.doorTop, new Vector2Int(x, y + halfHeight)) },
+            { Direction.South, (room.doorBottom, new Vector2Int(x, y - halfHeight)) },
+            { Direction.West, (room.doorLeft, new Vector2Int(x - halfWidth, y)) },
+            { Direction.East, (room.doorRight, new Vector2Int(x + halfWidth, y)) }
+        };
+
+        foreach((Direction dir, (bool isOpen, Vector2Int center)) in doorOffsets) {
+            if(!isOpen) continue;
+
+            if(
+                tile == center || 
+                tile == center + Vector2Int.left || 
+                tile == center + Vector2Int.right ||
+                tile == center + Vector2Int.up || 
+                tile == center + Vector2Int.down
+             ) {
+                return true;
             }
         }
+
+
         return false;
     }
 }
