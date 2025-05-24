@@ -15,13 +15,12 @@ public class Room {
     }
 
     public List<Vector2Int> GetNeighbourPositions() {
-        List<Vector2Int> neighbourPositions = new List<Vector2Int> {
+        return new List<Vector2Int> {
             new Vector2Int(roomPos.x - roomSize.x - 1, roomPos.y), // West
             new Vector2Int(roomPos.x + roomSize.x + 1, roomPos.y), // East
             new Vector2Int(roomPos.x, roomPos.y + roomSize.y + 1), // North
             new Vector2Int(roomPos.x, roomPos.y - roomSize.y - 1) // South
         };
-        return neighbourPositions;
     }
 
     public void Connect(Room neighborRoom) {
