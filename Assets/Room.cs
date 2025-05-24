@@ -2,9 +2,7 @@
 using UnityEngine;
 
 public class Room {
-
     public Dictionary<Direction, Room> neighbourRooms;
-
     public Vector2Int roomPos;
     public Vector2Int roomSize;
 
@@ -17,31 +15,51 @@ public class Room {
     }
 
     public List<Vector2Int> GetNeighbourPositions() {
-        List<Vector2Int> neighbourPositions = new List<Vector2Int>
-        {
-            new Vector2Int(roomPos.x - roomSize.x - 1, roomPos.y),
-            new Vector2Int(roomPos.x + roomSize.x + 1, roomPos.y),
-            new Vector2Int(roomPos.x, roomPos.y + roomSize.y + 1),
-            new Vector2Int(roomPos.x, roomPos.y - roomSize.y - 1)
+        return new List<Vector2Int> {
+            new Vector2Int(roomPos.x - roomSize.x - 1, roomPos.y), // West
+            new Vector2Int(roomPos.x + roomSize.x + 1, roomPos.y), // East
+            new Vector2Int(roomPos.x, roomPos.y + roomSize.y + 1), // North
+            new Vector2Int(roomPos.x, roomPos.y - roomSize.y - 1) // South
         };
-        return neighbourPositions;
     }
 
     public void Connect(Room neighborRoom) {
-        Direction direction = Direction.North;
+        Direction? direction = GetDirectionTo(neighborRoom);
+        if(direction == null) return;
 
-        if(neighborRoom.roomPos.y < roomPos.y) {
-            direction = Direction.North;
-        } else if(neighborRoom.roomPos.x > roomPos.x) {
-            direction = Direction.East;
-        } else if(neighborRoom.roomPos.y > roomPos.y) {
-            direction = Direction.South;
-        } else if(neighborRoom.roomPos.x < roomPos.x) {
-            direction = Direction.West;
+        switch(direction) {
+            case Direction.North:
+                doorTop = true;
+                neighborRoom.doorBottom = true;
+                break;
+            case Direction.East:
+                doorRight = true;
+                neighborRoom.doorLeft = true;
+                break;
+            case Direction.South:
+                doorBottom = true;
+                neighborRoom.doorTop = true;
+                break;
+            case Direction.West:
+                doorLeft = true;
+                neighborRoom.doorRight = true;
+                break;
         }
 
-        if(!neighbourRooms.ContainsKey(direction)) {
-            neighbourRooms.Add(direction, neighborRoom);
+        if(!neighbourRooms.ContainsKey(direction.Value)) {
+            neighbourRooms.Add(direction.Value, neighborRoom);
         }
     }
+
+    private Direction? GetDirectionTo(Room other) {
+        Vector2Int delta = other.roomPos - roomPos;
+
+        if(delta.y > 0 && delta.x == 0) return Direction.North;
+        if(delta.y < 0 && delta.x == 0) return Direction.South;
+        if(delta.x > 0 && delta.y == 0) return Direction.East;
+        if(delta.x < 0 && delta.y == 0) return Direction.West;
+
+        return null;
+    }
+
 }
