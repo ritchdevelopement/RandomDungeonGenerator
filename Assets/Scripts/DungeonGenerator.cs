@@ -4,15 +4,27 @@ using UnityEngine;
 public class DungeonGenerator : MonoBehaviour {
     public Vector2Int roomSize;
     public int numberOfRooms;
+    public GameObject wallTile;
 
+    [SerializeField]
+    private RoomGenerator roomGenerator;
     private Dictionary<Vector2Int, Room> rooms;
     private List<Room> createdRooms = new List<Room>();
-    private RoomGenerator roomGenerator;
+    private HashSet<Vector2Int> reservedPositions = new HashSet<Vector2Int>();
 
     private void Start() {
-        roomGenerator = GameObject.FindGameObjectWithTag("RoomGenerator").GetComponent<RoomGenerator>();
-        CreateRooms();
         GenerateDungeon();
+    }
+
+    private void GenerateDungeon() {
+        CreateRooms();
+        Debug.Log($"Generated {createdRooms.Count} rooms out of requested {numberOfRooms}.");
+
+        RoomGenerator roomGenerator = new RoomGenerator(wallTile);
+
+        foreach(Room room in createdRooms) {
+            roomGenerator.DrawRoom(room);
+        }
     }
 
     private void CreateRooms() {
@@ -21,6 +33,7 @@ public class DungeonGenerator : MonoBehaviour {
 
         Queue<Room> roomsToCreate = new();
         roomsToCreate.Enqueue(new Room(roomSize, initialRoomPos));
+        reservedPositions.Add(initialRoomPos);
 
         while(roomsToCreate.Count > 0 && createdRooms.Count < numberOfRooms) {
             Room currentRoom = roomsToCreate.Dequeue();
@@ -37,7 +50,7 @@ public class DungeonGenerator : MonoBehaviour {
         List<Vector2Int> availableNeighbours = new();
 
         foreach(Vector2Int position in neighbourPositions) {
-            if(!rooms.ContainsKey(position)) {
+            if(!rooms.ContainsKey(position) && !reservedPositions.Contains(position)) {
                 availableNeighbours.Add(position);
             }
         }
@@ -48,6 +61,7 @@ public class DungeonGenerator : MonoBehaviour {
             Vector2Int chosen = availableNeighbours[Random.Range(0, availableNeighbours.Count)];
             availableNeighbours.Remove(chosen);
             roomsToCreate.Enqueue(new Room(roomSize, chosen));
+            reservedPositions.Add(chosen);
         }
     }
 
@@ -58,12 +72,6 @@ public class DungeonGenerator : MonoBehaviour {
                     room.Connect(neighbour);
                 }
             }
-        }
-    }
-
-    private void GenerateDungeon() {
-        foreach(Room room in createdRooms) {
-            roomGenerator.DrawRoom(room);
         }
     }
 }

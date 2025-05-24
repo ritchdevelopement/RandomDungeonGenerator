@@ -150,6 +150,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roomSize: {x: 32, y: 18}
   numberOfRooms: 100
+  wallTile: {fileID: 1964693960537784010, guid: 3a9f10412519dbc458fec5f678ca8230,
+    type: 3}
 --- !u!4 &502260524
 Transform:
   m_ObjectHideFlags: 0
@@ -257,56 +259,9 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1543583662
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1543583664}
-  - component: {fileID: 1543583663}
-  m_Layer: 0
-  m_Name: RoomGenerator
-  m_TagString: RoomGenerator
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1543583663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1543583662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8dc853c2080dc614b868d6e2a731fddb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wallTile: {fileID: 1964693960537784010, guid: 3a9f10412519dbc458fec5f678ca8230,
-    type: 3}
---- !u!4 &1543583664
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1543583662}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 514634856}
   - {fileID: 502260524}
-  - {fileID: 1543583664}

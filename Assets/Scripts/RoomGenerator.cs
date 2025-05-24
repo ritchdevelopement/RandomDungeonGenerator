@@ -1,15 +1,17 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class RoomGenerator : MonoBehaviour {
-    public GameObject wallTile;
+public class RoomGenerator {
+    private GameObject allRoomsParent = new GameObject("Rooms");
+    private GameObject wallTile;
+
+    public RoomGenerator(GameObject wallTile) {
+        this.wallTile = wallTile ?? throw new MissingReferenceException("WallTile must not be null.");
+    }
 
     public void DrawRoom(Room room) {
-        if(wallTile == null) {
-            throw new MissingReferenceException($"{nameof(RoomGenerator)}: {nameof(wallTile)} is not assigned on GameObject '{gameObject.name}'.");
-        }
-
         GameObject roomGameObject = new GameObject("Room_" + room.roomPos.x + "_" + room.roomPos.y);
+        roomGameObject.transform.parent = allRoomsParent.transform;
         DrawWalls(room, roomGameObject);
     }
 
@@ -33,7 +35,7 @@ public class RoomGenerator : MonoBehaviour {
                     Mathf.Approximately(tilePos.y, bottom);
 
                 if(isEdgeTile && !IsDoorTile(room, tile)) {
-                    Instantiate(wallTile, tilePos, Quaternion.identity).transform.parent = wallGameObject.transform;
+                    Object.Instantiate(wallTile, tilePos, Quaternion.identity).transform.parent = wallGameObject.transform;
                 }
             }
         }
