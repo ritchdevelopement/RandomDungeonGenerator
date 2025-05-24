@@ -4,16 +4,27 @@ using UnityEngine;
 public class DungeonGenerator : MonoBehaviour {
     public Vector2Int roomSize;
     public int numberOfRooms;
+    public GameObject wallTile;
 
+    [SerializeField]
+    private RoomGenerator roomGenerator;
     private Dictionary<Vector2Int, Room> rooms;
     private List<Room> createdRooms = new List<Room>();
-    private RoomGenerator roomGenerator;
     private HashSet<Vector2Int> reservedPositions = new HashSet<Vector2Int>();
 
     private void Start() {
-        roomGenerator = GameObject.FindGameObjectWithTag("RoomGenerator").GetComponent<RoomGenerator>();
-        CreateRooms();
         GenerateDungeon();
+    }
+
+    private void GenerateDungeon() {
+        CreateRooms();
+        Debug.Log($"Generated {createdRooms.Count} rooms out of requested {numberOfRooms}.");
+
+        RoomGenerator roomGenerator = new RoomGenerator(wallTile);
+
+        foreach(Room room in createdRooms) {
+            roomGenerator.DrawRoom(room);
+        }
     }
 
     private void CreateRooms() {
@@ -61,13 +72,6 @@ public class DungeonGenerator : MonoBehaviour {
                     room.Connect(neighbour);
                 }
             }
-        }
-    }
-
-    private void GenerateDungeon() {
-        Debug.Log($"Generated {createdRooms.Count} rooms out of requested {numberOfRooms}.");
-        foreach(Room room in createdRooms) {
-            roomGenerator.DrawRoom(room);
         }
     }
 }
