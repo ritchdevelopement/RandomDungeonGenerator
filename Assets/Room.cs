@@ -27,25 +27,31 @@ public class Room {
 
     public void Connect(Room neighborRoom) {
         Direction? direction = GetDirectionTo(neighborRoom);
-        if(direction == null) return;
+        if(direction == null) {
+            return;
+        }
 
         switch(direction) {
-            case Direction.North:
+            case Direction.North: {
                 doorTop = true;
                 neighborRoom.doorBottom = true;
                 break;
-            case Direction.East:
+            }
+            case Direction.East: {
                 doorRight = true;
                 neighborRoom.doorLeft = true;
                 break;
-            case Direction.South:
+            }
+            case Direction.South: {
                 doorBottom = true;
                 neighborRoom.doorTop = true;
                 break;
-            case Direction.West:
+            }
+            case Direction.West: {
                 doorLeft = true;
                 neighborRoom.doorRight = true;
                 break;
+            }
         }
 
         if(!neighbourRooms.ContainsKey(direction.Value)) {
@@ -56,12 +62,19 @@ public class Room {
     private Direction? GetDirectionTo(Room other) {
         Vector2Int delta = other.roomPos - roomPos;
 
-        if(delta.y > 0 && delta.x == 0) return Direction.North;
-        if(delta.y < 0 && delta.x == 0) return Direction.South;
-        if(delta.x > 0 && delta.y == 0) return Direction.East;
-        if(delta.x < 0 && delta.y == 0) return Direction.West;
+        if(delta.y > 0 && delta.x == 0) {
+            return Direction.North;
+        }
+        if(delta.y < 0 && delta.x == 0) {
+            return Direction.South;
+        }
+        if(delta.x > 0 && delta.y == 0) {
+            return Direction.East;
+        }
+        if(delta.x < 0 && delta.y == 0) {
+            return Direction.West;
+        }
 
         return null;
     }
-
 }
