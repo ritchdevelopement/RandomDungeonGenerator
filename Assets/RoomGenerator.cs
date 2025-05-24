@@ -5,6 +5,10 @@ public class RoomGenerator : MonoBehaviour {
     public GameObject wallTile;
 
     public void DrawRoom(Room room) {
+        if(wallTile == null) {
+            throw new MissingReferenceException($"{nameof(RoomGenerator)}: {nameof(wallTile)} is not assigned on GameObject '{gameObject.name}'.");
+        }
+
         GameObject roomGameObject = new GameObject("Room_" + room.roomPos.x + "_" + room.roomPos.y);
         DrawWalls(room, roomGameObject);
     }
