@@ -55,19 +55,19 @@ public class RoomGenerator : MonoBehaviour {
         };
 
         foreach((Direction dir, (bool isOpen, Vector2Int center)) in doorOffsets) {
-            if(!isOpen) continue;
+            if(!isOpen) {
+                continue;
+            }
 
-            if(
-                tile == center || 
-                tile == center + Vector2Int.left || 
-                tile == center + Vector2Int.right ||
-                tile == center + Vector2Int.up || 
-                tile == center + Vector2Int.down
-             ) {
-                return true;
+            // Check if the tile is within the 3x3 area around the door center
+            for(int dx = -1; dx <= 1; dx++) {
+                for(int dy = -1; dy <= 1; dy++) {
+                    if(tile == center + new Vector2Int(dx, dy)) {
+                        return true;
+                    }
+                }
             }
         }
-
 
         return false;
     }
