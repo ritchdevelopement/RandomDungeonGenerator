@@ -2,17 +2,87 @@
 using UnityEngine;
 
 public class RoomGenerator {
-    private GameObject allRoomsParent = new GameObject("Rooms");
+    private GameObject allRoomsParent;
     private GameObject wallTile;
+    private Dictionary<Vector2Int, Room> rooms;
+    private List<Room> createdRooms = new List<Room>();
+    private HashSet<Vector2Int> reservedPositions = new HashSet<Vector2Int>();
+    private int numberOfRooms;
+    private Vector2Int roomSize;
 
-    public RoomGenerator(GameObject wallTile) {
+    public RoomGenerator(GameObject wallTile, int numberOfRooms, Vector2Int roomSize) {
         this.wallTile = wallTile ?? throw new MissingReferenceException("WallTile must not be null.");
+        this.numberOfRooms = numberOfRooms;
+        this.roomSize = roomSize;
+        allRoomsParent = new GameObject("Rooms");
     }
 
-    public void DrawRoom(Room room) {
+    public void Run() {
+        DrawRooms();
+    }
+
+    private void DrawRooms() {
+        CreateRooms();
+
+        foreach(Room room in createdRooms) {
+            DrawRoom(room);
+        }
+
+        Debug.Log($"Generated {createdRooms.Count} rooms out of requested {numberOfRooms}.");
+    }
+
+    private void DrawRoom(Room room) {
         GameObject roomGameObject = new GameObject("Room_" + room.roomPos.x + "_" + room.roomPos.y);
         roomGameObject.transform.parent = allRoomsParent.transform;
         DrawWalls(room, roomGameObject);
+    }
+
+    private void CreateRooms() {
+        rooms = new Dictionary<Vector2Int, Room>();
+        Vector2Int initialRoomPos = Vector2Int.zero;
+
+        Queue<Room> roomsToCreate = new();
+        roomsToCreate.Enqueue(new Room(roomSize, initialRoomPos));
+        reservedPositions.Add(initialRoomPos);
+
+        while(roomsToCreate.Count > 0 && createdRooms.Count < numberOfRooms) {
+            Room currentRoom = roomsToCreate.Dequeue();
+            rooms[currentRoom.roomPos] = currentRoom;
+            createdRooms.Add(currentRoom);
+            AddNeighbour(currentRoom, roomsToCreate);
+        }
+
+        CreateDoors(createdRooms);
+    }
+
+    private void AddNeighbour(Room currentRoom, Queue<Room> roomsToCreate) {
+        List<Vector2Int> neighbourPositions = currentRoom.GetNeighbourPositions();
+        List<Vector2Int> availableNeighbours = new();
+
+        foreach(Vector2Int position in neighbourPositions) {
+            if(!rooms.ContainsKey(position) && !reservedPositions.Contains(position)) {
+                availableNeighbours.Add(position);
+            }
+        }
+
+        int numberOfNeighbors = Random.Range(1, availableNeighbours.Count + 1);
+
+        for(int i = 0; i < numberOfNeighbors && availableNeighbours.Count > 0; i++) {
+            Vector2Int chosen = availableNeighbours[Random.Range(0, availableNeighbours.Count)];
+            availableNeighbours.Remove(chosen);
+            roomsToCreate.Enqueue(new Room(roomSize, chosen));
+            reservedPositions.Add(chosen);
+        }
+    }
+
+    private void CreateDoors(List<Room> createdRooms) {
+        foreach(Room room in createdRooms) {
+            foreach(Vector2Int pos in room.GetNeighbourPositions()) {
+                if(rooms.TryGetValue(pos, out Room neighbour)) {
+                    room.Connect(neighbour);
+                }
+            }
+        }
     }
 
     private void DrawWalls(Room room, GameObject roomGameObject) {
