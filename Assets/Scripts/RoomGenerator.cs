@@ -1,34 +1,31 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class RoomGenerator {
+public class RoomGenerator : DungeonSubGeneratorBase {
+    public GameObject wallTile;
+
     private GameObject allRoomsParent;
-    private GameObject wallTile;
-    private Dictionary<Vector2Int, Room> rooms;
-    private List<Room> createdRooms = new List<Room>();
-    private HashSet<Vector2Int> reservedPositions = new HashSet<Vector2Int>();
-    private int numberOfRooms;
-    private Vector2Int roomSize;
+    private HashSet<Vector2Int> reservedPositions = new();
 
-    public RoomGenerator(GameObject wallTile, int numberOfRooms, Vector2Int roomSize) {
-        this.wallTile = wallTile ?? throw new MissingReferenceException("WallTile must not be null.");
-        this.numberOfRooms = numberOfRooms;
-        this.roomSize = roomSize;
+    public override void Run() {
+        if(wallTile == null) {
+            throw new MissingReferenceException($"No wall tile set for {gameObject.name}: {wallTile}");
+        }
+
+        reservedPositions.Clear();
+
         allRoomsParent = new GameObject("Rooms");
-    }
 
-    public void Run() {
+        CreateRooms();
         DrawRooms();
+
+        Debug.Log($"Generated {context.createdRooms.Count} rooms out of requested {context.numberOfRooms}.");
     }
 
     private void DrawRooms() {
-        CreateRooms();
-
-        foreach(Room room in createdRooms) {
+        foreach(Room room in context.createdRooms.Values) {
             DrawRoom(room);
         }
-
-        Debug.Log($"Generated {createdRooms.Count} rooms out of requested {numberOfRooms}.");
     }
 
     private void DrawRoom(Room room) {
@@ -38,21 +35,19 @@ public class RoomGenerator {
     }
 
     private void CreateRooms() {
-        rooms = new Dictionary<Vector2Int, Room>();
         Vector2Int initialRoomPos = Vector2Int.zero;
 
         Queue<Room> roomsToCreate = new();
-        roomsToCreate.Enqueue(new Room(roomSize, initialRoomPos));
+        roomsToCreate.Enqueue(new Room(context.roomSize, initialRoomPos));
         reservedPositions.Add(initialRoomPos);
 
-        while(roomsToCreate.Count > 0 && createdRooms.Count < numberOfRooms) {
+        while(roomsToCreate.Count > 0 && context.createdRooms.Count < context.numberOfRooms) {
             Room currentRoom = roomsToCreate.Dequeue();
-            rooms[currentRoom.roomPos] = currentRoom;
-            createdRooms.Add(currentRoom);
+            context.createdRooms[currentRoom.roomPos] = currentRoom;
             AddNeighbour(currentRoom, roomsToCreate);
         }
 
-        CreateDoors(createdRooms);
+        CreateDoors();
     }
 
     private void AddNeighbour(Room currentRoom, Queue<Room> roomsToCreate) {
@@ -60,7 +55,7 @@ public class RoomGenerator {
         List<Vector2Int> availableNeighbours = new();
 
         foreach(Vector2Int position in neighbourPositions) {
-            if(!rooms.ContainsKey(position) && !reservedPositions.Contains(position)) {
+            if(!context.createdRooms.ContainsKey(position) && !reservedPositions.Contains(position)) {
                 availableNeighbours.Add(position);
             }
         }
@@ -70,15 +65,15 @@ public class RoomGenerator {
         for(int i = 0; i < numberOfNeighbors && availableNeighbours.Count > 0; i++) {
             Vector2Int chosen = availableNeighbours[Random.Range(0, availableNeighbours.Count)];
             availableNeighbours.Remove(chosen);
-            roomsToCreate.Enqueue(new Room(roomSize, chosen));
+            roomsToCreate.Enqueue(new Room(context.roomSize, chosen));
             reservedPositions.Add(chosen);
         }
     }
 
-    private void CreateDoors(List<Room> createdRooms) {
-        foreach(Room room in createdRooms) {
+    private void CreateDoors() {
+        foreach(Room room in context.createdRooms.Values) {
             foreach(Vector2Int pos in room.GetNeighbourPositions()) {
-                if(rooms.TryGetValue(pos, out Room neighbour)) {
+                if(context.createdRooms.TryGetValue(pos, out Room neighbour)) {
                     room.Connect(neighbour);
                 }
             }

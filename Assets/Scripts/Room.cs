@@ -2,7 +2,7 @@
 using UnityEngine;
 
 public class Room {
-    public Dictionary<Direction, Room> neighbourRooms;
+    public Dictionary<Direction, Room> neighbourRooms = new();
     public Vector2Int roomPos;
     public Vector2Int roomSize;
 
@@ -11,7 +11,6 @@ public class Room {
     public Room(Vector2Int roomSize, Vector2Int roomPos) {
         this.roomSize = roomSize;
         this.roomPos = roomPos;
-        neighbourRooms = new Dictionary<Direction, Room>();
     }
 
     public List<Vector2Int> GetNeighbourPositions() {

@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour {
-    public Vector2Int roomSize;
-    public int numberOfRooms;
-    public GameObject wallTile;
+    [Header("Configuration")]
+    public DungeonConfig config;
 
+    [Header("Generators")]
     [SerializeField]
-    private RoomGenerator roomGenerator;
+    private List<DungeonSubGeneratorBase> subGenerators;
 
     private void Start() {
         GenerateDungeon();
@@ -14,13 +15,26 @@ public class DungeonGenerator : MonoBehaviour {
 
     [ContextMenu("Generate Dungeon")]
     private void GenerateDungeon() {
+        if(config == null) {
+            throw new MissingReferenceException($"Dungeon configuration not assigned to GameObject: {gameObject.name}");
+        }
+
         ResetDungeon();
 
-        RoomGenerator roomGenerator = new RoomGenerator(wallTile, numberOfRooms, roomSize);
-        roomGenerator.Run();
+        foreach(DungeonSubGeneratorBase generator in subGenerators) {
+            generator.SetContext(new DungeonGenerationContext {
+                roomSize = config.roomSize,
+                numberOfRooms = config.numberOfRooms,
+            });
+            generator.Run();
+        }
     }
 
     private void ResetDungeon() {
-        DestroyImmediate(GameObject.Find("Rooms"));
+        GameObject roomsGO = GameObject.Find("Rooms");
+
+        if(roomsGO != null) {
+            DestroyImmediate(roomsGO);
+        }
     }
 }
