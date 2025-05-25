@@ -8,7 +8,9 @@ public class DungeonGeneratorEditor : Editor {
 
         DungeonGenerator generator = (DungeonGenerator) target;
 
-        GUILayout.Space(10);
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Dungeon Actions", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
         if(GUILayout.Button("Generate Dungeon")) {
             generator.GenerateDungeon();
