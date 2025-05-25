@@ -1,18 +1,83 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class RoomGenerator {
-    private GameObject allRoomsParent = new GameObject("Rooms");
-    private GameObject wallTile;
+public class RoomGenerator : DungeonSubGeneratorBase {
+    public GameObject wallTile;
 
-    public RoomGenerator(GameObject wallTile) {
-        this.wallTile = wallTile ?? throw new MissingReferenceException("WallTile must not be null.");
+    private GameObject allRoomsParent;
+    private HashSet<Vector2Int> reservedPositions = new();
+
+    public override void Run() {
+        if(wallTile == null) {
+            throw new MissingReferenceException($"No wall tile set for {gameObject.name}: {wallTile}");
+        }
+
+        reservedPositions.Clear();
+
+        allRoomsParent = new GameObject("Rooms");
+
+        CreateRooms();
+        DrawRooms();
+
+        Debug.Log($"Generated {context.createdRooms.Count} rooms out of requested {context.numberOfRooms}.");
     }
 
-    public void DrawRoom(Room room) {
+    private void DrawRooms() {
+        foreach(Room room in context.createdRooms.Values) {
+            DrawRoom(room);
+        }
+    }
+
+    private void DrawRoom(Room room) {
         GameObject roomGameObject = new GameObject("Room_" + room.roomPos.x + "_" + room.roomPos.y);
         roomGameObject.transform.parent = allRoomsParent.transform;
         DrawWalls(room, roomGameObject);
+    }
+
+    private void CreateRooms() {
+        Vector2Int initialRoomPos = Vector2Int.zero;
+
+        Queue<Room> roomsToCreate = new();
+        roomsToCreate.Enqueue(new Room(context.roomSize, initialRoomPos));
+        reservedPositions.Add(initialRoomPos);
+
+        while(roomsToCreate.Count > 0 && context.createdRooms.Count < context.numberOfRooms) {
+            Room currentRoom = roomsToCreate.Dequeue();
+            context.createdRooms[currentRoom.roomPos] = currentRoom;
+            AddNeighbour(currentRoom, roomsToCreate);
+        }
+
+        CreateDoors();
+    }
+
+    private void AddNeighbour(Room currentRoom, Queue<Room> roomsToCreate) {
+        List<Vector2Int> neighbourPositions = currentRoom.GetNeighbourPositions();
+        List<Vector2Int> availableNeighbours = new();
+
+        foreach(Vector2Int position in neighbourPositions) {
+            if(!context.createdRooms.ContainsKey(position) && !reservedPositions.Contains(position)) {
+                availableNeighbours.Add(position);
+            }
+        }
+
+        int numberOfNeighbors = Random.Range(1, availableNeighbours.Count + 1);
+
+        for(int i = 0; i < numberOfNeighbors && availableNeighbours.Count > 0; i++) {
+            Vector2Int chosen = availableNeighbours[Random.Range(0, availableNeighbours.Count)];
+            availableNeighbours.Remove(chosen);
+            roomsToCreate.Enqueue(new Room(context.roomSize, chosen));
+            reservedPositions.Add(chosen);
+        }
+    }
+
+    private void CreateDoors() {
+        foreach(Room room in context.createdRooms.Values) {
+            foreach(Vector2Int pos in room.GetNeighbourPositions()) {
+                if(context.createdRooms.TryGetValue(pos, out Room neighbour)) {
+                    room.Connect(neighbour);
+                }
+            }
+        }
     }
 
     private void DrawWalls(Room room, GameObject roomGameObject) {
