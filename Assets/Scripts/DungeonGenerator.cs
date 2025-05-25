@@ -21,11 +21,14 @@ public class DungeonGenerator : MonoBehaviour {
 
         ResetDungeon();
 
+        DungeonGenerationContext context = new DungeonGenerationContext {
+            roomSize = config.roomSize,
+            numberOfRooms = config.numberOfRooms,
+            createdRooms = new Dictionary<Vector2Int, Room>()
+        };
+
         foreach(DungeonSubGeneratorBase generator in subGenerators) {
-            generator.SetContext(new DungeonGenerationContext {
-                roomSize = config.roomSize,
-                numberOfRooms = config.numberOfRooms,
-            });
+            generator.SetContext(context);
             generator.Run();
         }
     }
