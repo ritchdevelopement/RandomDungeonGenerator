@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour {
@@ -31,6 +32,11 @@ public class DungeonGenerator : MonoBehaviour {
             generator.SetContext(context);
             generator.Run();
         }
+    }
+
+    [ContextMenu("Sync SubGenerators")]
+    private void SyncSubGenerators() {
+        subGenerators = GetComponentsInChildren<DungeonSubGeneratorBase>().ToList();
     }
 
     private void ResetDungeon() {
