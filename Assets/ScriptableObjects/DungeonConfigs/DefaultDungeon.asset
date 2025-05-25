@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdfaac58d70bb844bb0f4bed398eff50, type: 3}
-  m_Name: DefaultDungeonConfig
+  m_Name: DefaultDungeon
   m_EditorClassIdentifier: 
   roomSize: {x: 32, y: 18}
   numberOfRooms: 25
