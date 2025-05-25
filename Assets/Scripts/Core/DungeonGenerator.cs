@@ -3,10 +3,8 @@ using System.Linq;
 using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour {
-    [Header("Configuration")]
-    public DungeonConfig config;
 
-    [Header("Generators")]
+    public DungeonConfig dungeonConfig;
     [SerializeField]
     private List<DungeonSubGeneratorBase> subGenerators;
 
@@ -14,17 +12,16 @@ public class DungeonGenerator : MonoBehaviour {
         GenerateDungeon();
     }
 
-    [ContextMenu("Generate Dungeon")]
-    private void GenerateDungeon() {
-        if(config == null) {
+    public void GenerateDungeon() {
+        if(dungeonConfig == null) {
             throw new MissingReferenceException($"Dungeon configuration not assigned to GameObject: {gameObject.name}");
         }
 
         ResetDungeon();
 
         DungeonGenerationContext context = new DungeonGenerationContext {
-            roomSize = config.roomSize,
-            numberOfRooms = config.numberOfRooms,
+            roomSize = dungeonConfig.roomSize,
+            numberOfRooms = dungeonConfig.numberOfRooms,
             createdRooms = new Dictionary<Vector2Int, Room>()
         };
 
@@ -34,12 +31,11 @@ public class DungeonGenerator : MonoBehaviour {
         }
     }
 
-    [ContextMenu("Sync SubGenerators")]
-    private void SyncSubGenerators() {
+    public void SyncSubGenerators() {
         subGenerators = GetComponentsInChildren<DungeonSubGeneratorBase>().ToList();
     }
 
-    private void ResetDungeon() {
+    public void ResetDungeon() {
         GameObject roomsGO = GameObject.Find("Rooms");
 
         if(roomsGO != null) {
