@@ -14,6 +14,10 @@ public class DungeonGeneratorEditor : Editor {
             generator.GenerateDungeon();
         }
 
+        if(GUILayout.Button("Reset Dungeon")) {
+            generator.ResetDungeon();
+        }
+
         if(GUILayout.Button("Sync Sub Generators")) {
             generator.SyncSubGenerators();
         }
