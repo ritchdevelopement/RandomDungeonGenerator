@@ -55,14 +55,16 @@ public class RoomGenerator : DungeonSubGeneratorBase {
         List<Vector2Int> availableNeighbours = new();
 
         foreach(Vector2Int position in neighbourPositions) {
-            if(!context.createdRooms.ContainsKey(position) && !reservedPositions.Contains(position)) {
-                availableNeighbours.Add(position);
+            if(context.createdRooms.ContainsKey(position) && reservedPositions.Contains(position)) {
+                continue;
             }
+
+            availableNeighbours.Add(position);
         }
 
-        int numberOfNeighbors = Random.Range(1, availableNeighbours.Count + 1);
+        int maxNumberOfNeighbors = 1;
 
-        for(int i = 0; i < numberOfNeighbors && availableNeighbours.Count > 0; i++) {
+        for(int i = 0; i < maxNumberOfNeighbors && availableNeighbours.Count > 0; i++) {
             Vector2Int chosen = availableNeighbours[Random.Range(0, availableNeighbours.Count)];
             availableNeighbours.Remove(chosen);
             roomsToCreate.Enqueue(new Room(context.roomSize, chosen));
