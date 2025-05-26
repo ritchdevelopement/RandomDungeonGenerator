@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RoomGenerator : DungeonSubGeneratorBase {
@@ -62,6 +63,10 @@ public class RoomGenerator : DungeonSubGeneratorBase {
             availableNeighbours.Add(position);
         }
 
+        if(context.createdRooms.Count > context.roomDistributionFactor) {
+            RemoveClosestRoomToCenter(availableNeighbours);
+        }
+
         int maxNumberOfNeighbors = Random.Range(1, availableNeighbours.Count + 1);
 
         for(int i = 0; i < maxNumberOfNeighbors && availableNeighbours.Count > 0; i++) {
@@ -70,6 +75,18 @@ public class RoomGenerator : DungeonSubGeneratorBase {
             roomsToCreate.Enqueue(new Room(context.roomSize, chosen));
             reservedPositions.Add(chosen);
         }
+    }
+
+    private void RemoveClosestRoomToCenter(List<Vector2Int> availableNeighbours) {
+        if(availableNeighbours.Count == 0) {
+            return;
+        }
+
+        Vector2Int closest = availableNeighbours
+            .OrderBy(pos => Vector2Int.Distance(pos, Vector2Int.zero))
+            .First();
+
+        availableNeighbours.Remove(closest);
     }
 
     private void CreateDoors() {
