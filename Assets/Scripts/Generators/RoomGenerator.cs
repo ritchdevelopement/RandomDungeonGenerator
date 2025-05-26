@@ -29,7 +29,7 @@ public class RoomGenerator : DungeonSubGeneratorBase {
     }
 
     private void DrawRoom(Room room) {
-        GameObject roomGameObject = new GameObject("Room_" + room.roomPos.x + "_" + room.roomPos.y);
+        GameObject roomGameObject = new GameObject("Room_" + room.RoomPos.x + "_" + room.RoomPos.y);
         roomGameObject.transform.parent = allRoomsParent.transform;
         DrawWalls(room, roomGameObject);
     }
@@ -43,7 +43,7 @@ public class RoomGenerator : DungeonSubGeneratorBase {
 
         while(roomsToCreate.Count > 0 && context.createdRooms.Count < context.numberOfRooms) {
             Room currentRoom = roomsToCreate.Dequeue();
-            context.createdRooms[currentRoom.roomPos] = currentRoom;
+            context.createdRooms[currentRoom.RoomPos] = currentRoom;
             AddNeighbour(currentRoom, roomsToCreate);
         }
 
@@ -62,7 +62,7 @@ public class RoomGenerator : DungeonSubGeneratorBase {
             availableNeighbours.Add(position);
         }
 
-        int maxNumberOfNeighbors = 1;
+        int maxNumberOfNeighbors = Random.Range(1, availableNeighbours.Count + 1);
 
         for(int i = 0; i < maxNumberOfNeighbors && availableNeighbours.Count > 0; i++) {
             Vector2Int chosen = availableNeighbours[Random.Range(0, availableNeighbours.Count)];
@@ -85,13 +85,13 @@ public class RoomGenerator : DungeonSubGeneratorBase {
     private void DrawWalls(Room room, GameObject roomGameObject) {
         GameObject wallGameObject = new GameObject("Wall");
 
-        float left = -room.roomSize.x / 2f + room.roomPos.x;
-        float right = room.roomSize.x / 2f + room.roomPos.x;
-        float top = room.roomSize.y / 2f + room.roomPos.y;
-        float bottom = -room.roomSize.y / 2f + room.roomPos.y;
+        float left = -room.RoomSize.x / 2f + room.RoomPos.x;
+        float right = room.RoomSize.x / 2f + room.RoomPos.x;
+        float top = room.RoomSize.y / 2f + room.RoomPos.y;
+        float bottom = -room.RoomSize.y / 2f + room.RoomPos.y;
 
-        for(int i = 0; i <= room.roomSize.x; i++) {
-            for(int j = 0; j <= room.roomSize.y; j++) {
+        for(int i = 0; i <= room.RoomSize.x; i++) {
+            for(int j = 0; j <= room.RoomSize.y; j++) {
                 Vector2 tilePos = new Vector2(left + i, top - j);
                 Vector2Int tile = Vector2Int.RoundToInt(tilePos);
 
@@ -111,16 +111,16 @@ public class RoomGenerator : DungeonSubGeneratorBase {
     }
 
     private bool IsDoorTile(Room room, Vector2Int tile) {
-        int x = room.roomPos.x;
-        int y = room.roomPos.y;
-        int halfWidth = room.roomSize.x / 2;
-        int halfHeight = room.roomSize.y / 2;
+        int x = room.RoomPos.x;
+        int y = room.RoomPos.y;
+        int halfWidth = room.RoomSize.x / 2;
+        int halfHeight = room.RoomSize.y / 2;
 
         var doorOffsets = new Dictionary<Direction, (bool isOpen, Vector2Int center)> {
-            { Direction.North, (room.doorTop, new Vector2Int(x, y + halfHeight)) },
-            { Direction.South, (room.doorBottom, new Vector2Int(x, y - halfHeight)) },
-            { Direction.West, (room.doorLeft, new Vector2Int(x - halfWidth, y)) },
-            { Direction.East, (room.doorRight, new Vector2Int(x + halfWidth, y)) }
+            { Direction.North, (room.DoorTop, new Vector2Int(x, y + halfHeight)) },
+            { Direction.South, (room.DoorBottom, new Vector2Int(x, y - halfHeight)) },
+            { Direction.West, (room.DoorLeft, new Vector2Int(x - halfWidth, y)) },
+            { Direction.East, (room.DoorRight, new Vector2Int(x + halfWidth, y)) }
         };
 
         foreach((Direction dir, (bool isOpen, Vector2Int center)) in doorOffsets) {
