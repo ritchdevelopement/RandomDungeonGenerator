@@ -2,25 +2,30 @@
 using UnityEngine;
 
 public class Room {
-    public Dictionary<Direction, Room> neighbourRooms = new();
-    public Vector2Int roomPos;
-    public Vector2Int roomSize;
+    public Dictionary<Direction, Room> NeighbourRooms { get; } = new();
 
-    public bool doorTop, doorBottom, doorLeft, doorRight;
+    public Vector2Int RoomPos { get; private set; }
+    public Vector2Int RoomSize { get; private set; }
+    public float DistanceFromCenter { get; private set; }
+    public bool DoorTop { get; private set; }
+    public bool DoorBottom { get; private set; }
+    public bool DoorLeft { get; private set; }
+    public bool DoorRight { get; private set; }
 
     public Room(Vector2Int roomSize, Vector2Int roomPos) {
-        this.roomSize = roomSize;
-        this.roomPos = roomPos;
+        RoomSize = roomSize;
+        RoomPos = roomPos;
+        DistanceFromCenter = Vector2Int.Distance(roomPos, Vector2Int.zero);
     }
 
     public List<Vector2Int> GetNeighbourPositions() {
-        int spacingX = roomSize.x + 1;
-        int spacingY = roomSize.y + 1;
+        int spacingX = RoomSize.x + 1;
+        int spacingY = RoomSize.y + 1;
         return new List<Vector2Int> {
-            new Vector2Int(roomPos.x - spacingX, roomPos.y),
-            new Vector2Int(roomPos.x + spacingX, roomPos.y),
-            new Vector2Int(roomPos.x, roomPos.y + spacingY),
-            new Vector2Int(roomPos.x, roomPos.y - spacingY)
+            new Vector2Int(RoomPos.x - spacingX, RoomPos.y),
+            new Vector2Int(RoomPos.x + spacingX, RoomPos.y),
+            new Vector2Int(RoomPos.x, RoomPos.y + spacingY),
+            new Vector2Int(RoomPos.x, RoomPos.y - spacingY)
         };
     }
 
@@ -32,34 +37,34 @@ public class Room {
 
         switch(direction) {
             case Direction.North: {
-                doorTop = true;
-                neighborRoom.doorBottom = true;
+                DoorTop = true;
+                neighborRoom.DoorBottom = true;
                 break;
             }
             case Direction.East: {
-                doorRight = true;
-                neighborRoom.doorLeft = true;
+                DoorRight = true;
+                neighborRoom.DoorLeft = true;
                 break;
             }
             case Direction.South: {
-                doorBottom = true;
-                neighborRoom.doorTop = true;
+                DoorBottom = true;
+                neighborRoom.DoorTop = true;
                 break;
             }
             case Direction.West: {
-                doorLeft = true;
-                neighborRoom.doorRight = true;
+                DoorLeft = true;
+                neighborRoom.DoorRight = true;
                 break;
             }
         }
 
-        if(!neighbourRooms.ContainsKey(direction.Value)) {
-            neighbourRooms.Add(direction.Value, neighborRoom);
+        if(!NeighbourRooms.ContainsKey(direction.Value)) {
+            NeighbourRooms.Add(direction.Value, neighborRoom);
         }
     }
 
     private Direction? GetDirectionTo(Room other) {
-        Vector2Int delta = other.roomPos - roomPos;
+        Vector2Int delta = other.RoomPos - RoomPos;
 
         if(delta.y > 0 && delta.x == 0) {
             return Direction.North;

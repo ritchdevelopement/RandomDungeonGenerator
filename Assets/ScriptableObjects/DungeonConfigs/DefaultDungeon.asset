@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: DefaultDungeon
   m_EditorClassIdentifier: 
   roomSize: {x: 32, y: 18}
-  numberOfRooms: 50
+  numberOfRooms: 100
+  roomDistributionFactor: 0
   wallTile: {fileID: 1964693960537784010, guid: 3a9f10412519dbc458fec5f678ca8230,
     type: 3}

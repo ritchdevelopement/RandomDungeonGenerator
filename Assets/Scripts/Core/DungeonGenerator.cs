@@ -22,6 +22,7 @@ public class DungeonGenerator : MonoBehaviour {
         DungeonGenerationContext context = new DungeonGenerationContext {
             roomSize = dungeonConfig.roomSize,
             numberOfRooms = dungeonConfig.numberOfRooms,
+            roomDistributionFactor = dungeonConfig.roomDistributionFactor,
             createdRooms = new Dictionary<Vector2Int, Room>()
         };
 
