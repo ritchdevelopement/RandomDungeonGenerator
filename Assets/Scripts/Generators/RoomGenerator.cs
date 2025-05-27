@@ -1,21 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class RoomGenerator : DungeonSubGeneratorBase {
-    public GameObject wallTile;
-
-    private GameObject allRoomsParent;
     private HashSet<Vector2Int> reservedPositions = new();
 
+    private Tilemap tilemap;
+    private string tilemapName = "WallsTilemap";
+
     public override void Run() {
-        if(wallTile == null) {
-            throw new MissingReferenceException($"No wall tile set for {gameObject.name}: {wallTile}");
+        GameObject gridGO = new GameObject("Dungeon");
+        Grid grid = gridGO.AddComponent<Grid>();
+        grid.cellSize = new Vector3Int(1, 1, 0);
+
+        GameObject tilemapGO = new GameObject(tilemapName);
+        tilemapGO.transform.parent = gridGO.transform;
+
+        tilemap = tilemapGO.AddComponent<Tilemap>();
+        TilemapRenderer renderer = tilemapGO.AddComponent<TilemapRenderer>();
+        renderer.sortOrder = TilemapRenderer.SortOrder.TopLeft;
+
+        if(context.wallTile == null) {
+            throw new MissingReferenceException($"No wall tile set for rooms: {context.wallTile}");
         }
 
         reservedPositions.Clear();
-
-        allRoomsParent = new GameObject("Rooms");
 
         CreateRooms();
         DrawRooms();
@@ -25,14 +35,8 @@ public class RoomGenerator : DungeonSubGeneratorBase {
 
     private void DrawRooms() {
         foreach(Room room in context.createdRooms.Values) {
-            DrawRoom(room);
+            DrawWalls(room);
         }
-    }
-
-    private void DrawRoom(Room room) {
-        GameObject roomGameObject = new GameObject("Room_" + room.RoomPos.x + "_" + room.RoomPos.y);
-        roomGameObject.transform.parent = allRoomsParent.transform;
-        DrawWalls(room, roomGameObject);
     }
 
     private void CreateRooms() {
@@ -99,9 +103,7 @@ public class RoomGenerator : DungeonSubGeneratorBase {
         }
     }
 
-    private void DrawWalls(Room room, GameObject roomGameObject) {
-        GameObject wallGameObject = new GameObject("Wall");
-
+    private void DrawWalls(Room room) {
         float left = -room.RoomSize.x / 2f + room.RoomPos.x;
         float right = room.RoomSize.x / 2f + room.RoomPos.x;
         float top = room.RoomSize.y / 2f + room.RoomPos.y;
@@ -119,12 +121,10 @@ public class RoomGenerator : DungeonSubGeneratorBase {
                     Mathf.Approximately(tilePos.y, bottom);
 
                 if(isEdgeTile && !IsDoorTile(room, tile)) {
-                    Object.Instantiate(wallTile, tilePos, Quaternion.identity).transform.parent = wallGameObject.transform;
+                    tilemap.SetTile(new Vector3Int(tile.x, tile.y, 0), context.wallTile);
                 }
             }
         }
-
-        wallGameObject.transform.parent = roomGameObject.transform;
     }
 
     private bool IsDoorTile(Room room, Vector2Int tile) {

@@ -23,7 +23,8 @@ public class DungeonGenerator : MonoBehaviour {
             roomSize = dungeonConfig.roomSize,
             numberOfRooms = dungeonConfig.numberOfRooms,
             roomDistributionFactor = dungeonConfig.roomDistributionFactor,
-            createdRooms = new Dictionary<Vector2Int, Room>()
+            createdRooms = new Dictionary<Vector2Int, Room>(),
+            wallTile = dungeonConfig.wallTile
         };
 
         foreach(DungeonSubGeneratorBase generator in subGenerators) {
@@ -37,10 +38,10 @@ public class DungeonGenerator : MonoBehaviour {
     }
 
     public void ResetDungeon() {
-        GameObject roomsGO = GameObject.Find("Rooms");
+        GameObject dungeonGO = GameObject.Find("Dungeon");
 
-        if(roomsGO != null) {
-            DestroyImmediate(roomsGO);
+        if(dungeonGO != null) {
+            DestroyImmediate(dungeonGO);
         }
     }
 }
