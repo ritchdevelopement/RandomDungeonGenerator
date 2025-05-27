@@ -6,7 +6,7 @@ public class DungeonGenerator : MonoBehaviour {
 
     public DungeonConfig dungeonConfig;
     [SerializeField]
-    private List<DungeonSubGeneratorBase> subGenerators;
+    private List<GeneratorBase> subGenerators;
 
     private void Start() {
         GenerateDungeon();
@@ -27,14 +27,14 @@ public class DungeonGenerator : MonoBehaviour {
             wallTile = dungeonConfig.wallTile
         };
 
-        foreach(DungeonSubGeneratorBase generator in subGenerators) {
+        foreach(GeneratorBase generator in subGenerators) {
             generator.SetContext(context);
             generator.Run();
         }
     }
 
     public void SyncSubGenerators() {
-        subGenerators = GetComponentsInChildren<DungeonSubGeneratorBase>().ToList();
+        subGenerators = GetComponentsInChildren<GeneratorBase>().ToList();
     }
 
     public void ResetDungeon() {

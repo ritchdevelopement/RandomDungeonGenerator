@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class RoomGenerator : DungeonSubGeneratorBase {
+public class RoomGenerator : GeneratorBase {
     private HashSet<Vector2Int> reservedPositions = new();
 
     private Tilemap tilemap;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class DungeonSubGeneratorBase : MonoBehaviour {
+public abstract class GeneratorBase : MonoBehaviour {
     protected DungeonGenerationContext context;
 
     public virtual void SetContext(DungeonGenerationContext context) {
