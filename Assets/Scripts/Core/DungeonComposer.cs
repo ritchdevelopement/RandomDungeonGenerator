@@ -2,17 +2,19 @@
 using System.Linq;
 using UnityEngine;
 
-public class DungeonGenerator : MonoBehaviour {
+public class DungeonComposer : MonoBehaviour {
 
-    public DungeonConfig dungeonConfig;
+    [SerializeField]
+    private DungeonConfig dungeonConfig;
+
     [SerializeField]
     private List<DungeonTask> dungeonTasks;
 
     private void Start() {
-        GenerateDungeon();
+        ComposeDungeon();
     }
 
-    public void GenerateDungeon() {
+    public void ComposeDungeon() {
         if(dungeonConfig == null) {
             throw new MissingReferenceException($"Dungeon configuration not assigned to GameObject: {gameObject.name}");
         }
@@ -33,15 +35,15 @@ public class DungeonGenerator : MonoBehaviour {
         }
     }
 
-    public void SyncSubGenerators() {
+    public void SyncDungeonTasks() {
         dungeonTasks = GetComponentsInChildren<DungeonTask>().ToList();
     }
 
     public void ResetDungeon() {
-        GameObject dungeonGO = GameObject.Find("Dungeon");
+        GameObject dungeonGameObject = GameObject.Find("Dungeon");
 
-        if(dungeonGO != null) {
-            DestroyImmediate(dungeonGO);
+        if(dungeonGameObject != null) {
+            DestroyImmediate(dungeonGameObject);
         }
     }
 }
