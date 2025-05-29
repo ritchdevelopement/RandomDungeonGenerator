@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-public class RoomGenerator : DungeonTask {
+public class RoomGenerator : DungeonTaskBase {
     private HashSet<Vector2Int> reservedPositions = new();
 
     public override void Execute() {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class RoomDrawer : DungeonTask {
+public class RoomDrawer : DungeonTaskBase {
     private Tilemap dungeonTilemap;
 
     public override void Execute() {

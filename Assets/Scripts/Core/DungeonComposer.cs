@@ -8,7 +8,7 @@ public class DungeonComposer : MonoBehaviour {
     private DungeonConfig dungeonConfig;
 
     [SerializeField]
-    private List<DungeonTask> dungeonTasks;
+    private List<DungeonTaskBase> dungeonTasks;
 
     private void Start() {
         ComposeDungeon();
@@ -29,14 +29,14 @@ public class DungeonComposer : MonoBehaviour {
             wallTile = dungeonConfig.wallTile
         };
 
-        foreach(DungeonTask dungeonTask in dungeonTasks) {
+        foreach(DungeonTaskBase dungeonTask in dungeonTasks) {
             dungeonTask.SetContext(context);
             dungeonTask.Execute();
         }
     }
 
     public void SyncDungeonTasks() {
-        dungeonTasks = GetComponentsInChildren<DungeonTask>().ToList();
+        dungeonTasks = GetComponentsInChildren<DungeonTaskBase>().ToList();
     }
 
     public void ResetDungeon() {

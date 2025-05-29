@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class DungeonTask : MonoBehaviour {
+public abstract class DungeonTaskBase : MonoBehaviour {
     protected DungeonGenerationContext context;
 
     public virtual void SetContext(DungeonGenerationContext context) {
