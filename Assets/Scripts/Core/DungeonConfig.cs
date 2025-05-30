@@ -7,4 +7,5 @@ public class DungeonConfig : ScriptableObject {
     public int numberOfRooms = 25;
     public int roomDistributionFactor = 0;
     public TileBase wallTile;
+    public TileBase doorTile;
 }

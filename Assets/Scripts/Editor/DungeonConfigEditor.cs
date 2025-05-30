@@ -12,6 +12,7 @@ public class DungeonConfigEditor : Editor {
         config.roomSize = EditorGUILayout.Vector2IntField("Room Size", config.roomSize);
         config.numberOfRooms = EditorGUILayout.IntField("Number of Rooms", config.numberOfRooms);
         config.wallTile = (TileBase) EditorGUILayout.ObjectField("Wall Tile", config.wallTile, typeof(TileBase), false);
+        config.doorTile = (TileBase) EditorGUILayout.ObjectField("Door Tile", config.doorTile, typeof(TileBase), false);
 
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
