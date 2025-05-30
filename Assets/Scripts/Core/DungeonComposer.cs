@@ -49,7 +49,6 @@ public class DungeonComposer : MonoBehaviour {
             return;
         }
 
-        if(dungeonGameObject != null) {
             DestroyImmediate(dungeonGameObject);
         }
 
