@@ -2,83 +2,91 @@
 using UnityEngine;
 
 public class Room {
-    public Dictionary<Direction, Room> NeighbourRooms { get; } = new();
-
-    public Vector2Int RoomPos { get; private set; }
-    public Vector2Int RoomSize { get; private set; }
+    public Dictionary<Direction, Room> Neighbors { get; } = new();
+    public Dictionary<Direction, Door> Doors { get; } = new();
+    public Vector2Int Center { get; }
+    public Vector2Int RoomSize { get; }
     public float DistanceFromCenter { get; private set; }
-    public bool DoorTop { get; private set; }
-    public bool DoorBottom { get; private set; }
-    public bool DoorLeft { get; private set; }
-    public bool DoorRight { get; private set; }
 
-    public Room(Vector2Int roomSize, Vector2Int roomPos) {
+    public Room(Vector2Int roomSize, Vector2Int center) {
         RoomSize = roomSize;
-        RoomPos = roomPos;
-        DistanceFromCenter = Vector2Int.Distance(roomPos, Vector2Int.zero);
+        Center = center;
+        DistanceFromCenter = Vector2Int.Distance(center, Vector2Int.zero);
     }
 
     public List<Vector2Int> GetNeighbourPositions() {
         int spacingX = RoomSize.x + 1;
         int spacingY = RoomSize.y + 1;
         return new List<Vector2Int> {
-            new Vector2Int(RoomPos.x - spacingX, RoomPos.y),
-            new Vector2Int(RoomPos.x + spacingX, RoomPos.y),
-            new Vector2Int(RoomPos.x, RoomPos.y + spacingY),
-            new Vector2Int(RoomPos.x, RoomPos.y - spacingY)
+            new Vector2Int(Center.x - spacingX, Center.y),
+            new Vector2Int(Center.x + spacingX, Center.y),
+            new Vector2Int(Center.x, Center.y + spacingY),
+            new Vector2Int(Center.x, Center.y - spacingY)
         };
     }
 
-    public void Connect(Room neighborRoom) {
-        Direction? direction = GetDirectionTo(neighborRoom);
-        if(direction == null) {
-            return;
-        }
+    public void Connect(Room neighbor) {
+        Direction dir = GetDirectionTo(neighbor);
+        Direction opposite = dir.Opposite();
 
-        switch(direction) {
-            case Direction.North: {
-                DoorTop = true;
-                neighborRoom.DoorBottom = true;
-                break;
-            }
-            case Direction.East: {
-                DoorRight = true;
-                neighborRoom.DoorLeft = true;
-                break;
-            }
-            case Direction.South: {
-                DoorBottom = true;
-                neighborRoom.DoorTop = true;
-                break;
-            }
-            case Direction.West: {
-                DoorLeft = true;
-                neighborRoom.DoorRight = true;
-                break;
-            }
-        }
+        Neighbors[dir] = neighbor;
+        neighbor.Neighbors[opposite] = this;
 
-        if(!NeighbourRooms.ContainsKey(direction.Value)) {
-            NeighbourRooms.Add(direction.Value, neighborRoom);
-        }
+        var door = new Door(GetDoorTilePositions(this, dir));
+        Doors[dir] = door;
+        neighbor.Doors[opposite] = door;
     }
 
-    private Direction? GetDirectionTo(Room other) {
-        Vector2Int delta = other.RoomPos - RoomPos;
+    private Direction GetDirectionTo(Room neighbor) {
+        Vector2Int delta = neighbor.Center - Center;
 
-        if(delta.y > 0 && delta.x == 0) {
-            return Direction.North;
-        }
-        if(delta.y < 0 && delta.x == 0) {
-            return Direction.South;
-        }
-        if(delta.x > 0 && delta.y == 0) {
-            return Direction.East;
-        }
-        if(delta.x < 0 && delta.y == 0) {
-            return Direction.West;
-        }
-
-        return null;
+        return delta switch {
+            { x: 0, y: > 0 } => Direction.North,
+            { x: 0, y: < 0 } => Direction.South,
+            { x: > 0, y: 0 } => Direction.East,
+            { x: < 0, y: 0 } => Direction.West,
+            _ => throw new System.InvalidOperationException($"Rooms {this} and {neighbor} are not directly adjacent!")
+        };
     }
+
+    public bool IsDoorTile(Vector2Int tile) {
+        foreach(var door in Doors.Values) {
+            if(door.TilePositions.Contains(tile)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Vector2Int> GetDoorTilePositions(Room room, Direction direction, int doorWidth = 3, int doorDepth = 2) {
+        List<Vector2Int> tiles = new();
+        int halfWidth = doorWidth / 2;
+        Vector2Int center = room.Center;
+
+        Vector2Int basePos = direction switch {
+            Direction.North => new Vector2Int(center.x, center.y + room.RoomSize.y / 2),
+            Direction.South => new Vector2Int(center.x, center.y - room.RoomSize.y / 2),
+            Direction.East => new Vector2Int(center.x + room.RoomSize.x / 2, center.y),
+            Direction.West => new Vector2Int(center.x - room.RoomSize.x / 2, center.y),
+            _ => center
+        };
+
+        for(int offset = -halfWidth; offset <= halfWidth; offset++) {
+            for(int depth = 0; depth < doorDepth; depth++) {
+                Vector2Int tile = direction switch {
+                    Direction.North => new Vector2Int(basePos.x + offset, basePos.y + depth),
+                    Direction.South => new Vector2Int(basePos.x + offset, basePos.y - depth),
+                    Direction.East => new Vector2Int(basePos.x + depth, basePos.y + offset),
+                    Direction.West => new Vector2Int(basePos.x - depth, basePos.y + offset),
+                    _ => basePos
+                };
+                tiles.Add(tile);
+            }
+            
+        }
+
+        return tiles;
+    }
+
+    public bool HasDoor(Direction direction) => Doors.ContainsKey(direction);
 }

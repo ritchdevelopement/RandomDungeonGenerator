@@ -21,7 +21,7 @@ public class RoomGenerator : DungeonTaskBase {
 
         while(roomsToCreate.Count > 0 && context.createdRooms.Count < context.numberOfRooms) {
             Room currentRoom = roomsToCreate.Dequeue();
-            context.createdRooms[currentRoom.RoomPos] = currentRoom;
+            context.createdRooms[currentRoom.Center] = currentRoom;
             AddNeighbour(currentRoom, roomsToCreate);
         }
 

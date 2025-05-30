@@ -49,8 +49,8 @@ public class DungeonComposer : MonoBehaviour {
             return;
         }
 
-            DestroyImmediate(dungeonGameObject);
-        }
+        DestroyImmediate(dungeonGameObject);
+    }
 
     public void CreateDungeonBase() {
         dungeonGameObject = new GameObject("Dungeon");
