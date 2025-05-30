@@ -31,31 +31,27 @@ public class RoomDrawer : DungeonTaskBase {
     }
 
     private void DrawWalls(Room room) {
-        float left = -room.RoomSize.x / 2f + room.Center.x;
-        float right = room.RoomSize.x / 2f + room.Center.x;
-        float top = room.RoomSize.y / 2f + room.Center.y;
-        float bottom = -room.RoomSize.y / 2f + room.Center.y;
+        int halfWidth = room.RoomSize.x / 2;
+        int halfHeight = room.RoomSize.y / 2;
 
-        for(int i = 0; i <= room.RoomSize.x; i++) {
-            for(int j = 0; j <= room.RoomSize.y; j++) {
-                Vector2 tilePos = new Vector2(left + i, top - j);
-                Vector2Int tile = Vector2Int.RoundToInt(tilePos);
+        int left = room.Center.x - halfWidth;
+        int right = room.Center.x + halfWidth;
+        int top = room.Center.y + halfHeight;
+        int bottom = room.Center.y - halfHeight;
 
-                bool isEdgeTile =
-                    Mathf.Approximately(tilePos.x, left) ||
-                    Mathf.Approximately(tilePos.x, right) ||
-                    Mathf.Approximately(tilePos.y, top) ||
-                    Mathf.Approximately(tilePos.y, bottom);
+        for(int x = left; x <= right; x++) {
+            for(int y = bottom; y <= top; y++) {
+                bool isEdgeTile = 
+                    x == left || 
+                    x == right || 
+                    y == top || 
+                    y == bottom;
 
-                if(!isEdgeTile) { 
-                    continue; 
+                if(!isEdgeTile || room.IsDoorTile(new Vector2Int(x, y))) {
+                    continue;
                 }
 
-                if(room.IsDoorTile(tile)) {
-                    dungeonTilemap.SetTile(new Vector3Int(tile.x, tile.y), context.doorTile);
-                } else {
-                    dungeonTilemap.SetTile(new Vector3Int(tile.x, tile.y), context.wallTile);
-                }
+                dungeonTilemap.SetTile(new Vector3Int(x, y), context.wallTile);
             }
         }
     }
