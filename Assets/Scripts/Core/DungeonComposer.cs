@@ -10,6 +10,8 @@ public class DungeonComposer : MonoBehaviour {
     [SerializeField]
     private List<DungeonTaskBase> dungeonTasks;
 
+    private GameObject dungeonGameObject;
+
     private void Start() {
         ComposeDungeon();
     }
@@ -20,6 +22,7 @@ public class DungeonComposer : MonoBehaviour {
         }
 
         ResetDungeon();
+        CreateDungeonBase();
 
         DungeonGenerationContext context = new DungeonGenerationContext {
             roomSize = dungeonConfig.roomSize,
@@ -27,6 +30,7 @@ public class DungeonComposer : MonoBehaviour {
             roomDistributionFactor = dungeonConfig.roomDistributionFactor,
             createdRooms = new Dictionary<Vector2Int, Room>(),
             wallTile = dungeonConfig.wallTile
+            dungeonGameObject = dungeonGameObject
         };
 
         foreach(DungeonTaskBase dungeonTask in dungeonTasks) {
@@ -40,10 +44,17 @@ public class DungeonComposer : MonoBehaviour {
     }
 
     public void ResetDungeon() {
-        GameObject dungeonGameObject = GameObject.Find("Dungeon");
+        if(dungeonGameObject == null) {
+            return;
+        }
 
         if(dungeonGameObject != null) {
             DestroyImmediate(dungeonGameObject);
         }
+
+    public void CreateDungeonBase() {
+        dungeonGameObject = new GameObject("Dungeon");
+        Grid dungeonGrid = dungeonGameObject.AddComponent<Grid>();
+        dungeonGrid.cellSize = new Vector3Int(1, 1, 0);
     }
 }
