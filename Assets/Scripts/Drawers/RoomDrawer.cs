@@ -22,12 +22,8 @@ public class RoomDrawer : DungeonTaskBase {
         }
     }
     private void CreateTilemap() {
-        GameObject gridGameObject = new GameObject("Dungeon");
-        Grid dungeonGrid = gridGameObject.AddComponent<Grid>();
-        dungeonGrid.cellSize = new Vector3Int(1, 1, 0);
-
         GameObject tilemapGameObject = new GameObject("Rooms");
-        tilemapGameObject.transform.parent = gridGameObject.transform;
+        tilemapGameObject.transform.parent = context.dungeonGameObject.transform;
 
         dungeonTilemap = tilemapGameObject.AddComponent<Tilemap>();
         TilemapRenderer tilemapRenderer = tilemapGameObject.AddComponent<TilemapRenderer>();
