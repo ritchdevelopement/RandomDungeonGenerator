@@ -8,4 +8,6 @@ public class DungeonGenerationContext {
     public int numberOfRooms;
     public int roomDistributionFactor;
     public TileBase wallTile;
+    public TileBase doorTile;
+    public GameObject dungeonGameObject;
 }
