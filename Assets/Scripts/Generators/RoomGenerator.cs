@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-public class RoomGenerator : DungeonTask {
+public class RoomGenerator : DungeonTaskBase {
     private HashSet<Vector2Int> reservedPositions = new();
 
     public override void Execute() {
@@ -21,11 +21,9 @@ public class RoomGenerator : DungeonTask {
 
         while(roomsToCreate.Count > 0 && context.createdRooms.Count < context.numberOfRooms) {
             Room currentRoom = roomsToCreate.Dequeue();
-            context.createdRooms[currentRoom.RoomPos] = currentRoom;
+            context.createdRooms[currentRoom.Center] = currentRoom;
             AddNeighbour(currentRoom, roomsToCreate);
         }
-
-        CreateDoors();
     }
 
     private void AddNeighbour(Room currentRoom, Queue<Room> roomsToCreate) {
@@ -64,15 +62,5 @@ public class RoomGenerator : DungeonTask {
             .First();
 
         availableNeighbours.Remove(closest);
-    }
-
-    private void CreateDoors() {
-        foreach(Room room in context.createdRooms.Values) {
-            foreach(Vector2Int pos in room.GetNeighbourPositions()) {
-                if(context.createdRooms.TryGetValue(pos, out Room neighbour)) {
-                    room.Connect(neighbour);
-                }
-            }
-        }
     }
 }
