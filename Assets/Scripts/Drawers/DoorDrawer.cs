@@ -8,6 +8,11 @@ public class DoorDrawer : DungeonTaskBase {
     private Grid dungeonGrid;
 
     public override void Execute() {
+        if(doorPrefab == null) {
+            Debug.LogError("Door prefab not assigned to DoorDrawer!");
+            return;
+        }
+
         GameObject doorsGameObject = new GameObject("Doors");
         doorsGameObject.transform.SetParent(context.dungeonGameObject.transform);
         doorsParent = doorsGameObject.transform;
