@@ -2,9 +2,11 @@ using System.Linq;
 using UnityEngine;
 
 public class PlayerGenerator : DungeonTaskBase {
-    [Header("Player Settings")]
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private bool spawnInCenterRoom = true;
+    [SerializeField]
+    private GameObject playerPrefab;
+
+    [SerializeField]
+    private SpawnLocation spawnMode = SpawnLocation.CenterRoom;
     private GameObject spawnedPlayer;
 
     public override void Execute() {
@@ -24,7 +26,7 @@ public class PlayerGenerator : DungeonTaskBase {
     private void GeneratePlayer() {
         DestroyExistingPlayer();
 
-        Room spawnRoom = GetSpawnRoom();
+        Room spawnRoom = GetPlayerSpawnRoom(spawnMode);
         Vector2 spawnPosition = GetSpawnPosition(spawnRoom);
 
         context.playerSpawnPosition = spawnPosition;
@@ -35,20 +37,42 @@ public class PlayerGenerator : DungeonTaskBase {
         Debug.Log($"Player generated at {spawnPosition} in room at {spawnRoom.Center}");
     }
 
-    private Room GetSpawnRoom() {
-        if(spawnInCenterRoom) {
-            return context.createdRooms.Values
-                .OrderBy(room => Vector2Int.Distance(room.Center, Vector2Int.zero))
-                .First();
+    public Room GetPlayerSpawnRoom(SpawnLocation spawnLocation) {
+        var rooms = context.createdRooms.Values.ToArray();
+        if(rooms.Length == 0) {
+            Debug.LogWarning("No rooms available for player spawn selection!");
+            return null;
         }
 
-        return context.createdRooms.Values.First();
+        return spawnLocation switch {
+            SpawnLocation.CenterRoom => GetCenterRoom(rooms),
+            SpawnLocation.RandomRoom => GetRandomRoom(rooms),
+            SpawnLocation.EdgeRoom => GetEdgeRoom(rooms),
+            _ => throw new System.ArgumentOutOfRangeException(
+                nameof(spawnLocation),
+                $"Unsupported spawn location: {spawnLocation}"
+            )
+        };
+    }
+
+    public Room GetCenterRoom(Room[] rooms) {
+        return rooms
+            .OrderBy(room => Vector2Int.Distance(room.Center, Vector2Int.zero))
+            .First();
+    }
+
+    public Room GetRandomRoom(Room[] rooms) {
+        return rooms[Random.Range(0, rooms.Length)];
+    }
+
+    public Room GetEdgeRoom(Room[] rooms) {
+        return rooms
+            .OrderByDescending(room => Vector2Int.Distance(room.Center, Vector2Int.zero))
+            .First();
     }
 
     private Vector2 GetSpawnPosition(Room room) {
-        Vector2 roomCenter = new Vector2(room.Center.x, room.Center.y);
-
-        return roomCenter;
+        return new Vector2(room.Center.x, room.Center.y);
     }
 
     private void CreatePlayer(Vector2 spawnPosition) {
@@ -66,16 +90,6 @@ public class PlayerGenerator : DungeonTaskBase {
         PlayerController existingPlayer = FindFirstObjectByType<PlayerController>();
         if(existingPlayer != null) {
             DestroyImmediate(existingPlayer.gameObject);
-        }
-    }
-
-    public GameObject GetSpawnedPlayer() {
-        return spawnedPlayer;
-    }
-
-    public void RespawnPlayer() {
-        if(context != null && context.createdRooms.Count > 0) {
-            GeneratePlayer();
         }
     }
 }
