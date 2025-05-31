@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roomSize: {x: 32, y: 18}
   numberOfRooms: 25
-  roomDistributionFactor: 3
+  roomDistributionFactor: 4
   wallTile: {fileID: 11400000, guid: 75ec9b35811dde147882bff52852907f, type: 2}
   doorTile: {fileID: 11400000, guid: abe48aa666fd39744b533c274b1ac1b4, type: 2}
