@@ -38,14 +38,8 @@ public class DoorDrawer : DungeonTaskBase {
     }
 
     private Vector3 GetDoorWorldCenter(Door door) {
-        List<Vector2Int> tilePositions = door.TilePositions;
-        int minX = tilePositions.Min(pos => pos.x);
-        int maxX = tilePositions.Max(pos => pos.x);
-        int minY = tilePositions.Min(pos => pos.y);
-        int maxY = tilePositions.Max(pos => pos.y);
-
-        Vector3 minWorld = dungeonGrid.CellToWorld(new Vector3Int(minX, minY));
-        Vector3 maxWorld = dungeonGrid.CellToWorld(new Vector3Int(maxX + 1, maxY + 1));
+        Vector3 minWorld = dungeonGrid.CellToWorld(new Vector3Int(door.MinBounds.x, door.MinBounds.y));
+        Vector3 maxWorld = dungeonGrid.CellToWorld(new Vector3Int(door.MaxBounds.x + 1, door.MaxBounds.y + 1));
 
         return (minWorld + maxWorld) * 0.5f;
     }
