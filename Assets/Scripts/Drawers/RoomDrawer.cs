@@ -3,12 +3,13 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class RoomDrawer : DungeonTaskBase {
+    public TileBase wallTile;
     private Tilemap dungeonTilemap;
 
     public override void Execute() {
 
-        if(context.wallTile == null) {
-            throw new MissingReferenceException($"No wall tile set for rooms: {context.wallTile}");
+        if(wallTile == null) {
+            throw new MissingReferenceException($"No wall tile set for rooms: {wallTile}");
         }
 
         DrawRooms();
@@ -41,17 +42,17 @@ public class RoomDrawer : DungeonTaskBase {
 
         for(int x = left; x <= right; x++) {
             for(int y = bottom; y <= top; y++) {
-                bool isEdgeTile = 
-                    x == left || 
-                    x == right || 
-                    y == top || 
+                bool isEdgeTile =
+                    x == left ||
+                    x == right ||
+                    y == top ||
                     y == bottom;
 
                 if(!isEdgeTile || room.IsDoorTile(new Vector2Int(x, y))) {
                     continue;
                 }
 
-                dungeonTilemap.SetTile(new Vector3Int(x, y), context.wallTile);
+                dungeonTilemap.SetTile(new Vector3Int(x, y), wallTile);
             }
         }
     }

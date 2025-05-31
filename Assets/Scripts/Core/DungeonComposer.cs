@@ -29,8 +29,6 @@ public class DungeonComposer : MonoBehaviour {
             numberOfRooms = dungeonConfig.numberOfRooms,
             roomDistributionFactor = dungeonConfig.roomDistributionFactor,
             createdRooms = new Dictionary<Vector2Int, Room>(),
-            wallTile = dungeonConfig.wallTile,
-            doorTile = dungeonConfig.doorTile,
             dungeonGameObject = dungeonGameObject
         };
 
