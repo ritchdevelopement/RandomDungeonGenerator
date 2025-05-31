@@ -16,10 +16,12 @@ public class Door {
     }
 
     private Vector2Int CalculateSize() {
-        int minX = TilePositions.Min(pos => pos.x);
-        int maxX = TilePositions.Max(pos => pos.x);
-        int minY = TilePositions.Min(pos => pos.y);
-        int maxY = TilePositions.Max(pos => pos.y);
-        return new Vector2Int(maxX - minX + 1, maxY - minY + 1);
+        var xValues = TilePositions.Select(tilePosition => tilePosition.x);
+        var yValues = TilePositions.Select(tilePosition => tilePosition.y);
+
+        return new Vector2Int(
+            xValues.Max() - xValues.Min() + 1,
+            yValues.Max() - yValues.Min() + 1
+        );
     }
 }
