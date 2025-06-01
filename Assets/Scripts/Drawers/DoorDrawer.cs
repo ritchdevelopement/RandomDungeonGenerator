@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class DoorDrawer : DungeonTaskBase {
@@ -34,6 +32,10 @@ public class DoorDrawer : DungeonTaskBase {
         if(doorGameObject.TryGetComponent(out SpriteRenderer renderer)) {
             renderer.drawMode = SpriteDrawMode.Tiled;
             renderer.size = door.Size;
+        }
+
+        if(doorGameObject.TryGetComponent(out BoxCollider2D boxCollider)) {
+            boxCollider.size = new Vector2(door.Size.x, door.Size.y);
         }
     }
 

@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Default
   m_EditorClassIdentifier: 
   roomSize: {x: 32, y: 18}
-  numberOfRooms: 50
-  roomDistributionFactor: 4
+  numberOfRooms: 25
+  roomDistributionFactor: 2

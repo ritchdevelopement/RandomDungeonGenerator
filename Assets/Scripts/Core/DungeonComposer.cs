@@ -29,7 +29,8 @@ public class DungeonComposer : MonoBehaviour {
             numberOfRooms = dungeonConfig.numberOfRooms,
             roomDistributionFactor = dungeonConfig.roomDistributionFactor,
             createdRooms = new Dictionary<Vector2Int, Room>(),
-            dungeonGameObject = dungeonGameObject
+            dungeonGameObject = dungeonGameObject,
+            frictionlessMaterial = dungeonConfig.frictionlessMaterial
         };
 
         foreach(DungeonTaskBase dungeonTask in dungeonTasks) {
