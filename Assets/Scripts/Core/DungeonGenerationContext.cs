@@ -13,4 +13,7 @@ public class DungeonGenerationContext {
     [Header("Player Data")]
     public Vector2 playerSpawnPosition;
     public Room playerSpawnRoom;
+
+    [Header("Materials")]
+    public PhysicsMaterial2D frictionlessMaterial;
 }
