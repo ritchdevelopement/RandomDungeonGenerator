@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -22,13 +21,24 @@ public class RoomDrawer : DungeonTaskBase {
             DrawWalls(room);
         }
     }
+
     private void CreateTilemap() {
         GameObject tilemapGameObject = new GameObject("Rooms");
         tilemapGameObject.transform.parent = context.dungeonGameObject.transform;
 
+        Rigidbody2D rb = tilemapGameObject.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Static;
+        rb.gravityScale = 0f;
+        rb.freezeRotation = true;
+
         dungeonTilemap = tilemapGameObject.AddComponent<Tilemap>();
         TilemapRenderer tilemapRenderer = tilemapGameObject.AddComponent<TilemapRenderer>();
         tilemapRenderer.sortOrder = TilemapRenderer.SortOrder.TopLeft;
+
+        TilemapCollider2D tilemapCollider = tilemapGameObject.AddComponent<TilemapCollider2D>();
+        CompositeCollider2D compositeCollider = tilemapGameObject.AddComponent<CompositeCollider2D>();
+        compositeCollider.sharedMaterial = context.frictionlessMaterial;
+        tilemapCollider.compositeOperation = Collider2D.CompositeOperation.Merge;
     }
 
     private void DrawWalls(Room room) {
