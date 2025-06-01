@@ -80,6 +80,8 @@ public class PlayerGenerator : DungeonTaskBase {
         spawnedPlayer = Instantiate(playerPrefab, spawnPos3D, Quaternion.identity);
         spawnedPlayer.name = "Player";
         spawnedPlayer.transform.SetParent(context.dungeonGameObject.transform);
+
+        FindFirstObjectByType<CameraController>().SetPlayer(spawnedPlayer.transform);
     }
 
     private void DestroyExistingPlayer() {
