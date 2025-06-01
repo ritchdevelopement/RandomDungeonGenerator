@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 [CustomEditor(typeof(DungeonConfig))]
 public class DungeonConfigEditor : Editor {
@@ -9,10 +8,12 @@ public class DungeonConfigEditor : Editor {
 
         EditorGUI.BeginChangeCheck();
 
-        config.roomSize = EditorGUILayout.Vector2IntField("Room Size", config.roomSize);
-        config.numberOfRooms = EditorGUILayout.IntField("Number of Rooms", config.numberOfRooms);
+        DrawDefaultInspector();
 
+        EditorGUILayout.Space();
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+        EditorGUILayout.LabelField("Advanced Settings", EditorStyles.boldLabel);
 
         config.roomDistributionFactor = EditorGUILayout.IntSlider(
             "Room Distribution",
@@ -21,15 +22,15 @@ public class DungeonConfigEditor : Editor {
             config.numberOfRooms
         );
 
-        if(EditorGUI.EndChangeCheck()) {
-            EditorUtility.SetDirty(config);
-        }
-
         EditorGUILayout.HelpBox(
             "Controls how densely rooms are allowed to cluster near the center. " +
             "Higher values result in tighter groupings, lower values encourage outward spread. " +
             "This value cannot exceed the total number of rooms.",
             MessageType.Info
         );
+
+        if(EditorGUI.EndChangeCheck()) {
+            EditorUtility.SetDirty(config);
+        }
     }
 }
