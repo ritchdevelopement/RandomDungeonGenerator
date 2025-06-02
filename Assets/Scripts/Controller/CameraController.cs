@@ -5,15 +5,7 @@ public class CameraController : MonoBehaviour {
 
     [SerializeField]
     private Transform playerTransform;
-
-    [Header("Smoothing")]
-
-    [SerializeField]
-    private bool useSmoothFollow = false;
-
-    [SerializeField]
-    private float smoothTime = 0.3f;
-
+    private Vector3 offset = new Vector3(0, 0, -10f);
     private Vector3 velocity = Vector3.zero;
 
     private void Start() {
@@ -31,19 +23,9 @@ public class CameraController : MonoBehaviour {
     }
 
     private void FollowPlayer() {
-        Vector3 targetPosition = playerTransform.position;
-
-        if(useSmoothFollow) {
-            transform.position = Vector3.SmoothDamp(
-                transform.position,
-                targetPosition,
-                ref velocity,
-                smoothTime
-            );
-        } else {
-            transform.position = targetPosition;
-            velocity = Vector3.zero;
-        }
+        Vector3 targetPosition = playerTransform.position + offset;
+        transform.position = targetPosition;
+        velocity = Vector3.zero;
     }
 
     public void SetPlayer(Transform newPlayer) {
