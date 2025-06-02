@@ -37,9 +37,8 @@ jobs:
           buildsPath: build
           versioning: Tag
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: build.zip
-          path: build/StandaloneWindows64/
-          retention-days: 30
+          files: build/StandaloneWindows64/**
+          name: "Dungeon Generator ${{ github.ref_name }}"
