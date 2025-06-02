@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Windows
@@ -36,6 +39,7 @@ jobs:
           buildName: DungeonGenerator
           buildsPath: build
           versioning: Tag
+          customParameters: '-nographics'
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
