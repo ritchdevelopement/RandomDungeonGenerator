@@ -50,4 +50,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: RandomDungeonGenerator-${{ github.ref_name }}.zip
-          name: "Random Dungeon Generator ${{ github.ref_name }}"
+          name: ${{ github.ref_name }}
