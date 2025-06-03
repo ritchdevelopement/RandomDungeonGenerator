@@ -36,7 +36,7 @@ jobs:
         with:
           targetPlatform: StandaloneWindows64
           unityVersion: 6000.1.4f1
-          buildName: DungeonGenerator
+          buildName: RandomDungeonGenerator
           buildsPath: build
           versioning: Tag
           customParameters: '-nographics'
@@ -44,10 +44,10 @@ jobs:
       - name: Create ZIP
         run: |
           cd build/StandaloneWindows64
-          zip -r ../../DungeonGenerator-Windows.zip .
+          zip -r ../../RandomDungeonGenerator-${{ github.ref_name }}.zip .
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: DungeonGenerator-Windows.zip
-          name: "Dungeon Generator ${{ github.ref_name }}"
+          files: RandomDungeonGenerator-${{ github.ref_name }}.zip
+          name: "Random Dungeon Generator ${{ github.ref_name }}"
