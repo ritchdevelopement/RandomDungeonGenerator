@@ -5,11 +5,14 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Windows
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -38,9 +41,13 @@ jobs:
           versioning: Tag
           customParameters: '-nographics'
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+      - name: Create ZIP
+        run: |
+          cd build/StandaloneWindows64
+          zip -r ../../DungeonGenerator-Windows.zip .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: build
-          path: build/StandaloneWindows64/
-          retention-days: 30
+          files: DungeonGenerator-Windows.zip
+          name: "Dungeon Generator ${{ github.ref_name }}"
