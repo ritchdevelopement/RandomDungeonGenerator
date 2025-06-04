@@ -26,10 +26,10 @@ public class Room {
     public void Connect(Room neighbor, Door door, Direction dir) {
         Direction opposite = dir.Opposite();
 
-        Neighbors[dir] = neighbor;
-        neighbor.Neighbors[opposite] = this;
-        Doors[dir] = door;
-        neighbor.Doors[opposite] = door;
+        Neighbors.Add(dir, neighbor);
+        neighbor.Neighbors.Add(opposite, this);
+        Doors.Add(dir, door);
+        neighbor.Doors.Add(opposite, door);
     }
 
     public Direction GetDirectionTo(Room neighbor) {
