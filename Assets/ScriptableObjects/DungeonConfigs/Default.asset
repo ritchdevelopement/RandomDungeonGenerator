@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roomSize: {x: 32, y: 18}
   numberOfRooms: 25
-  roomDistributionFactor: 25
+  roomDistributionFactor: 3
   frictionlessMaterial: {fileID: 6200000, guid: ebf0609166e5714479b45d917fd4d06b,
     type: 2}
