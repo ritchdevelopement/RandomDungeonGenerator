@@ -31,7 +31,7 @@ public class RoomGenerator : DungeonTaskBase {
         List<Vector2Int> availableNeighbours = new();
 
         foreach(Vector2Int position in neighbourPositions) {
-            if(context.createdRooms.ContainsKey(position) && reservedPositions.Contains(position)) {
+            if(context.createdRooms.ContainsKey(position) || reservedPositions.Contains(position)) {
                 continue;
             }
 
