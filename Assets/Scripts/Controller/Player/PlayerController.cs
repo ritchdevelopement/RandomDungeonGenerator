@@ -18,6 +18,12 @@ public class PlayerController : MonoBehaviour {
         HandleMovement();
     }
 
+    private void OnTriggerEnter2D(Collider2D other) {
+        if (other.TryGetComponent(out IDamageable damageable)) {
+            damageable.TakeDamage(1);
+        }
+    }
+
     private void HandleInput() {
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
