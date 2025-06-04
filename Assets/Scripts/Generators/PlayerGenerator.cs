@@ -15,17 +15,10 @@ public class PlayerGenerator : DungeonTaskBase {
             return;
         }
 
-        if(context.createdRooms == null || context.createdRooms.Count == 0) {
-            Debug.LogError("No rooms available for player generation!");
-            return;
-        }
-
         GeneratePlayer();
     }
 
     private void GeneratePlayer() {
-        DestroyExistingPlayer();
-
         Room spawnRoom = GetPlayerSpawnRoom(spawnMode);
         Vector2 spawnPosition = GetSpawnPosition(spawnRoom);
 
@@ -82,16 +75,5 @@ public class PlayerGenerator : DungeonTaskBase {
         spawnedPlayer.transform.SetParent(context.dungeonGameObject.transform);
 
         FindFirstObjectByType<CameraController>().SetPlayer(spawnedPlayer.transform);
-    }
-
-    private void DestroyExistingPlayer() {
-        if(spawnedPlayer != null) {
-            DestroyImmediate(spawnedPlayer);
-        }
-
-        PlayerController existingPlayer = FindFirstObjectByType<PlayerController>();
-        if(existingPlayer != null) {
-            DestroyImmediate(existingPlayer.gameObject);
-        }
     }
 }
