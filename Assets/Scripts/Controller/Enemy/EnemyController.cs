@@ -14,6 +14,8 @@ public class EnemyController : MonoBehaviour, IDamageable {
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
 
+    public event System.Action OnDeath;
+
     private void Awake() {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -39,6 +41,7 @@ public class EnemyController : MonoBehaviour, IDamageable {
         Debug.Log($"Enemy took {damage} damage! Health: {health}");
 
         if (health <= 0) {
+            OnDeath.Invoke();
             Destroy(gameObject);
         } else {
             StartInvulnerability();

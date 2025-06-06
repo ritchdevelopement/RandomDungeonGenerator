@@ -27,6 +27,8 @@ public class PlayerGenerator : DungeonTaskBase {
 
         CreatePlayer(spawnPosition);
 
+        RoomManager.Instance.SetContext(context);
+
         Debug.Log($"Player generated at {spawnPosition} in room at {spawnRoom.Center}");
     }
 
@@ -77,5 +79,6 @@ public class PlayerGenerator : DungeonTaskBase {
         FindFirstObjectByType<CameraController>().SetPlayer(spawnedPlayer.transform);
 
         EnemyManager.Instance.SetPlayer(spawnedPlayer.transform);
+        RoomManager.Instance.SetPlayer(spawnedPlayer.transform);
     }
 }

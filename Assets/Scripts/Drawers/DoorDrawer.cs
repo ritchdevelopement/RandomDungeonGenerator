@@ -15,6 +15,7 @@ public class DoorDrawer : DungeonTaskBase {
         doorsGameObject.transform.SetParent(context.dungeonGameObject.transform);
         doorsParent = doorsGameObject.transform;
         dungeonGrid = context.dungeonGameObject.GetComponent<Grid>();
+        doorsGameObject.AddComponent<DoorManager>();
 
         DrawDoors();
     }
@@ -37,6 +38,9 @@ public class DoorDrawer : DungeonTaskBase {
         if(doorGameObject.TryGetComponent(out BoxCollider2D boxCollider)) {
             boxCollider.size = new Vector2(door.Size.x, door.Size.y);
         }
+
+        DoorController doorController = doorGameObject.GetComponent<DoorController>();
+        doorController.Register(door);
     }
 
     private Vector3 GetDoorWorldCenter(Door door) {
