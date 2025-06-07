@@ -1,81 +1,62 @@
 using UnityEngine;
 
 public class DoorController : MonoBehaviour {
+    public float teleportDistance = 2f;
     private BoxCollider2D mainCollider;
     private SpriteRenderer spriteRenderer;
-
-    [Header("Teleport Triggers")]
-    private BoxCollider2D triggerA;
-    private BoxCollider2D triggerB;
+    private Room roomA;
+    private Room roomB;
 
     private void Awake() {
         mainCollider = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    public void Initialize(Door door) {
-        CreateTriggerZones();
+    public void Initialize(Door door, Room roomA, Room roomB) {
+        this.roomA = roomA;
+        this.roomB = roomB;
         DoorManager.Instance.RegisterDoor(door, this);
     }
 
-    private void CreateTriggerZones() {
-        GameObject triggerGameObjectA = new GameObject("TriggerA");
-        triggerGameObjectA.transform.SetParent(transform);
-        triggerA = triggerGameObjectA.AddComponent<BoxCollider2D>();
-        triggerA.isTrigger = true;
+    private void OnTriggerEnter2D(Collider2D other) {
+        if(!other.TryGetComponent<PlayerController>(out var player))
+            return;
 
-        GameObject triggerGameObjectB = new GameObject("TriggerB");
-        triggerGameObjectB.transform.SetParent(transform);
-        triggerB = triggerGameObjectB.AddComponent<BoxCollider2D>();
-        triggerB.isTrigger = true;
-
-        SetupTriggerSizes();
+        Vector2 targetPosition = DetermineTargetPosition(other.transform.position);
+        player.SetPosition(targetPosition);
     }
 
-    private void SetupTriggerSizes() {
+    private Vector2 DetermineTargetPosition(Vector2 playerPosition) {
+        Vector2 doorCenter = transform.position;
         Vector2 doorSize = spriteRenderer.size;
         bool isHorizontal = doorSize.x > doorSize.y;
 
+        Vector2 targetPosition;
+
         if (isHorizontal) {
-            SetupHorizontalTriggers(doorSize);
+            if (playerPosition.y > doorCenter.y) {
+                targetPosition = new Vector2(doorCenter.x, doorCenter.y - teleportDistance);
+            } else {
+                targetPosition = new Vector2(doorCenter.x, doorCenter.y + teleportDistance);
+            }
         } else {
-            SetupVerticalTriggers(doorSize);
+            if (playerPosition.x < doorCenter.x) {
+                targetPosition = new Vector2(doorCenter.x + teleportDistance, doorCenter.y);
+            } else {
+                targetPosition = new Vector2(doorCenter.x - teleportDistance, doorCenter.y);
+            }
         }
-    }
 
-    private void SetupHorizontalTriggers(Vector2 doorSize) {
-        float doorHalfHeight = doorSize.y * 0.5f;
-        float quarterHeight = doorHalfHeight * 0.5f;
-
-        Vector2 triggerSize = new Vector2(doorSize.x, doorHalfHeight);
-
-        triggerA.size = triggerSize;
-        triggerA.transform.localPosition = new Vector3(0, quarterHeight);
-
-        triggerB.size = triggerSize;
-        triggerB.transform.localPosition = new Vector3(0, -quarterHeight);
-    }
-
-    private void SetupVerticalTriggers(Vector2 doorSize) {
-        float doorHalfWidth = doorSize.x * 0.5f;
-        float quarterWidth = doorHalfWidth * 0.5f;
-
-        Vector2 triggerSize = new Vector2(doorHalfWidth, doorSize.y);
-
-        triggerA.size = triggerSize;
-        triggerA.transform.localPosition = new Vector3(-quarterWidth, 0);
-
-        triggerB.size = triggerSize;
-        triggerB.transform.localPosition = new Vector3(quarterWidth, 0);
+        return targetPosition;
     }
 
     public void Open() {
-        mainCollider.enabled = false;
-        spriteRenderer.enabled = false;
+        mainCollider.isTrigger = true;
+        spriteRenderer.color = Color.green;
     }
 
     public void Close() {
-        mainCollider.enabled = true;
-        spriteRenderer.enabled = true;
+        mainCollider.isTrigger = false;
+        spriteRenderer.color = Color.red;
     }
 }

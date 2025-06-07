@@ -29,12 +29,10 @@ public class EnemyManager : MonoBehaviour {
     }
 
     public void OnPlayerEnterRoom(Room room) {
+        if(room == null || activeEnemies.ContainsKey(room)) return;
+
         if(room == dungeonContext.playerSpawnRoom) {
             DoorManager.Instance.OpenRoomDoors(room);
-            return;
-        }
-
-        if(activeEnemies.ContainsKey(room)) {
             return;
         }
 

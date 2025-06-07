@@ -29,15 +29,13 @@ public class RoomManager : MonoBehaviour {
     }
 
     private void Update() {
-        if(context == null || player == null) return;
-
         currentRoom = GetRoomForPosition(player.position);
         if(IsRoomCleared(currentRoom)) return;
 
         EnemyManager.Instance.OnPlayerEnterRoom(currentRoom);
     }
 
-    private bool IsRoomCleared(Room room) {
+    public bool IsRoomCleared(Room room) {
         return clearedRooms.Contains(room);
     }
 
