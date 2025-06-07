@@ -12,9 +12,6 @@ public class EnemyGenerator : DungeonTaskBase {
         GameObject enemiesGameObject = new GameObject("Enemies");
         enemiesGameObject.transform.SetParent(context.dungeonGameObject.transform);
         EnemyManager enemyManager = enemiesGameObject.AddComponent<EnemyManager>();
-        RoomManager roomManager = enemiesGameObject.AddComponent<RoomManager>();
-
-        roomManager.SetContext(context);
 
         enemyManager.SetDungeonContext(context);
         enemyManager.SetEnemyPrefab(enemyPrefab);

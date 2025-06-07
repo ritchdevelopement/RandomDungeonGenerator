@@ -40,7 +40,7 @@ public class DoorDrawer : DungeonTaskBase {
         }
 
         DoorController doorController = doorGameObject.GetComponent<DoorController>();
-        doorController.Register(door);
+        doorController.Initialize(door);
     }
 
     private Vector3 GetDoorWorldCenter(Door door) {

@@ -26,6 +26,9 @@ public class RoomDrawer : DungeonTaskBase {
         GameObject tilemapGameObject = new GameObject("Rooms");
         tilemapGameObject.transform.parent = context.dungeonGameObject.transform;
 
+        RoomManager roomManager = tilemapGameObject.AddComponent<RoomManager>();
+        roomManager.SetContext(context);
+
         Rigidbody2D rb = tilemapGameObject.AddComponent<Rigidbody2D>();
         rb.bodyType = RigidbodyType2D.Static;
         rb.gravityScale = 0f;
