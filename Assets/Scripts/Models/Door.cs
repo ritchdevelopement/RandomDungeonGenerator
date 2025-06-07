@@ -7,6 +7,8 @@ public class Door {
     public Vector2Int Size { get; private set; }
     public Vector2Int MinBounds { get; private set; }
     public Vector2Int MaxBounds { get; private set; }
+    public Room RoomA { get; private set; }
+    public Room RoomB { get; private set; }
 
     public Door(List<Vector2Int> tilePositions) {
         if(tilePositions == null || tilePositions.Count == 0) {
@@ -26,5 +28,10 @@ public class Door {
         MinBounds = new Vector2Int(minX, minY);
         MaxBounds = new Vector2Int(maxX, maxY);
         Size = new Vector2Int(maxX - minX + 1, maxY - minY + 1);
+    }
+
+    public void SetConnectedRooms(Room roomA, Room roomB) {
+        RoomA = roomA;
+        RoomB = roomB;
     }
 }
