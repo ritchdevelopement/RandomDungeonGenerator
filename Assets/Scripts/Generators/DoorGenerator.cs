@@ -18,6 +18,7 @@ public class DoorGenerator : DungeonTaskBase {
                     List<Vector2Int> doorTiles = GetDoorTilePositions(room, dir);
 
                     Door door = new Door(doorTiles);
+                    door.SetConnectedRooms(room, neighbour);
                     room.Connect(neighbour, door, dir);
                     context.createdDoors.Add(door);
                 }
