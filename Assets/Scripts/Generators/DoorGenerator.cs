@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorGenerator : DungeonTaskBase {
+    public int doorWidth = 4;
+    private int doorDepth = 3;
+
     public override void Execute() {
         GenerateDoors();
     }
@@ -26,7 +29,7 @@ public class DoorGenerator : DungeonTaskBase {
         }
     }
 
-    private List<Vector2Int> GetDoorTilePositions(Room room, Direction direction, int doorWidth = 3, int doorDepth = 2) {
+    private List<Vector2Int> GetDoorTilePositions(Room room, Direction direction) {
         List<Vector2Int> tiles = new();
         int halfWidth = doorWidth / 2;
         Vector2Int center = room.Center;
