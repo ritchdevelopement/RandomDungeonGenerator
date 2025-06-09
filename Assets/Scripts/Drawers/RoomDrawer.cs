@@ -45,23 +45,13 @@ public class RoomDrawer : DungeonTaskBase {
     }
 
     private void DrawWalls(Room room) {
-        int halfWidth = room.RoomSize.x / 2;
-        int halfHeight = room.RoomSize.y / 2;
+        RectInt roomBounds = room.Bounds;
 
-        int left = room.Center.x - halfWidth;
-        int right = room.Center.x + halfWidth;
-        int top = room.Center.y + halfHeight;
-        int bottom = room.Center.y - halfHeight;
+        for(int x = roomBounds.xMin; x < roomBounds.xMax; x++) {
+            for(int y = roomBounds.yMin; y < roomBounds.yMax; y++) {
+                Vector2Int position = new Vector2Int(x, y);
 
-        for(int x = left; x <= right; x++) {
-            for(int y = bottom; y <= top; y++) {
-                bool isEdgeTile =
-                    x == left ||
-                    x == right ||
-                    y == top ||
-                    y == bottom;
-
-                if(!isEdgeTile || room.IsDoorTile(new Vector2Int(x, y))) {
+                if(!room.IsWallTile(position)) {
                     continue;
                 }
 
