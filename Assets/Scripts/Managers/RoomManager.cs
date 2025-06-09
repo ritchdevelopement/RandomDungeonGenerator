@@ -29,6 +29,8 @@ public class RoomManager : MonoBehaviour {
     }
 
     private void Update() {
+        if(player == null) return;
+
         currentRoom = GetRoomForPosition(player.position);
         if(IsRoomCleared(currentRoom)) return;
 
