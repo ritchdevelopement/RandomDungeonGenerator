@@ -27,8 +27,8 @@ public class Room {
     }
 
     public List<Vector2Int> GetNeighbourPositions() {
-        int spacingX = RoomSize.x + 1;
-        int spacingY = RoomSize.y + 1;
+        int spacingX = RoomSize.x;
+        int spacingY = RoomSize.y;
         return new List<Vector2Int> {
             new Vector2Int(Center.x - spacingX, Center.y),
             new Vector2Int(Center.x + spacingX, Center.y),

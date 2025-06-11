@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class DoorGenerator : DungeonTaskBase {
     public int doorWidth = 4;
-    private int doorDepth = 3;
+    private int doorDepth = 2;
 
     public override void Execute() {
         GenerateDoors();

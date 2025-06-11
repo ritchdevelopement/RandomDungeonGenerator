@@ -5,13 +5,19 @@ public class PlayerController : MonoBehaviour {
 
     private Rigidbody2D rigidbody2d;
     private Vector2 moveInput;
+    private SpriteRenderer spriteRenderer;
+    private Animator animator;
+    private bool facingRight = false;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
     }
 
     private void Update() {
         HandleInput();
+        HandleAnimation();
     }
 
     private void FixedUpdate() {
@@ -29,6 +35,23 @@ public class PlayerController : MonoBehaviour {
         float vertical = Input.GetAxisRaw("Vertical");
 
         moveInput = new Vector2(horizontal, vertical).normalized;
+
+
+        if(horizontal == 0) {
+            return;
+
+        }
+
+        bool shouldFaceRight = horizontal > 0;
+        if (shouldFaceRight != facingRight) {
+            facingRight = shouldFaceRight;
+            spriteRenderer.flipX = !spriteRenderer.flipX;
+        }
+    }
+
+    private void HandleAnimation() {
+        bool isMoving = moveInput.magnitude > 0;
+        animator.SetBool("IsMoving", isMoving);
     }
 
     private void HandleMovement() {
