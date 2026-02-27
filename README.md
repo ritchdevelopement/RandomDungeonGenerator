@@ -73,13 +73,20 @@ graph TD
 
 ## Setup
 
-After cloning the repository, run the following command once to activate the Git hooks:
+After cloning the repository, run the setup script **once**:
 
 ```sh
-git config core.hooksPath .githooks
+./setup.sh
 ```
 
-This enables the commit message linter, which enforces the [Conventional Commits](https://www.conventionalcommits.org/) format.
+This activates two Git hooks:
+- **commit-msg** – enforces the [Conventional Commits](https://www.conventionalcommits.org/) format
+- **pre-commit** – checks C# formatting via `dotnet format`
+
+To fix formatting issues automatically before committing:
+```sh
+dotnet format whitespace Assembly-CSharp.csproj
+```
 
 ## Requirements
 
