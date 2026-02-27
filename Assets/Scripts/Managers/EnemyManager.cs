@@ -11,7 +11,7 @@ public class EnemyManager : MonoBehaviour {
     private Dictionary<Room, EnemyController> activeEnemies = new();
 
     private void Awake() {
-        if(Instance == null) {
+        if (Instance == null) {
             Instance = this;
         }
     }
@@ -37,7 +37,7 @@ public class EnemyManager : MonoBehaviour {
             return;
         }
 
-        if(room == dungeonContext.playerSpawnRoom) {
+        if (room == dungeonContext.playerSpawnRoom) {
             DoorManager.Instance.OpenRoomDoors(room);
             return;
         }

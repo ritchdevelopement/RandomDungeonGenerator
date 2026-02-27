@@ -10,7 +10,7 @@ public class AspectRatioController : MonoBehaviour {
     private void Awake() {
         targetCamera = GetComponent<Camera>();
 
-        if(targetCamera == null) {
+        if (targetCamera == null) {
             Debug.LogError("AspectRatioController requires a Camera component!");
             enabled = false;
             return;
@@ -21,7 +21,7 @@ public class AspectRatioController : MonoBehaviour {
     }
 
     private void Update() {
-        if(HasScreenSizeChanged()) {
+        if (HasScreenSizeChanged()) {
             UpdateScreenSize();
             EnforceAspectRatio();
         }
@@ -39,12 +39,12 @@ public class AspectRatioController : MonoBehaviour {
     private void EnforceAspectRatio() {
         float currentAspectRatio = GetCurrentAspectRatio();
 
-        if(IsAspectRatioCorrect(currentAspectRatio)) {
+        if (IsAspectRatioCorrect(currentAspectRatio)) {
             SetFullScreenRect();
             return;
         }
 
-        if(IsScreenWiderThanTarget(currentAspectRatio)) {
+        if (IsScreenWiderThanTarget(currentAspectRatio)) {
             ApplyHorizontalCrop(currentAspectRatio);
         } else {
             ApplyVerticalCrop(currentAspectRatio);

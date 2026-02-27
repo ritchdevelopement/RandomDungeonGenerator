@@ -19,7 +19,7 @@ public class RoomGenerator : DungeonTaskBase {
         roomsToCreate.Enqueue(new Room(context.roomSize, initialRoomPos));
         reservedPositions.Add(initialRoomPos);
 
-        while(roomsToCreate.Count > 0 && context.createdRooms.Count < context.numberOfRooms) {
+        while (roomsToCreate.Count > 0 && context.createdRooms.Count < context.numberOfRooms) {
             Room currentRoom = roomsToCreate.Dequeue();
             context.createdRooms[currentRoom.Center] = currentRoom;
             AddNeighbour(currentRoom, roomsToCreate);
@@ -30,21 +30,21 @@ public class RoomGenerator : DungeonTaskBase {
         List<Vector2Int> neighbourPositions = currentRoom.GetNeighbourPositions();
         List<Vector2Int> availableNeighbours = new();
 
-        foreach(Vector2Int position in neighbourPositions) {
-            if(context.createdRooms.ContainsKey(position) || reservedPositions.Contains(position)) {
+        foreach (Vector2Int position in neighbourPositions) {
+            if (context.createdRooms.ContainsKey(position) || reservedPositions.Contains(position)) {
                 continue;
             }
 
             availableNeighbours.Add(position);
         }
 
-        if(context.createdRooms.Count > context.roomDistributionFactor) {
+        if (context.createdRooms.Count > context.roomDistributionFactor) {
             RemoveClosestRoomToCenter(availableNeighbours);
         }
 
         int maxNumberOfNeighbors = Random.Range(1, availableNeighbours.Count + 1);
 
-        for(int i = 0; i < maxNumberOfNeighbors && availableNeighbours.Count > 0; i++) {
+        for (int i = 0; i < maxNumberOfNeighbors && availableNeighbours.Count > 0; i++) {
             Vector2Int chosen = availableNeighbours[Random.Range(0, availableNeighbours.Count)];
             availableNeighbours.Remove(chosen);
             roomsToCreate.Enqueue(new Room(context.roomSize, chosen));
@@ -53,7 +53,7 @@ public class RoomGenerator : DungeonTaskBase {
     }
 
     private void RemoveClosestRoomToCenter(List<Vector2Int> availableNeighbours) {
-        if(availableNeighbours.Count == 0) {
+        if (availableNeighbours.Count == 0) {
             return;
         }
 

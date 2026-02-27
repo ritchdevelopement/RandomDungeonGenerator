@@ -64,7 +64,7 @@ public class DoorController : MonoBehaviour {
 
     private IEnumerator SlideTo(Vector2 target) {
         mainCollider.enabled = false;
-        while ((Vector2)transform.position != target) {
+        while ((Vector2) transform.position != target) {
             transform.position = Vector2.MoveTowards(transform.position, target, slideSpeed * Time.deltaTime);
             yield return null;
         }

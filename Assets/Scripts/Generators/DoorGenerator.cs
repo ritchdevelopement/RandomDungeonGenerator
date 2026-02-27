@@ -10,10 +10,10 @@ public class DoorGenerator : DungeonTaskBase {
     }
 
     public void GenerateDoors() {
-        foreach(Room room in context.createdRooms.Values) {
-            foreach(Vector2Int pos in room.GetNeighbourPositions()) {
-                if(context.createdRooms.TryGetValue(pos, out Room neighbour)) {
-                    if(room.Neighbors.ContainsValue(neighbour)) {
+        foreach (Room room in context.createdRooms.Values) {
+            foreach (Vector2Int pos in room.GetNeighbourPositions()) {
+                if (context.createdRooms.TryGetValue(pos, out Room neighbour)) {
+                    if (room.Neighbors.ContainsValue(neighbour)) {
                         continue;
                     }
 
@@ -42,8 +42,8 @@ public class DoorGenerator : DungeonTaskBase {
             _ => center
         };
 
-        for(int offset = -halfWidth; offset <= halfWidth; offset++) {
-            for(int depth = 0; depth < doorDepth; depth++) {
+        for (int offset = -halfWidth; offset <= halfWidth; offset++) {
+            for (int depth = 0; depth < doorDepth; depth++) {
                 Vector2Int tile = direction switch {
                     Direction.North => new Vector2Int(basePos.x + offset, basePos.y + depth),
                     Direction.South => new Vector2Int(basePos.x + offset, basePos.y - depth),

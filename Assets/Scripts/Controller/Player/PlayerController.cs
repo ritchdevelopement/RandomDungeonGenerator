@@ -37,7 +37,7 @@ public class PlayerController : MonoBehaviour {
         moveInput = new Vector2(horizontal, vertical).normalized;
 
 
-        if(horizontal == 0) {
+        if (horizontal == 0) {
             return;
 
         }

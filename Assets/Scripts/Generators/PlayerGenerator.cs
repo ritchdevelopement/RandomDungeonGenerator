@@ -10,7 +10,7 @@ public class PlayerGenerator : DungeonTaskBase {
     private GameObject spawnedPlayer;
 
     public override void Execute() {
-        if(playerPrefab == null) {
+        if (playerPrefab == null) {
             Debug.LogError("Player prefab not assigned to PlayerGenerator!");
             return;
         }
@@ -34,7 +34,7 @@ public class PlayerGenerator : DungeonTaskBase {
 
     public Room GetPlayerSpawnRoom(SpawnLocation spawnLocation) {
         var rooms = context.createdRooms.Values.ToArray();
-        if(rooms.Length == 0) {
+        if (rooms.Length == 0) {
             Debug.LogWarning("No rooms available for player spawn selection!");
             return null;
         }
