@@ -7,6 +7,7 @@ public class RoomManager : MonoBehaviour {
     private DungeonGenerationContext context;
     private Transform player;
     private Room currentRoom;
+    private Room lastRevealedRoom;
     private readonly HashSet<Room> clearedRooms = new();
 
     private void Awake() {
@@ -18,6 +19,8 @@ public class RoomManager : MonoBehaviour {
     public void SetContext(DungeonGenerationContext ctx) {
         context = ctx;
         currentRoom = ctx.playerSpawnRoom;
+        lastRevealedRoom = ctx.playerSpawnRoom;
+        FogOfWarManager.Instance?.RevealRoom(ctx.playerSpawnRoom);
     }
 
     public void SetPlayer(Transform playerTransform) {
@@ -32,6 +35,12 @@ public class RoomManager : MonoBehaviour {
         if(player == null) return;
 
         currentRoom = GetRoomForPosition(player.position);
+
+        if (currentRoom != null && currentRoom != lastRevealedRoom) {
+            lastRevealedRoom = currentRoom;
+            FogOfWarManager.Instance?.RevealRoom(currentRoom);
+        }
+
         if(IsRoomCleared(currentRoom)) return;
 
         EnemyManager.Instance.OnPlayerEnterRoom(currentRoom);
