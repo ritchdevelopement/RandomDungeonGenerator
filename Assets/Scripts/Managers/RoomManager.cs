@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteAlways]
 public class RoomManager : MonoBehaviour {
     public static RoomManager Instance { get; private set; }
 
@@ -32,6 +33,7 @@ public class RoomManager : MonoBehaviour {
     }
 
     private void Update() {
+        if (!Application.isPlaying) return;
         if(player == null) return;
 
         currentRoom = GetRoomForPosition(player.position);
