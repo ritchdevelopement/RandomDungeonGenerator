@@ -147,3 +147,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb56c90dc716abe47adc490cbeb718e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  slideSpeed: 5
+  minPlayerDistanceToClose: 3.5

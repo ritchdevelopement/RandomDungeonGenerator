@@ -1,11 +1,16 @@
+using System.Collections;
 using UnityEngine;
 
 public class DoorController : MonoBehaviour {
-    public float teleportDistance = 2f;
+    [SerializeField] private float slideSpeed = 5f;
+    [SerializeField] private float minPlayerDistanceToClose = 3f;
+
     private BoxCollider2D mainCollider;
     private SpriteRenderer spriteRenderer;
-    private Room roomA;
-    private Room roomB;
+    private Vector2 closedPosition;
+    private Vector2 openPosition;
+    private Coroutine slideCoroutine;
+    private Transform playerTransform;
 
     private void Awake() {
         mainCollider = GetComponent<BoxCollider2D>();
@@ -13,50 +18,50 @@ public class DoorController : MonoBehaviour {
     }
 
     public void Initialize(Door door, Room roomA, Room roomB) {
-        this.roomA = roomA;
-        this.roomB = roomB;
+        closedPosition = transform.position;
+        openPosition = CalculateOpenPosition();
         DoorManager.Instance.RegisterDoor(door, this);
     }
 
-    private void OnTriggerEnter2D(Collider2D other) {
-        if(!other.TryGetComponent<PlayerController>(out var player))
-            return;
-
-        Vector2 targetPosition = DetermineTargetPosition(other.transform.position);
-        player.SetPosition(targetPosition);
-    }
-
-    private Vector2 DetermineTargetPosition(Vector2 playerPosition) {
-        Vector2 doorCenter = transform.position;
+    private Vector2 CalculateOpenPosition() {
         Vector2 doorSize = spriteRenderer.size;
         bool isHorizontal = doorSize.x > doorSize.y;
-
-        Vector2 targetPosition;
-
-        if (isHorizontal) {
-            if (playerPosition.y > doorCenter.y) {
-                targetPosition = new Vector2(doorCenter.x, doorCenter.y - teleportDistance);
-            } else {
-                targetPosition = new Vector2(doorCenter.x, doorCenter.y + teleportDistance);
-            }
-        } else {
-            if (playerPosition.x < doorCenter.x) {
-                targetPosition = new Vector2(doorCenter.x + teleportDistance, doorCenter.y);
-            } else {
-                targetPosition = new Vector2(doorCenter.x - teleportDistance, doorCenter.y);
-            }
-        }
-
-        return targetPosition;
+        return isHorizontal
+            ? closedPosition + new Vector2(doorSize.x, 0f)
+            : closedPosition + new Vector2(0f, doorSize.y);
     }
 
     public void Open() {
-        mainCollider.isTrigger = true;
-        spriteRenderer.color = Color.green;
+        if (slideCoroutine != null) StopCoroutine(slideCoroutine);
+        slideCoroutine = StartCoroutine(SlideTo(openPosition));
     }
 
     public void Close() {
-        mainCollider.isTrigger = false;
-        spriteRenderer.color = Color.red;
+        if (slideCoroutine != null) StopCoroutine(slideCoroutine);
+        slideCoroutine = StartCoroutine(CloseWhenPlayerClear());
+    }
+
+    private IEnumerator CloseWhenPlayerClear() {
+        if (playerTransform == null) {
+            GameObject playerGO = GameObject.FindWithTag("Player");
+            if (playerGO != null) playerTransform = playerGO.transform;
+        }
+
+        if (playerTransform != null) {
+            yield return new WaitUntil(() =>
+                Vector2.Distance(playerTransform.position, transform.position) >= minPlayerDistanceToClose
+            );
+        }
+
+        yield return StartCoroutine(SlideTo(closedPosition));
+    }
+
+    private IEnumerator SlideTo(Vector2 target) {
+        mainCollider.enabled = false;
+        while ((Vector2)transform.position != target) {
+            transform.position = Vector2.MoveTowards(transform.position, target, slideSpeed * Time.deltaTime);
+            yield return null;
+        }
+        mainCollider.enabled = target == closedPosition;
     }
 }
