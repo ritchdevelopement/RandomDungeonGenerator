@@ -23,14 +23,19 @@ public class FogOfWarManager : DungeonTaskBase {
         Transform fogContainer = CreateFogContainer();
         Sprite unitWhiteSprite = CreateUnitWhiteSprite();
         foreach (Room room in context.createdRooms.Values) {
-            List<GameObject> overlays = CreateAllFogOverlays(room, fogContainer, unitWhiteSprite);
-            roomFogs[room] = new RoomFog(room, overlays);
+            CreateEdgeOverlays(room, fogContainer, unitWhiteSprite);
+            roomFogs[room] = CreateRoomFog(room, fogContainer, unitWhiteSprite);
         }
 
         RevealRoom(context.playerSpawnRoom);
     }
 
-    private List<GameObject> CreateAllFogOverlays(Room room, Transform parent, Sprite sprite) {
+    private RoomFog CreateRoomFog(Room room, Transform parent, Sprite sprite) {
+        GameObject mainOverlay = CreateFogOverlay(room.Bounds, $"Fog_{room.Center}", parent, sprite);
+        return new RoomFog(room, new List<GameObject> { mainOverlay });
+    }
+
+    private void CreateEdgeOverlays(Room room, Transform parent, Sprite sprite) {
         RectInt bounds = room.Bounds;
         int extendX = room.RoomSize.x;
         int extendY = room.RoomSize.y;
@@ -46,7 +51,6 @@ public class FogOfWarManager : DungeonTaskBase {
         bool hasSouthEast = context.createdRooms.ContainsKey(center + new Vector2Int(extendX, -extendY));
         bool hasSouthWest = context.createdRooms.ContainsKey(center + new Vector2Int(-extendX, -extendY));
 
-        // Edge overlays cover empty space permanently — not included in RoomFog
         if (!hasNorth) CreateFogOverlay(NorthSideBounds(bounds, extendY), $"FogN_{center}", parent, sprite);
         if (!hasSouth) CreateFogOverlay(SouthSideBounds(bounds, extendY), $"FogS_{center}", parent, sprite);
         if (!hasEast) CreateFogOverlay(EastSideBounds(bounds, extendX), $"FogE_{center}", parent, sprite);
@@ -55,9 +59,6 @@ public class FogOfWarManager : DungeonTaskBase {
         if (!hasNorthWest) CreateFogOverlay(NorthWestCornerBounds(bounds, extendX, extendY), $"FogNW_{center}", parent, sprite);
         if (!hasSouthEast) CreateFogOverlay(SouthEastCornerBounds(bounds, extendX, extendY), $"FogSE_{center}", parent, sprite);
         if (!hasSouthWest) CreateFogOverlay(SouthWestCornerBounds(bounds, extendX, extendY), $"FogSW_{center}", parent, sprite);
-
-        // Only the main overlay is tracked in RoomFog — removed when room is revealed
-        return new List<GameObject> { CreateFogOverlay(bounds, $"Fog_{center}", parent, sprite) };
     }
 
     private GameObject CreateFogOverlay(RectInt bounds, string name, Transform parent, Sprite sprite) {
