@@ -32,19 +32,25 @@ public class DoorController : MonoBehaviour {
     }
 
     public void Open() {
-        if (slideCoroutine != null) StopCoroutine(slideCoroutine);
+        if (slideCoroutine != null) {
+            StopCoroutine(slideCoroutine);
+        }
         slideCoroutine = StartCoroutine(SlideTo(openPosition));
     }
 
     public void Close() {
-        if (slideCoroutine != null) StopCoroutine(slideCoroutine);
+        if (slideCoroutine != null) {
+            StopCoroutine(slideCoroutine);
+        }
         slideCoroutine = StartCoroutine(CloseWhenPlayerClear());
     }
 
     private IEnumerator CloseWhenPlayerClear() {
         if (playerTransform == null) {
             GameObject playerGO = GameObject.FindWithTag("Player");
-            if (playerGO != null) playerTransform = playerGO.transform;
+            if (playerGO != null) {
+                playerTransform = playerGO.transform;
+            }
         }
 
         if (playerTransform != null) {

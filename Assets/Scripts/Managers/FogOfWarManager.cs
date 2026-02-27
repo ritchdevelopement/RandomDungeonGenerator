@@ -51,14 +51,30 @@ public class FogOfWarManager : DungeonTaskBase {
         bool hasSouthEast = context.createdRooms.ContainsKey(center + new Vector2Int(extendX, -extendY));
         bool hasSouthWest = context.createdRooms.ContainsKey(center + new Vector2Int(-extendX, -extendY));
 
-        if (!hasNorth) CreateFogOverlay(NorthSideBounds(bounds, extendY), $"FogN_{center}", parent, sprite);
-        if (!hasSouth) CreateFogOverlay(SouthSideBounds(bounds, extendY), $"FogS_{center}", parent, sprite);
-        if (!hasEast) CreateFogOverlay(EastSideBounds(bounds, extendX), $"FogE_{center}", parent, sprite);
-        if (!hasWest) CreateFogOverlay(WestSideBounds(bounds, extendX), $"FogW_{center}", parent, sprite);
-        if (!hasNorthEast) CreateFogOverlay(NorthEastCornerBounds(bounds, extendX, extendY), $"FogNE_{center}", parent, sprite);
-        if (!hasNorthWest) CreateFogOverlay(NorthWestCornerBounds(bounds, extendX, extendY), $"FogNW_{center}", parent, sprite);
-        if (!hasSouthEast) CreateFogOverlay(SouthEastCornerBounds(bounds, extendX, extendY), $"FogSE_{center}", parent, sprite);
-        if (!hasSouthWest) CreateFogOverlay(SouthWestCornerBounds(bounds, extendX, extendY), $"FogSW_{center}", parent, sprite);
+        if (!hasNorth) {
+            CreateFogOverlay(NorthSideBounds(bounds, extendY), $"FogN_{center}", parent, sprite);
+        }
+        if (!hasSouth) {
+            CreateFogOverlay(SouthSideBounds(bounds, extendY), $"FogS_{center}", parent, sprite);
+        }
+        if (!hasEast) {
+            CreateFogOverlay(EastSideBounds(bounds, extendX), $"FogE_{center}", parent, sprite);
+        }
+        if (!hasWest) {
+            CreateFogOverlay(WestSideBounds(bounds, extendX), $"FogW_{center}", parent, sprite);
+        }
+        if (!hasNorthEast) {
+            CreateFogOverlay(NorthEastCornerBounds(bounds, extendX, extendY), $"FogNE_{center}", parent, sprite);
+        }
+        if (!hasNorthWest) {
+            CreateFogOverlay(NorthWestCornerBounds(bounds, extendX, extendY), $"FogNW_{center}", parent, sprite);
+        }
+        if (!hasSouthEast) {
+            CreateFogOverlay(SouthEastCornerBounds(bounds, extendX, extendY), $"FogSE_{center}", parent, sprite);
+        }
+        if (!hasSouthWest) {
+            CreateFogOverlay(SouthWestCornerBounds(bounds, extendX, extendY), $"FogSW_{center}", parent, sprite);
+        }
     }
 
     private GameObject CreateFogOverlay(RectInt bounds, string name, Transform parent, Sprite sprite) {
@@ -109,7 +125,9 @@ public class FogOfWarManager : DungeonTaskBase {
     }
 
     public void RevealRoom(Room room) {
-        if (room == null || !roomFogs.TryGetValue(room, out RoomFog roomFog)) return;
+        if (room == null || !roomFogs.TryGetValue(room, out RoomFog roomFog)) {
+            return;
+        }
         roomFog.Reveal();
         roomFogs.Remove(room);
     }

@@ -21,7 +21,9 @@ public class RoomManager : MonoBehaviour {
         context = ctx;
         currentRoom = ctx.playerSpawnRoom;
         lastRevealedRoom = ctx.playerSpawnRoom;
-        if (FogOfWarManager.Instance != null) FogOfWarManager.Instance.RevealRoom(ctx.playerSpawnRoom);
+        if (FogOfWarManager.Instance != null) {
+            FogOfWarManager.Instance.RevealRoom(ctx.playerSpawnRoom);
+        }
     }
 
     public void SetPlayer(Transform playerTransform) {
@@ -33,17 +35,25 @@ public class RoomManager : MonoBehaviour {
     }
 
     private void Update() {
-        if (!Application.isPlaying) return;
-        if(player == null) return;
+        if (!Application.isPlaying) {
+            return;
+        }
+        if (player == null) {
+            return;
+        }
 
         currentRoom = GetRoomForPosition(player.position);
 
         if (currentRoom != null && currentRoom != lastRevealedRoom) {
             lastRevealedRoom = currentRoom;
-            if (FogOfWarManager.Instance != null) FogOfWarManager.Instance.RevealRoom(currentRoom);
+            if (FogOfWarManager.Instance != null) {
+                FogOfWarManager.Instance.RevealRoom(currentRoom);
+            }
         }
 
-        if(IsRoomCleared(currentRoom)) return;
+        if (IsRoomCleared(currentRoom)) {
+            return;
+        }
 
         EnemyManager.Instance.OnPlayerEnterRoom(currentRoom);
     }

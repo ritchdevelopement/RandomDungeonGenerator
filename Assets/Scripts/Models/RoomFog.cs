@@ -13,7 +13,9 @@ public class RoomFog {
     }
 
     public void Reveal() {
-        if (IsRevealed) return;
+        if (IsRevealed) {
+            return;
+        }
         IsRevealed = true;
         foreach (GameObject overlay in overlays) {
             overlay.SetActive(false);

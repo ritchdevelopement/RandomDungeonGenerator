@@ -30,7 +30,9 @@ public class EnemyController : MonoBehaviour, IDamageable {
     }
 
     private void MoveTowardsPlayer() {
-        if (playerTransform == null) return;
+        if (playerTransform == null) {
+            return;
+        }
 
         Vector2 direction = (playerTransform.position - transform.position).normalized;
         rb.linearVelocity = direction * moveSpeed;

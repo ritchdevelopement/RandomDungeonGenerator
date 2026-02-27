@@ -30,8 +30,12 @@ public class EnemyManager : MonoBehaviour {
     }
 
     public void OnPlayerEnterRoom(Room room) {
-        if (!Application.isPlaying) return;
-        if(room == null || dungeonContext == null || activeEnemies.ContainsKey(room)) return;
+        if (!Application.isPlaying) {
+            return;
+        }
+        if (room == null || dungeonContext == null || activeEnemies.ContainsKey(room)) {
+            return;
+        }
 
         if(room == dungeonContext.playerSpawnRoom) {
             DoorManager.Instance.OpenRoomDoors(room);
