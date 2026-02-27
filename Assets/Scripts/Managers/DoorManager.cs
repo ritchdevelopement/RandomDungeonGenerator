@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteAlways]
 public class DoorManager : MonoBehaviour {
     public static DoorManager Instance { get; private set; }
 

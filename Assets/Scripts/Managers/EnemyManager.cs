@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteAlways]
 public class EnemyManager : MonoBehaviour {
     public static EnemyManager Instance { get; private set; }
 
@@ -29,6 +30,7 @@ public class EnemyManager : MonoBehaviour {
     }
 
     public void OnPlayerEnterRoom(Room room) {
+        if (!Application.isPlaying) return;
         if(room == null || dungeonContext == null || activeEnemies.ContainsKey(room)) return;
 
         if(room == dungeonContext.playerSpawnRoom) {

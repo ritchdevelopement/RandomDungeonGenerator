@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f0a401e9df44614b946fc96770a5259, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fogColor: {r: 0.509434, g: 0.49741903, b: 0.49741903, a: 1}
+  fogColor: {r: 0.5566038, g: 0.09714311, b: 0.09714311, a: 1}
   fogSortingOrder: 10
 --- !u!4 &91611135
 Transform:
