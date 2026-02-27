@@ -71,6 +71,16 @@ graph TD
     MODELS --> DOOR["Door.cs<br/>Door data: tile positions, connected rooms"]
 ```
 
+## Setup
+
+After cloning the repository, run the following command once to activate the Git hooks:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+This enables the commit message linter, which enforces the [Conventional Commits](https://www.conventionalcommits.org/) format.
+
 ## Requirements
 
 - Unity 2022.3 or newer
