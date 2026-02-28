@@ -1,66 +1,101 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class RoomGenerator : DungeonTaskBase {
-    private HashSet<Vector2Int> reservedPositions = new();
+    private List<RectInt> reservedBounds = new();
 
     public override void Execute() {
-        reservedPositions.Clear();
+        reservedBounds.Clear();
         CreateRooms();
 
         Debug.Log($"Generated {context.createdRooms.Count} rooms out of requested {context.numberOfRooms}.");
     }
 
     private void CreateRooms() {
-        Vector2Int initialRoomPos = Vector2Int.zero;
+        Vector2Int firstSize = PickRandomSize();
+        Room firstRoom = new Room(firstSize, Vector2Int.zero);
 
         Queue<Room> roomsToCreate = new();
-        roomsToCreate.Enqueue(new Room(context.roomSize, initialRoomPos));
-        reservedPositions.Add(initialRoomPos);
+        roomsToCreate.Enqueue(firstRoom);
+        reservedBounds.Add(firstRoom.Bounds);
 
         while (roomsToCreate.Count > 0 && context.createdRooms.Count < context.numberOfRooms) {
             Room currentRoom = roomsToCreate.Dequeue();
             context.createdRooms[currentRoom.Center] = currentRoom;
-            AddNeighbour(currentRoom, roomsToCreate);
+            AddNeighbours(currentRoom, roomsToCreate);
         }
     }
 
-    private void AddNeighbour(Room currentRoom, Queue<Room> roomsToCreate) {
-        List<Vector2Int> neighbourPositions = currentRoom.GetNeighbourPositions();
-        List<Vector2Int> availableNeighbours = new();
+    private void AddNeighbours(Room currentRoom, Queue<Room> roomsToCreate) {
+        Direction[] directions = { Direction.North, Direction.South, Direction.East, Direction.West };
+        List<(Direction Dir, Room Candidate)> available = new();
 
-        foreach (Vector2Int position in neighbourPositions) {
-            if (context.createdRooms.ContainsKey(position) || reservedPositions.Contains(position)) {
+        foreach (Direction dir in directions) {
+            Vector2Int candidateSize = Room.EnsureOddSize(PickRandomSize());
+            Vector2Int candidateCenter = currentRoom.GetNeighborCenter(dir, candidateSize);
+
+            if (context.createdRooms.ContainsKey(candidateCenter)) {
                 continue;
             }
 
-            availableNeighbours.Add(position);
+            RectInt candidateBounds = new RectInt(
+                candidateCenter.x - candidateSize.x / 2,
+                candidateCenter.y - candidateSize.y / 2,
+                candidateSize.x,
+                candidateSize.y
+            );
+
+            if (OverlapsAnyReserved(candidateBounds)) {
+                continue;
+            }
+
+            available.Add((dir, new Room(candidateSize, candidateCenter)));
         }
 
         if (context.createdRooms.Count > context.roomDistributionFactor) {
-            RemoveClosestRoomToCenter(availableNeighbours);
+            RemoveClosestToCenter(available);
         }
 
-        int maxNumberOfNeighbors = Random.Range(1, availableNeighbours.Count + 1);
+        int maxNeighbours = Random.Range(1, available.Count + 1);
 
-        for (int i = 0; i < maxNumberOfNeighbors && availableNeighbours.Count > 0; i++) {
-            Vector2Int chosen = availableNeighbours[Random.Range(0, availableNeighbours.Count)];
-            availableNeighbours.Remove(chosen);
-            roomsToCreate.Enqueue(new Room(context.roomSize, chosen));
-            reservedPositions.Add(chosen);
+        for (int i = 0; i < maxNeighbours && available.Count > 0; i++) {
+            int index = Random.Range(0, available.Count);
+            (Direction Dir, Room Candidate) chosen = available[index];
+            available.RemoveAt(index);
+
+            roomsToCreate.Enqueue(chosen.Candidate);
+            reservedBounds.Add(chosen.Candidate.Bounds);
+            context.adjacencies.Add((currentRoom, chosen.Candidate, chosen.Dir));
         }
     }
 
-    private void RemoveClosestRoomToCenter(List<Vector2Int> availableNeighbours) {
-        if (availableNeighbours.Count == 0) {
+    private bool OverlapsAnyReserved(RectInt candidate) {
+        foreach (RectInt reserved in reservedBounds) {
+            if (candidate.Overlaps(reserved)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void RemoveClosestToCenter(List<(Direction Dir, Room Candidate)> available) {
+        if (available.Count == 0) {
             return;
         }
 
-        Vector2Int closest = availableNeighbours
-            .OrderBy(pos => Vector2Int.Distance(pos, Vector2Int.zero))
+        (Direction Dir, Room Candidate) closest = available
+            .OrderBy(entry => Vector2Int.Distance(entry.Candidate.Center, Vector2Int.zero))
             .First();
 
-        availableNeighbours.Remove(closest);
+        available.Remove(closest);
     }
+
+    private Vector2Int PickRandomSize() {
+        if (context.roomSizes == null || context.roomSizes.Count == 0) {
+            throw new System.InvalidOperationException("DungeonConfig.roomSizes must contain at least one entry.");
+        }
+        return context.roomSizes[Random.Range(0, context.roomSizes.Count)];
+    }
+
 }

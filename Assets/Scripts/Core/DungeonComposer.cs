@@ -25,10 +25,11 @@ public class DungeonComposer : MonoBehaviour {
         CreateDungeonBase();
 
         DungeonGenerationContext context = new DungeonGenerationContext {
-            roomSize = dungeonConfig.roomSize,
+            roomSizes = dungeonConfig.roomSizes,
             numberOfRooms = dungeonConfig.numberOfRooms,
-            roomDistributionFactor = dungeonConfig.roomDistributionFactor,
+            roomDistributionFactor = Mathf.RoundToInt(dungeonConfig.numberOfRooms * dungeonConfig.distributionBias),
             createdRooms = new Dictionary<Vector2Int, Room>(),
+            adjacencies = new List<(Room, Room, Direction)>(),
             dungeonGameObject = dungeonGameObject,
             frictionlessMaterial = dungeonConfig.frictionlessMaterial
         };

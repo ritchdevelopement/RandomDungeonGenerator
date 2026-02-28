@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfaac58d70bb844bb0f4bed398eff50, type: 3}
   m_Name: Default
   m_EditorClassIdentifier: 
-  roomSize: {x: 33, y: 19}
-  numberOfRooms: 15
-  roomDistributionFactor: 4
+  roomSizes:
+  - {x: 33, y: 19}
+  - {x: 17, y: 17}
+  - {x: 53, y: 33}
+  numberOfRooms: 25
+  roomDistributionFactor: 10
   frictionlessMaterial: {fileID: 6200000, guid: ebf0609166e5714479b45d917fd4d06b,
     type: 2}

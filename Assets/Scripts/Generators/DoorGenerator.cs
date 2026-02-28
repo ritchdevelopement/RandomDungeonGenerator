@@ -2,36 +2,30 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorGenerator : DungeonTaskBase {
-    public int doorWidth = 4;
-    private int doorDepth = 2;
+    [SerializeField] private int doorWidth = 4;
+    private const int DoorDepth = 2;
 
     public override void Execute() {
         GenerateDoors();
     }
 
-    public void GenerateDoors() {
-        foreach (Room room in context.createdRooms.Values) {
-            foreach (Vector2Int pos in room.GetNeighbourPositions()) {
-                if (context.createdRooms.TryGetValue(pos, out Room neighbour)) {
-                    if (room.Neighbors.ContainsValue(neighbour)) {
-                        continue;
-                    }
-
-                    Direction dir = room.GetDirectionTo(neighbour);
-                    List<Vector2Int> doorTiles = GetDoorTilePositions(room, dir);
-
-                    Door door = new Door(doorTiles);
-                    door.SetConnectedRooms(room, neighbour);
-                    room.Connect(neighbour, door, dir);
-                    context.createdDoors.Add(door);
-                }
+    private void GenerateDoors() {
+        foreach ((Room roomA, Room roomB, Direction dir) in context.adjacencies) {
+            if (roomA.Neighbors.ContainsValue(roomB)) {
+                continue;
             }
+
+            List<Vector2Int> doorTiles = GetDoorTilePositions(roomA, roomB, dir);
+            Door door = new Door(doorTiles);
+            door.SetConnectedRooms(roomA, roomB);
+            roomA.Connect(roomB, door, dir);
+            context.createdDoors.Add(door);
         }
     }
 
-    private List<Vector2Int> GetDoorTilePositions(Room room, Direction direction) {
+    private List<Vector2Int> GetDoorTilePositions(Room room, Room neighbor, Direction direction) {
         List<Vector2Int> tiles = new();
-        int halfWidth = doorWidth / 2;
+        int halfWidth = EffectiveDoorWidth(room, neighbor, direction) / 2;
         Vector2Int center = room.Center;
 
         Vector2Int basePos = direction switch {
@@ -43,7 +37,7 @@ public class DoorGenerator : DungeonTaskBase {
         };
 
         for (int offset = -halfWidth; offset <= halfWidth; offset++) {
-            for (int depth = 0; depth < doorDepth; depth++) {
+            for (int depth = 0; depth < DoorDepth; depth++) {
                 Vector2Int tile = direction switch {
                     Direction.North => new Vector2Int(basePos.x + offset, basePos.y + depth),
                     Direction.South => new Vector2Int(basePos.x + offset, basePos.y - depth),
@@ -53,9 +47,16 @@ public class DoorGenerator : DungeonTaskBase {
                 };
                 tiles.Add(tile);
             }
-
         }
 
         return tiles;
+    }
+
+    private int EffectiveDoorWidth(Room room, Room neighbor, Direction direction) {
+        bool isNorthSouth = direction == Direction.North || direction == Direction.South;
+        int perpendicularA = isNorthSouth ? room.RoomSize.x : room.RoomSize.y;
+        int perpendicularB = isNorthSouth ? neighbor.RoomSize.x : neighbor.RoomSize.y;
+        int maxAllowed = Mathf.Min(perpendicularA, perpendicularB) - 2;
+        return Mathf.Clamp(doorWidth, 1, maxAllowed);
     }
 }
