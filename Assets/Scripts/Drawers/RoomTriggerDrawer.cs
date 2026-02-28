@@ -31,6 +31,7 @@ public class RoomTriggerDrawer : DungeonTaskBase {
 
         RoomTrigger roomTrigger = triggerObject.AddComponent<RoomTrigger>();
         roomTrigger.Initialize(room);
+        RoomManager.Instance.RegisterTrigger(room, roomTrigger);
     }
 
     private static Sprite CreateSquareSprite() {

@@ -12,6 +12,7 @@ public class FogRevealTrigger : MonoBehaviour {
             return;
         }
 
+        RoomManager.Instance.AssignRandomEventsToSiblings(room);
         FogOfWarManager.Instance.RevealRoom(room);
     }
 }
