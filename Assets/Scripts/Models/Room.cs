@@ -10,7 +10,7 @@ public class Room {
 
     public Room(Vector2Int roomSize, Vector2Int center) {
         Vector2Int originalSize = roomSize;
-        RoomSize = EnsureOddRoomSize(roomSize);
+        RoomSize = EnsureOddSize(roomSize);
         Center = center;
         Bounds = CalculateBounds();
 
@@ -19,21 +19,25 @@ public class Room {
         }
     }
 
-    private Vector2Int EnsureOddRoomSize(Vector2Int size) {
+    public static Vector2Int EnsureOddSize(Vector2Int size) {
         return new Vector2Int(
             size.x % 2 == 0 ? Mathf.Max(1, size.x + 1) : Mathf.Max(1, size.x),
             size.y % 2 == 0 ? Mathf.Max(1, size.y + 1) : Mathf.Max(1, size.y)
         );
     }
 
-    public List<Vector2Int> GetNeighbourPositions() {
-        int spacingX = RoomSize.x;
-        int spacingY = RoomSize.y;
-        return new List<Vector2Int> {
-            new Vector2Int(Center.x - spacingX, Center.y),
-            new Vector2Int(Center.x + spacingX, Center.y),
-            new Vector2Int(Center.x, Center.y + spacingY),
-            new Vector2Int(Center.x, Center.y - spacingY)
+    public Vector2Int GetNeighborCenter(Direction dir, Vector2Int neighborSize) {
+        int halfOwnX = RoomSize.x / 2;
+        int halfOwnY = RoomSize.y / 2;
+        int halfNeighborX = neighborSize.x / 2;
+        int halfNeighborY = neighborSize.y / 2;
+
+        return dir switch {
+            Direction.North => new Vector2Int(Center.x, Center.y + halfOwnY + halfNeighborY + 1),
+            Direction.South => new Vector2Int(Center.x, Center.y - halfOwnY - halfNeighborY - 1),
+            Direction.East => new Vector2Int(Center.x + halfOwnX + halfNeighborX + 1, Center.y),
+            Direction.West => new Vector2Int(Center.x - halfOwnX - halfNeighborX - 1, Center.y),
+            _ => throw new System.ArgumentOutOfRangeException(nameof(dir))
         };
     }
 
@@ -80,7 +84,7 @@ public class Room {
     }
 
     public bool IsFloorTile(Vector2Int position) {
-        return Bounds.Contains(position) && !IsEdgeTile(position);
+        return Bounds.Contains(position) && (!IsEdgeTile(position) || IsDoorTile(position));
     }
 
     public bool IsDoorTile(Vector2Int position) {

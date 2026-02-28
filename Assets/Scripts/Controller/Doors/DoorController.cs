@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class DoorController : MonoBehaviour {
     [SerializeField] private float slideSpeed = 5f;
     [SerializeField] private float minPlayerDistanceToClose = 3f;
@@ -18,6 +20,8 @@ public class DoorController : MonoBehaviour {
     }
 
     public void Initialize(Door door, Room roomA, Room roomB) {
+        mainCollider = GetComponent<BoxCollider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         closedPosition = transform.position;
         openPosition = CalculateOpenPosition();
         DoorManager.Instance.RegisterDoor(door, this);

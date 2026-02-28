@@ -29,6 +29,7 @@ public class RoomTrigger : MonoBehaviour {
     }
 
     private void ActivateRoom() {
+        RoomManager.Instance.AssignRandomEventsToSiblings(room);
         if (eventType != RoomEventType.Empty) {
             EnemyManager.Instance.StartRoomEncounter(room);
         }
