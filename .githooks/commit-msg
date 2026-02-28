@@ -1,0 +1,30 @@
+#!/bin/sh
+
+commit_msg=$(cat "$1")
+
+pattern="^(feat|fix|style|refactor|docs|test|chore|perf|ci|build|revert)(\(.+\))?: .+"
+
+if ! echo "$commit_msg" | grep -qE "$pattern"; then
+  echo ""
+  echo "❌ Invalid commit message format."
+  echo ""
+  echo "   Expected: <type>: <description>"
+  echo "   Example:  feat: add sliding door animation"
+  echo ""
+  echo "   Allowed types:"
+  echo "     feat     – new feature"
+  echo "     fix      – bug fix"
+  echo "     style    – formatting, no logic change"
+  echo "     refactor – code restructuring"
+  echo "     docs     – documentation only"
+  echo "     test     – adding or updating tests"
+  echo "     chore    – maintenance tasks"
+  echo "     perf     – performance improvement"
+  echo "     ci       – CI/CD changes"
+  echo "     build    – build system changes"
+  echo "     revert   – revert a commit"
+  echo ""
+  exit 1
+fi
+
+exit 0

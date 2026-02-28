@@ -14,7 +14,7 @@ public class DoorManager : MonoBehaviour {
     }
 
     public void RegisterDoor(Door model, DoorController doorController) {
-        if(doorLookup.ContainsKey(model)) {
+        if (doorLookup.ContainsKey(model)) {
             return;
         }
 
@@ -22,8 +22,8 @@ public class DoorManager : MonoBehaviour {
     }
 
     public void OpenRoomDoors(Room room) {
-        foreach(Door door in room.Doors.Values) {
-            if(doorLookup.TryGetValue(door, out DoorController doorController)) {
+        foreach (Door door in room.Doors.Values) {
+            if (doorLookup.TryGetValue(door, out DoorController doorController)) {
                 doorController.Open();
             }
         }

@@ -17,7 +17,7 @@ public class DungeonComposer : MonoBehaviour {
     }
 
     public void ComposeDungeon() {
-        if(dungeonConfig == null) {
+        if (dungeonConfig == null) {
             throw new MissingReferenceException($"Dungeon configuration not assigned to GameObject: {gameObject.name}");
         }
 
@@ -33,7 +33,7 @@ public class DungeonComposer : MonoBehaviour {
             frictionlessMaterial = dungeonConfig.frictionlessMaterial
         };
 
-        foreach(DungeonTaskBase dungeonTask in dungeonTasks) {
+        foreach (DungeonTaskBase dungeonTask in dungeonTasks) {
             dungeonTask.SetContext(context);
             dungeonTask.Execute();
         }
@@ -44,7 +44,7 @@ public class DungeonComposer : MonoBehaviour {
     }
 
     public void ResetDungeon() {
-        if(dungeonGameObject == null) {
+        if (dungeonGameObject == null) {
             return;
         }
 

@@ -71,6 +71,23 @@ graph TD
     MODELS --> DOOR["Door.cs<br/>Door data: tile positions, connected rooms"]
 ```
 
+## Setup
+
+After cloning the repository, run the setup script **once**:
+
+```sh
+./setup.sh
+```
+
+This activates two Git hooks:
+- **commit-msg** – enforces the [Conventional Commits](https://www.conventionalcommits.org/) format
+- **pre-commit** – checks C# formatting via `dotnet format`
+
+To fix formatting issues automatically before committing:
+```sh
+dotnet format whitespace Assembly-CSharp.csproj
+```
+
 ## Requirements
 
 - Unity 2022.3 or newer

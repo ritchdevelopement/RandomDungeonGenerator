@@ -21,18 +21,27 @@ public class FogOfWarManager : DungeonTaskBase {
     public override void Execute() {
         roomFogs.Clear();
         Transform fogContainer = CreateFogContainer();
-        Sprite unitWhiteSprite = CreateUnitWhiteSprite();
+        Sprite whiteSquareSprite = CreateWhiteSquareSprite();
         foreach (Room room in context.createdRooms.Values) {
-            CreateEdgeOverlays(room, fogContainer, unitWhiteSprite);
-            roomFogs[room] = CreateRoomFog(room, fogContainer, unitWhiteSprite);
+            CreateEdgeOverlays(room, fogContainer, whiteSquareSprite);
+            roomFogs[room] = CreateRoomFog(room, fogContainer, whiteSquareSprite);
         }
 
         RevealRoom(context.playerSpawnRoom);
     }
 
     private RoomFog CreateRoomFog(Room room, Transform parent, Sprite sprite) {
-        GameObject mainOverlay = CreateFogOverlay(room.Bounds, $"Fog_{room.Center}", parent, sprite);
-        return new RoomFog(room, new List<GameObject> { mainOverlay });
+        GameObject fogOverlay = CreateFogOverlay(room.Bounds, $"Fog_{room.Center}", parent, sprite);
+        AttachRevealTrigger(fogOverlay, room);
+        return new RoomFog(room, new List<GameObject> { fogOverlay });
+    }
+
+    private static void AttachRevealTrigger(GameObject fogOverlay, Room room) {
+        BoxCollider2D revealCollider = fogOverlay.AddComponent<BoxCollider2D>();
+        revealCollider.isTrigger = true;
+
+        FogRevealTrigger revealTrigger = fogOverlay.AddComponent<FogRevealTrigger>();
+        revealTrigger.Initialize(room);
     }
 
     private void CreateEdgeOverlays(Room room, Transform parent, Sprite sprite) {
@@ -51,14 +60,30 @@ public class FogOfWarManager : DungeonTaskBase {
         bool hasSouthEast = context.createdRooms.ContainsKey(center + new Vector2Int(extendX, -extendY));
         bool hasSouthWest = context.createdRooms.ContainsKey(center + new Vector2Int(-extendX, -extendY));
 
-        if (!hasNorth) CreateFogOverlay(NorthSideBounds(bounds, extendY), $"FogN_{center}", parent, sprite);
-        if (!hasSouth) CreateFogOverlay(SouthSideBounds(bounds, extendY), $"FogS_{center}", parent, sprite);
-        if (!hasEast) CreateFogOverlay(EastSideBounds(bounds, extendX), $"FogE_{center}", parent, sprite);
-        if (!hasWest) CreateFogOverlay(WestSideBounds(bounds, extendX), $"FogW_{center}", parent, sprite);
-        if (!hasNorthEast) CreateFogOverlay(NorthEastCornerBounds(bounds, extendX, extendY), $"FogNE_{center}", parent, sprite);
-        if (!hasNorthWest) CreateFogOverlay(NorthWestCornerBounds(bounds, extendX, extendY), $"FogNW_{center}", parent, sprite);
-        if (!hasSouthEast) CreateFogOverlay(SouthEastCornerBounds(bounds, extendX, extendY), $"FogSE_{center}", parent, sprite);
-        if (!hasSouthWest) CreateFogOverlay(SouthWestCornerBounds(bounds, extendX, extendY), $"FogSW_{center}", parent, sprite);
+        if (!hasNorth) {
+            CreateFogOverlay(NorthSideBounds(bounds, extendY), $"FogN_{center}", parent, sprite);
+        }
+        if (!hasSouth) {
+            CreateFogOverlay(SouthSideBounds(bounds, extendY), $"FogS_{center}", parent, sprite);
+        }
+        if (!hasEast) {
+            CreateFogOverlay(EastSideBounds(bounds, extendX), $"FogE_{center}", parent, sprite);
+        }
+        if (!hasWest) {
+            CreateFogOverlay(WestSideBounds(bounds, extendX), $"FogW_{center}", parent, sprite);
+        }
+        if (!hasNorthEast) {
+            CreateFogOverlay(NorthEastCornerBounds(bounds, extendX, extendY), $"FogNE_{center}", parent, sprite);
+        }
+        if (!hasNorthWest) {
+            CreateFogOverlay(NorthWestCornerBounds(bounds, extendX, extendY), $"FogNW_{center}", parent, sprite);
+        }
+        if (!hasSouthEast) {
+            CreateFogOverlay(SouthEastCornerBounds(bounds, extendX, extendY), $"FogSE_{center}", parent, sprite);
+        }
+        if (!hasSouthWest) {
+            CreateFogOverlay(SouthWestCornerBounds(bounds, extendX, extendY), $"FogSW_{center}", parent, sprite);
+        }
     }
 
     private GameObject CreateFogOverlay(RectInt bounds, string name, Transform parent, Sprite sprite) {
@@ -100,7 +125,7 @@ public class FogOfWarManager : DungeonTaskBase {
         return fogContainer.transform;
     }
 
-    private Sprite CreateUnitWhiteSprite() {
+    private Sprite CreateWhiteSquareSprite() {
         Texture2D whiteTexture = new(1, 1);
         whiteTexture.SetPixel(0, 0, Color.white);
         whiteTexture.Apply();
@@ -109,7 +134,9 @@ public class FogOfWarManager : DungeonTaskBase {
     }
 
     public void RevealRoom(Room room) {
-        if (room == null || !roomFogs.TryGetValue(room, out RoomFog roomFog)) return;
+        if (room == null || !roomFogs.TryGetValue(room, out RoomFog roomFog)) {
+            return;
+        }
         roomFog.Reveal();
         roomFogs.Remove(room);
     }

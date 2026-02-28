@@ -8,7 +8,7 @@ public class CameraController : MonoBehaviour {
     private Vector3 offset = new Vector3(0, 0, -10f);
 
     private void LateUpdate() {
-        if(playerTransform == null) {
+        if (playerTransform == null) {
             return;
         }
 

@@ -11,7 +11,7 @@ public class EnemyManager : MonoBehaviour {
     private Dictionary<Room, EnemyController> activeEnemies = new();
 
     private void Awake() {
-        if(Instance == null) {
+        if (Instance == null) {
             Instance = this;
         }
     }
@@ -29,11 +29,15 @@ public class EnemyManager : MonoBehaviour {
         dungeonContext = context;
     }
 
-    public void OnPlayerEnterRoom(Room room) {
-        if (!Application.isPlaying) return;
-        if(room == null || dungeonContext == null || activeEnemies.ContainsKey(room)) return;
+    public void StartRoomEncounter(Room room) {
+        if (!Application.isPlaying) {
+            return;
+        }
+        if (room == null || dungeonContext == null || activeEnemies.ContainsKey(room)) {
+            return;
+        }
 
-        if(room == dungeonContext.playerSpawnRoom) {
+        if (room == dungeonContext.playerSpawnRoom) {
             DoorManager.Instance.OpenRoomDoors(room);
             return;
         }

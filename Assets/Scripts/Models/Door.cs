@@ -11,7 +11,7 @@ public class Door {
     public Room RoomB { get; private set; }
 
     public Door(List<Vector2Int> tilePositions) {
-        if(tilePositions == null || tilePositions.Count == 0) {
+        if (tilePositions == null || tilePositions.Count == 0) {
             throw new System.ArgumentException("TilePositions cannot be null or empty", nameof(tilePositions));
         }
 

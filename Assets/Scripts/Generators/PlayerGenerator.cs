@@ -10,7 +10,7 @@ public class PlayerGenerator : DungeonTaskBase {
     private GameObject spawnedPlayer;
 
     public override void Execute() {
-        if(playerPrefab == null) {
+        if (playerPrefab == null) {
             Debug.LogError("Player prefab not assigned to PlayerGenerator!");
             return;
         }
@@ -34,7 +34,7 @@ public class PlayerGenerator : DungeonTaskBase {
 
     public Room GetPlayerSpawnRoom(SpawnLocation spawnLocation) {
         var rooms = context.createdRooms.Values.ToArray();
-        if(rooms.Length == 0) {
+        if (rooms.Length == 0) {
             Debug.LogWarning("No rooms available for player spawn selection!");
             return null;
         }
@@ -71,14 +71,13 @@ public class PlayerGenerator : DungeonTaskBase {
     }
 
     private void CreatePlayer(Vector2 spawnPosition) {
-        Vector3 spawnPos3D = new Vector3(spawnPosition.x, spawnPosition.y, 0);
-        spawnedPlayer = Instantiate(playerPrefab, spawnPos3D, Quaternion.identity);
+        Vector3 spawnPosition3D = new Vector3(spawnPosition.x, spawnPosition.y, 0);
+        spawnedPlayer = Instantiate(playerPrefab, spawnPosition3D, Quaternion.identity);
         spawnedPlayer.name = "Player";
         spawnedPlayer.transform.SetParent(context.dungeonGameObject.transform);
 
         FindFirstObjectByType<CameraController>().SetPlayer(spawnedPlayer.transform);
 
         EnemyManager.Instance.SetPlayer(spawnedPlayer.transform);
-        RoomManager.Instance.SetPlayer(spawnedPlayer.transform);
     }
 }

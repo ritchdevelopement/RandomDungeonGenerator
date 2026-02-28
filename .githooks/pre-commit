@@ -1,0 +1,18 @@
+#!/bin/sh
+
+echo "Running dotnet format whitespace check..."
+
+dotnet format whitespace "Assembly-CSharp.csproj" --verify-no-changes 2>/dev/null
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Formatting issues detected."
+  echo ""
+  echo "   Run the following command to fix them automatically:"
+  echo "   dotnet format whitespace Assembly-CSharp.csproj"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Formatting check passed."
+exit 0

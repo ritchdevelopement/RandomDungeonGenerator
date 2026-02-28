@@ -4,7 +4,7 @@ public class EnemyGenerator : DungeonTaskBase {
     [SerializeField] private GameObject enemyPrefab;
 
     public override void Execute() {
-        if(enemyPrefab == null) {
+        if (enemyPrefab == null) {
             Debug.LogError("Enemy prefab not assigned!");
             return;
         }

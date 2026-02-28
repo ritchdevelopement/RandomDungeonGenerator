@@ -6,7 +6,7 @@ public class DoorDrawer : DungeonTaskBase {
     private Grid dungeonGrid;
 
     public override void Execute() {
-        if(doorPrefab == null) {
+        if (doorPrefab == null) {
             Debug.LogError("Door prefab not assigned to DoorDrawer!");
             return;
         }
@@ -21,7 +21,7 @@ public class DoorDrawer : DungeonTaskBase {
     }
 
     private void DrawDoors() {
-        foreach(Door door in context.createdDoors) {
+        foreach (Door door in context.createdDoors) {
             DrawDoor(door);
         }
     }
@@ -30,12 +30,12 @@ public class DoorDrawer : DungeonTaskBase {
         Vector3 worldPos = GetDoorWorldCenter(door);
         GameObject doorGameObject = Instantiate(doorPrefab, worldPos, Quaternion.identity, doorsParent);
 
-        if(doorGameObject.TryGetComponent(out SpriteRenderer renderer)) {
+        if (doorGameObject.TryGetComponent(out SpriteRenderer renderer)) {
             renderer.drawMode = SpriteDrawMode.Tiled;
             renderer.size = door.Size;
         }
 
-        if(doorGameObject.TryGetComponent(out BoxCollider2D boxCollider)) {
+        if (doorGameObject.TryGetComponent(out BoxCollider2D boxCollider)) {
             boxCollider.size = new Vector2(door.Size.x, door.Size.y);
         }
 

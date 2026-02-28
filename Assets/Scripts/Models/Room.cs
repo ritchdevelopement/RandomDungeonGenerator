@@ -14,7 +14,7 @@ public class Room {
         Center = center;
         Bounds = CalculateBounds();
 
-        if(RoomSize != originalSize) {
+        if (RoomSize != originalSize) {
             Debug.LogWarning($"Room at {Center}: size corrected from {originalSize} to {RoomSize} (odd numbers required for correct room center).");
         }
     }
@@ -49,11 +49,7 @@ public class Room {
     public Direction GetDirectionTo(Room neighbor) {
         Vector2Int delta = neighbor.Center - Center;
 
-        return delta switch {
-            { x: 0, y: > 0 } => Direction.North,
-            { x: 0, y: < 0 } => Direction.South,
-            { x: > 0, y: 0 } => Direction.East,
-            { x: < 0, y: 0 } => Direction.West,
+        return delta switch { { x: 0, y: > 0 } => Direction.North, { x: 0, y: < 0 } => Direction.South, { x: > 0, y: 0 } => Direction.East, { x: < 0, y: 0 } => Direction.West,
             _ => throw new System.InvalidOperationException($"Rooms {this} and {neighbor} are not directly adjacent!")
         };
     }
@@ -69,7 +65,7 @@ public class Room {
 
     // Check room edge tiles (xMax/yMax are exclusive bounds)
     public bool IsEdgeTile(Vector2Int position) {
-        if(!Bounds.Contains(position)) {
+        if (!Bounds.Contains(position)) {
             return false;
         }
 
@@ -88,8 +84,8 @@ public class Room {
     }
 
     public bool IsDoorTile(Vector2Int position) {
-        foreach(Door door in Doors.Values) {
-            if(door.TilePositions.Contains(position)) {
+        foreach (Door door in Doors.Values) {
+            if (door.TilePositions.Contains(position)) {
                 return true;
             }
         }

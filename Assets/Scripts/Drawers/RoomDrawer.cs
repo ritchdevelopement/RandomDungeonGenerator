@@ -7,7 +7,7 @@ public class RoomDrawer : DungeonTaskBase {
 
     public override void Execute() {
 
-        if(wallTile == null) {
+        if (wallTile == null) {
             throw new MissingReferenceException($"No wall tile set for rooms: {wallTile}");
         }
 
@@ -17,7 +17,7 @@ public class RoomDrawer : DungeonTaskBase {
     private void DrawRooms() {
         CreateTilemap();
 
-        foreach(Room room in context.createdRooms.Values) {
+        foreach (Room room in context.createdRooms.Values) {
             DrawWalls(room);
         }
     }
@@ -47,11 +47,11 @@ public class RoomDrawer : DungeonTaskBase {
     private void DrawWalls(Room room) {
         RectInt roomBounds = room.Bounds;
 
-        for(int x = roomBounds.xMin; x < roomBounds.xMax; x++) {
-            for(int y = roomBounds.yMin; y < roomBounds.yMax; y++) {
+        for (int x = roomBounds.xMin; x < roomBounds.xMax; x++) {
+            for (int y = roomBounds.yMin; y < roomBounds.yMax; y++) {
                 Vector2Int position = new Vector2Int(x, y);
 
-                if(!room.IsWallTile(position)) {
+                if (!room.IsWallTile(position)) {
                     continue;
                 }
 
