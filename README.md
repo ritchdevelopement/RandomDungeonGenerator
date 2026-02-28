@@ -8,8 +8,10 @@ A 2D procedural dungeon generation game built in Unity. The goal is to create a 
 
 All features listed below are in an early, rudimentary state and still being iterated on.
 
-- **Procedural dungeon generation** – Rooms are placed using a queue-based algorithm with a configurable distribution factor to control dungeon spread
-- **Fog of war** – Unexplored rooms and their surrounding areas are hidden and revealed as the player explores
+- **Procedural dungeon generation** – Rooms are placed using a queue-based BFS algorithm; each room picks a random size from a configurable list, with AABB overlap detection to prevent collisions
+- **Variable room sizes** – Multiple room sizes can be defined in the Inspector; the generator picks randomly, and distribution bias controls how early outward spread kicks in
+- **Floor & wall rendering** – Rooms are drawn with separate tilemaps for walls (with collision) and floors (no collision, rendered beneath walls and fog)
+- **Fog of war** – Unexplored rooms are hidden by a fog overlay; the camera background is automatically synced to the fog color so the void always matches
 - **Sliding doors** – Doors physically slide open when a room is cleared and close again when the player enters a new room
 - **Enemy encounters** – An enemy spawns in each room the player enters; doors close until the enemy is defeated
 - **Edit mode preview** – The dungeon can be previewed in the Unity Editor without entering Play mode
@@ -18,58 +20,58 @@ All features listed below are in an early, rudimentary state and still being ite
 
 | System | Description |
 |---|---|
-| `RoomGenerator` | Procedurally places rooms on a grid |
-| `DoorGenerator` | Creates doors between adjacent rooms |
+| `RoomGenerator` | Procedurally places rooms on a grid using BFS with AABB overlap detection |
+| `DoorGenerator` | Creates doors between adjacent rooms using stored adjacency pairs |
+| `RoomDrawer` | Draws wall and floor tilemaps for all rooms |
+| `DoorDrawer` | Instantiates door prefabs at shared room edges |
 | `PlayerGenerator` | Spawns the player (center, random, or edge room) |
 | `EnemyManager` | Spawns and tracks enemies per room |
 | `DoorManager` | Opens/closes doors based on game state |
-| `FogOfWarManager` | Manages fog overlays for unexplored rooms |
+| `FogOfWarManager` | Manages fog overlays; syncs camera background to fog color |
 | `RoomManager` | Tracks the player's current room and cleared rooms |
 
 ## Configuration
 
 Dungeon parameters are controlled via the `DungeonConfig` ScriptableObject:
 
-- **Room size** – Default 32×18 tiles
+- **Room sizes** – List of allowed room sizes; each room picks one randomly (all values must be odd)
 - **Number of rooms** – Default 25
-- **Room distribution factor** – Controls how rooms spread from center
-- **Door width / depth** – Default 4 wide, 2 deep
-- **Player spawn location** – `CenterRoom`, `RandomRoom`, or `EdgeRoom`
+- **Distribution bias** – Float [0..1]; controls when outward spread kicks in relative to total room count (0 = always spread, 1 = never spread, default 0.25)
+
+Per-component settings (set directly on the component in the Inspector):
+
+- **Door width** – Configurable on `DoorGenerator`, default 4 tiles (capped to the smaller of the two connected rooms)
+- **Wall tile / Floor tile** – Tile assets assigned on `RoomDrawer`
+- **Fog color** – Assigned on `FogOfWarManager`; automatically applied to the camera background
 
 ## Project Structure
 
-```mermaid
-graph TD
-    ROOT[Random Dungeon Generator] --> SCRIPTS(Scripts/)
-
-    SCRIPTS --> CORE(Core/)
-    SCRIPTS --> GENERATORS(Generators/)
-    SCRIPTS --> MANAGERS(Managers/)
-    SCRIPTS --> CONTROLLER(Controller/)
-    SCRIPTS --> MODELS(Models/)
-
-    CORE --> DC["DungeonComposer.cs<br/>Orchestrates the generation pipeline"]
-    CORE --> DCFG["DungeonConfig.cs<br/>ScriptableObject with dungeon parameters"]
-    CORE --> DCTX["DungeonGenerationContext.cs<br/>Shared data passed between tasks"]
-
-    GENERATORS --> RG["RoomGenerator.cs<br/>Procedurally places rooms on a grid"]
-    GENERATORS --> DG["DoorGenerator.cs<br/>Creates doors between adjacent rooms"]
-    GENERATORS --> PG["PlayerGenerator.cs<br/>Spawns the player and initializes managers"]
-    GENERATORS --> EG["EnemyGenerator.cs<br/>Sets up the enemy system"]
-
-    MANAGERS --> RM["RoomManager.cs<br/>Tracks current room and cleared rooms"]
-    MANAGERS --> EM["EnemyManager.cs<br/>Spawns and manages enemies per room"]
-    MANAGERS --> DM["DoorManager.cs<br/>Opens and closes doors based on game state"]
-    MANAGERS --> FOW["FogOfWarManager.cs<br/>Manages fog overlays for unexplored rooms"]
-
-    CONTROLLER --> DOORC["DoorController.cs<br/>Sliding door animation logic"]
-    CONTROLLER --> EC["EnemyController.cs<br/>Enemy AI, health and death events"]
-    CONTROLLER --> PC["PlayerController.cs<br/>WASD movement and animation"]
-    CONTROLLER --> CC["CameraController.cs<br/>Smooth camera follow"]
-
-    MODELS --> ROOM["Room.cs<br/>Room data: position, size, neighbors, doors"]
-    MODELS --> DOOR["Door.cs<br/>Door data: tile positions, connected rooms"]
-```
+- `Core/`
+  - `DungeonComposer.cs` — Orchestrates the full generation pipeline
+  - `DungeonConfig.cs` — ScriptableObject with dungeon parameters
+  - `DungeonGenerationContext.cs` — Shared data passed between pipeline tasks
+- `Generators/`
+  - `RoomGenerator.cs` — Procedurally places rooms using BFS; records adjacency pairs
+  - `DoorGenerator.cs` — Creates doors between rooms using stored adjacency pairs
+  - `PlayerGenerator.cs` — Spawns the player and initializes runtime managers
+  - `EnemyGenerator.cs` — Sets up the enemy system
+- `Drawers/`
+  - `RoomDrawer.cs` — Draws wall and floor tilemaps for all rooms
+  - `DoorDrawer.cs` — Instantiates door prefabs at shared room edges
+  - `RoomTriggerDrawer.cs` — Places room activation triggers
+- `Managers/`
+  - `RoomManager.cs` — Tracks the player's current room and cleared rooms
+  - `EnemyManager.cs` — Spawns and manages enemies per room encounter
+  - `DoorManager.cs` — Opens and closes doors based on game state
+  - `FogOfWarManager.cs` — Manages fog overlays; syncs camera background to fog color
+- `Controller/`
+  - `DoorController.cs` — Sliding door animation logic
+  - `EnemyController.cs` — Enemy AI, health, and death events
+  - `PlayerController.cs` — WASD movement and animation
+  - `CameraController.cs` — Smooth camera follow
+- `Models/`
+  - `Room.cs` — Room data: position, size, bounds, neighbors, doors
+  - `Door.cs` — Door data: tile positions, connected rooms
 
 ## Setup
 
