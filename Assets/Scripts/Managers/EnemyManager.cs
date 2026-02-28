@@ -29,7 +29,7 @@ public class EnemyManager : MonoBehaviour {
         dungeonContext = context;
     }
 
-    public void OnPlayerEnterRoom(Room room) {
+    public void StartRoomEncounter(Room room) {
         if (!Application.isPlaying) {
             return;
         }

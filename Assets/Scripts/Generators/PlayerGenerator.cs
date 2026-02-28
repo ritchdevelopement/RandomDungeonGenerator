@@ -71,14 +71,13 @@ public class PlayerGenerator : DungeonTaskBase {
     }
 
     private void CreatePlayer(Vector2 spawnPosition) {
-        Vector3 spawnPos3D = new Vector3(spawnPosition.x, spawnPosition.y, 0);
-        spawnedPlayer = Instantiate(playerPrefab, spawnPos3D, Quaternion.identity);
+        Vector3 spawnPosition3D = new Vector3(spawnPosition.x, spawnPosition.y, 0);
+        spawnedPlayer = Instantiate(playerPrefab, spawnPosition3D, Quaternion.identity);
         spawnedPlayer.name = "Player";
         spawnedPlayer.transform.SetParent(context.dungeonGameObject.transform);
 
         FindFirstObjectByType<CameraController>().SetPlayer(spawnedPlayer.transform);
 
         EnemyManager.Instance.SetPlayer(spawnedPlayer.transform);
-        RoomManager.Instance.SetPlayer(spawnedPlayer.transform);
     }
 }

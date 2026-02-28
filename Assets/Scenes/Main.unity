@@ -165,6 +165,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1443764809}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &494045326
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 494045327}
+  - component: {fileID: 494045328}
+  m_Layer: 0
+  m_Name: RoomTriggerDrawer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &494045327
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 494045326}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -40.12176, y: -3.78216, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1443764809}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &494045328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 494045326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eec67aa0a8b72c54eaeb5ea036490d82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  triggerColor: {r: 0.28751338, g: 0.8584906, b: 0.43968982, a: 1}
+  triggerSize: 1
 --- !u!1 &514634853
 GameObject:
   m_ObjectHideFlags: 0
@@ -485,6 +531,7 @@ MonoBehaviour:
   - {fileID: 91611134}
   - {fileID: 611035743}
   - {fileID: 1329571050}
+  - {fileID: 494045328}
 --- !u!4 &1443764809
 Transform:
   m_ObjectHideFlags: 0
@@ -506,6 +553,7 @@ Transform:
   - {fileID: 611035742}
   - {fileID: 1329571051}
   - {fileID: 1835554678}
+  - {fileID: 494045327}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1561375204
