@@ -21,18 +21,27 @@ public class FogOfWarManager : DungeonTaskBase {
     public override void Execute() {
         roomFogs.Clear();
         Transform fogContainer = CreateFogContainer();
-        Sprite unitWhiteSprite = CreateUnitWhiteSprite();
+        Sprite whiteSquareSprite = CreateWhiteSquareSprite();
         foreach (Room room in context.createdRooms.Values) {
-            CreateEdgeOverlays(room, fogContainer, unitWhiteSprite);
-            roomFogs[room] = CreateRoomFog(room, fogContainer, unitWhiteSprite);
+            CreateEdgeOverlays(room, fogContainer, whiteSquareSprite);
+            roomFogs[room] = CreateRoomFog(room, fogContainer, whiteSquareSprite);
         }
 
         RevealRoom(context.playerSpawnRoom);
     }
 
     private RoomFog CreateRoomFog(Room room, Transform parent, Sprite sprite) {
-        GameObject mainOverlay = CreateFogOverlay(room.Bounds, $"Fog_{room.Center}", parent, sprite);
-        return new RoomFog(room, new List<GameObject> { mainOverlay });
+        GameObject fogOverlay = CreateFogOverlay(room.Bounds, $"Fog_{room.Center}", parent, sprite);
+        AttachRevealTrigger(fogOverlay, room);
+        return new RoomFog(room, new List<GameObject> { fogOverlay });
+    }
+
+    private static void AttachRevealTrigger(GameObject fogOverlay, Room room) {
+        BoxCollider2D revealCollider = fogOverlay.AddComponent<BoxCollider2D>();
+        revealCollider.isTrigger = true;
+
+        FogRevealTrigger revealTrigger = fogOverlay.AddComponent<FogRevealTrigger>();
+        revealTrigger.Initialize(room);
     }
 
     private void CreateEdgeOverlays(Room room, Transform parent, Sprite sprite) {
@@ -116,7 +125,7 @@ public class FogOfWarManager : DungeonTaskBase {
         return fogContainer.transform;
     }
 
-    private Sprite CreateUnitWhiteSprite() {
+    private Sprite CreateWhiteSquareSprite() {
         Texture2D whiteTexture = new(1, 1);
         whiteTexture.SetPixel(0, 0, Color.white);
         whiteTexture.Apply();
