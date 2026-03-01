@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f0a401e9df44614b946fc96770a5259, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fogColor: {r: 0.13207549, g: 0.13207549, b: 0.13207549, a: 1}
+  fogColor: {r: 0, g: 0, b: 0, a: 1}
   fogSortingOrder: 10
 --- !u!4 &91611135
 Transform:
@@ -250,7 +250,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.13207549, g: 0.13207549, b: 0.13207549, a: 1}
+  m_BackGroundColor: {r: 0.2264151, g: 0.2264151, b: 0.2264151, a: 0.9490196}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -275,7 +275,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5.3637285
+  orthographic size: 9.27
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -324,12 +324,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_AssetsPPU: 16
   m_RefResolutionX: 320
-  m_RefResolutionY: 176
-  m_UpscaleRT: 1
-  m_PixelSnapping: 1
-  m_CropFrameX: 0
-  m_CropFrameY: 0
-  m_StretchFill: 0
+  m_RefResolutionY: 180
+  m_UpscaleRT: 0
+  m_PixelSnapping: 0
+  m_CropFrameX: 1
+  m_CropFrameY: 1
+  m_StretchFill: 1
 --- !u!114 &514634858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -629,8 +629,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f015b5e0340b9447a0d77300ecc6e99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallTile: {fileID: 11400000, guid: 75ec9b35811dde147882bff52852907f, type: 2}
-  floorTile: {fileID: 11400000, guid: 8d575c19f36f363479feb62795cb7045, type: 2}
+  defaultTile: {fileID: 11400000, guid: abe48aa666fd39744b533c274b1ac1b4, type: 2}
+  wallTileSets:
+  - cornerTopLeft: {fileID: 11400000, guid: b9f1df3c5169b3a48a91513c532725f6, type: 2}
+    cornerTopRight: {fileID: 11400000, guid: 9e9ec2e65081c154fb31d0bd8a16a8a5, type: 2}
+    cornerBottomLeft: {fileID: 11400000, guid: 2f1c5fc6e425f014dadebc484300640f, type: 2}
+    cornerBottomRight: {fileID: 11400000, guid: 3f10e9bef0b8aa947980d0f53d157dc1,
+      type: 2}
+    wallTop: {fileID: 11400000, guid: 75ec9b35811dde147882bff52852907f, type: 2}
+    wallBottom: {fileID: 11400000, guid: b0873af613214114689ea475bdd2656f, type: 2}
+    wallVerticalLeft: {fileID: 11400000, guid: 2f1c5fc6e425f014dadebc484300640f, type: 2}
+    wallVerticalRight: {fileID: 11400000, guid: 3f10e9bef0b8aa947980d0f53d157dc1,
+      type: 2}
+  floorTiles:
+  - {fileID: 11400000, guid: e4926e88c50004e47940325850bb7063, type: 2}
 --- !u!4 &1607875956
 Transform:
   m_ObjectHideFlags: 0
@@ -736,6 +748,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   doorPrefab: {fileID: 1964693960537784010, guid: ac3f011d93f493440a5ca8fdbfe907ec,
     type: 3}
+  doorSprites:
+  - {fileID: 21300000, guid: a1798de96ae4bcf4198b14079e9c04ee, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
