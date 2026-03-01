@@ -2,18 +2,15 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class RoomDrawer : DungeonTaskBase {
-    [SerializeField] private TileBase wallTile;
-    [SerializeField] private TileBase floorTile;
+    [SerializeField] private TileBase defaultTile;
+    [SerializeField] private WallTileSet[] wallTileSets;
+    [SerializeField] private TileBase[] floorTiles;
     private Tilemap wallTilemap;
     private Tilemap floorTilemap;
 
     public override void Execute() {
-        if (wallTile == null) {
-            throw new MissingReferenceException($"No wall tile set for rooms: {wallTile}");
-        }
-
-        if (floorTile == null) {
-            throw new MissingReferenceException($"No floor tile set for rooms: {floorTile}");
+        if (defaultTile == null) {
+            throw new MissingReferenceException("No defaultTile assigned to RoomDrawer.");
         }
 
         DrawRooms();
@@ -23,9 +20,18 @@ public class RoomDrawer : DungeonTaskBase {
         CreateWallTilemap();
         CreateFloorTilemap();
 
+        wallTilemap.color = wallTileSets is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
+        floorTilemap.color = floorTiles is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
+
         foreach (Room room in context.createdRooms.Values) {
-            DrawWalls(room);
-            DrawFloor(room);
+            WallTileSet wallTileSet = wallTileSets is { Length: > 0 }
+                ? wallTileSets[Random.Range(0, wallTileSets.Length)]
+                : null;
+            TileBase floorTile = floorTiles is { Length: > 0 }
+                ? floorTiles[Random.Range(0, floorTiles.Length)]
+                : defaultTile;
+            DrawWalls(room, wallTileSet);
+            DrawFloor(room, floorTile);
         }
     }
 
@@ -61,7 +67,7 @@ public class RoomDrawer : DungeonTaskBase {
         tilemapRenderer.sortingOrder = -1;
     }
 
-    private void DrawWalls(Room room) {
+    private void DrawWalls(Room room, WallTileSet wallTileSet) {
         RectInt roomBounds = room.Bounds;
 
         for (int x = roomBounds.xMin; x < roomBounds.xMax; x++) {
@@ -72,19 +78,62 @@ public class RoomDrawer : DungeonTaskBase {
                     continue;
                 }
 
-                wallTilemap.SetTile(new Vector3Int(x, y), wallTile);
+                TileBase tile = SelectWallTile(roomBounds, position, wallTileSet);
+                wallTilemap.SetTile(new Vector3Int(x, y), tile);
             }
         }
     }
 
-    private void DrawFloor(Room room) {
+    private TileBase SelectWallTile(RectInt bounds, Vector2Int position, WallTileSet wallTileSet) {
+        if (wallTileSet == null) {
+            return defaultTile;
+        }
+
+        bool isTopEdge = position.y == bounds.yMax - 1;
+        bool isBottomEdge = position.y == bounds.yMin;
+        bool isLeftEdge = position.x == bounds.xMin;
+        bool isRightEdge = position.x == bounds.xMax - 1;
+
+        if (isTopEdge && isLeftEdge) {
+            return wallTileSet.cornerTopLeft != null ? wallTileSet.cornerTopLeft : defaultTile;
+        }
+        if (isTopEdge && isRightEdge) {
+            return wallTileSet.cornerTopRight != null ? wallTileSet.cornerTopRight : defaultTile;
+        }
+        if (isBottomEdge && isLeftEdge) {
+            return wallTileSet.cornerBottomLeft != null ? wallTileSet.cornerBottomLeft : defaultTile;
+        }
+        if (isBottomEdge && isRightEdge) {
+            return wallTileSet.cornerBottomRight != null ? wallTileSet.cornerBottomRight : defaultTile;
+        }
+
+        if (isTopEdge) {
+            return wallTileSet.wallTop != null ? wallTileSet.wallTop : defaultTile;
+        }
+        if (isBottomEdge) {
+            return wallTileSet.wallBottom != null ? wallTileSet.wallBottom : defaultTile;
+        }
+        if (isLeftEdge) {
+            return wallTileSet.wallVerticalLeft != null ? wallTileSet.wallVerticalLeft : defaultTile;
+        }
+        if (isRightEdge) {
+            return wallTileSet.wallVerticalRight != null ? wallTileSet.wallVerticalRight : defaultTile;
+        }
+
+        return defaultTile;
+    }
+
+    private void DrawFloor(Room room, TileBase floorTile) {
         RectInt roomBounds = room.Bounds;
 
         for (int x = roomBounds.xMin; x < roomBounds.xMax; x++) {
             for (int y = roomBounds.yMin; y < roomBounds.yMax; y++) {
                 Vector2Int position = new Vector2Int(x, y);
 
-                if (!room.IsFloorTile(position)) {
+                bool isBottomWallWithoutCorners = position.y == roomBounds.yMin
+                    && position.x != roomBounds.xMin
+                    && position.x != roomBounds.xMax - 1;
+                if (!room.IsFloorTile(position) && !isBottomWallWithoutCorners) {
                     continue;
                 }
 
