@@ -32,8 +32,11 @@ public class RoomDrawer : DungeonTaskBase {
 
         foreach (Room room in context.createdRooms.Values) {
             DrawWalls(room, wallTileSet);
-            DrawOuterWallRows(room, wallTileSet);
             DrawFloor(room, floorTile);
+        }
+
+        foreach (Room room in context.createdRooms.Values) {
+            DrawOuterWallRows(room, wallTileSet);
         }
     }
 
@@ -96,33 +99,7 @@ public class RoomDrawer : DungeonTaskBase {
         bool isLeftEdge = position.x == bounds.xMin;
         bool isRightEdge = position.x == bounds.xMax - 1;
 
-        if (isTopEdge && isLeftEdge) {
-            return wallTileSet.cornerTopLeft != null ? wallTileSet.cornerTopLeft : defaultTile;
-        }
-        if (isTopEdge && isRightEdge) {
-            return wallTileSet.cornerTopRight != null ? wallTileSet.cornerTopRight : defaultTile;
-        }
-        if (isBottomEdge && isLeftEdge) {
-            return wallTileSet.cornerBottomLeft != null ? wallTileSet.cornerBottomLeft : defaultTile;
-        }
-        if (isBottomEdge && isRightEdge) {
-            return wallTileSet.cornerBottomRight != null ? wallTileSet.cornerBottomRight : defaultTile;
-        }
-
-        if (isTopEdge) {
-            return wallTileSet.wallTop != null ? wallTileSet.wallTop : defaultTile;
-        }
-        if (isBottomEdge) {
-            return wallTileSet.wallBottom != null ? wallTileSet.wallBottom : defaultTile;
-        }
-        if (isLeftEdge) {
-            return wallTileSet.wallVerticalLeft != null ? wallTileSet.wallVerticalLeft : defaultTile;
-        }
-        if (isRightEdge) {
-            return wallTileSet.wallVerticalRight != null ? wallTileSet.wallVerticalRight : defaultTile;
-        }
-
-        return defaultTile;
+        return wallTileSet.SelectWallTile(isTopEdge, isBottomEdge, isLeftEdge, isRightEdge, defaultTile);
     }
 
     private void DrawOuterWallRows(Room room, WallTileSet wallTileSet) {
@@ -133,38 +110,36 @@ public class RoomDrawer : DungeonTaskBase {
         RectInt bounds = room.Bounds;
 
         for (int x = bounds.xMin; x < bounds.xMax; x++) {
-            Vector2Int outerBottomPosition = new Vector2Int(x, bounds.yMin - 1);
-            if (!IsOccupiedByAnyRoom(outerBottomPosition)) {
-                TileBase tile = SelectOuterBottomTile(bounds, outerBottomPosition, wallTileSet);
-                wallTilemap.SetTile(new Vector3Int(x, bounds.yMin - 1), tile);
-            }
-
-            Vector2Int outerTopPosition = new Vector2Int(x, bounds.yMax);
-            if (!IsOccupiedByAnyRoom(outerTopPosition)) {
-                TileBase tile = SelectOuterTopTile(bounds, outerTopPosition, wallTileSet);
-                wallTilemap.SetTile(new Vector3Int(x, bounds.yMax), tile);
-            }
+            PlaceOuterRowTile(x, bounds.yMin - 1, bounds, wallTileSet, false);
+            PlaceOuterRowTile(x, bounds.yMax, bounds, wallTileSet, true);
         }
     }
 
-    private TileBase SelectOuterBottomTile(RectInt bounds, Vector2Int position, WallTileSet wallTileSet) {
-        if (position.x == bounds.xMin) {
-            return wallTileSet.outerCornerBottomLeft != null ? wallTileSet.outerCornerBottomLeft : defaultTile;
+    private void PlaceOuterRowTile(int x, int y, RectInt bounds, WallTileSet wallTileSet, bool isTopRow) {
+        Vector2Int position = new Vector2Int(x, y);
+        bool currentOccupied = IsOccupiedByAnyRoom(position);
+        bool leftOccupied = IsOccupiedByAnyRoom(new Vector2Int(x - 1, y));
+        bool rightOccupied = IsOccupiedByAnyRoom(new Vector2Int(x + 1, y));
+
+        if (currentOccupied) {
+            TryPlaceTransitionTile(x, y, bounds, wallTileSet, isTopRow, leftOccupied, rightOccupied);
+            return;
         }
-        if (position.x == bounds.xMax - 1) {
-            return wallTileSet.outerCornerBottomRight != null ? wallTileSet.outerCornerBottomRight : defaultTile;
-        }
-        return wallTileSet.outerWallBottom != null ? wallTileSet.outerWallBottom : defaultTile;
+
+        bool isLeftEdge = x == bounds.xMin;
+        bool isRightEdge = x == bounds.xMax - 1;
+        TileBase tile = wallTileSet.SelectOuterTile(isTopRow, isLeftEdge, isRightEdge, defaultTile);
+        wallTilemap.SetTile(new Vector3Int(x, y), tile);
     }
 
-    private TileBase SelectOuterTopTile(RectInt bounds, Vector2Int position, WallTileSet wallTileSet) {
-        if (position.x == bounds.xMin) {
-            return wallTileSet.outerCornerTopLeft != null ? wallTileSet.outerCornerTopLeft : defaultTile;
+    private void TryPlaceTransitionTile(int x, int y, RectInt bounds, WallTileSet wallTileSet, bool isTopRow, bool leftOccupied, bool rightOccupied) {
+        bool isAtLeftEdgeOfOccupiedZone = !leftOccupied && x > bounds.xMin;
+        bool isAtRightEdgeOfOccupiedZone = !rightOccupied && x < bounds.xMax - 1;
+
+        if (isAtLeftEdgeOfOccupiedZone || isAtRightEdgeOfOccupiedZone) {
+            TileBase tile = wallTileSet.SelectTransitionTile(isTopRow, isAtLeftEdgeOfOccupiedZone, defaultTile);
+            wallTilemap.SetTile(new Vector3Int(x, y), tile);
         }
-        if (position.x == bounds.xMax - 1) {
-            return wallTileSet.outerCornerTopRight != null ? wallTileSet.outerCornerTopRight : defaultTile;
-        }
-        return wallTileSet.outerWallTop != null ? wallTileSet.outerWallTop : defaultTile;
     }
 
     private bool IsOccupiedByAnyRoom(Vector2Int position) {
