@@ -23,14 +23,16 @@ public class RoomDrawer : DungeonTaskBase {
         wallTilemap.color = wallTileSets is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
         floorTilemap.color = floorTiles is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
 
+        WallTileSet wallTileSet = wallTileSets is { Length: > 0 }
+            ? wallTileSets[Random.Range(0, wallTileSets.Length)]
+            : null;
+        TileBase floorTile = floorTiles is { Length: > 0 }
+            ? floorTiles[Random.Range(0, floorTiles.Length)]
+            : defaultTile;
+
         foreach (Room room in context.createdRooms.Values) {
-            WallTileSet wallTileSet = wallTileSets is { Length: > 0 }
-                ? wallTileSets[Random.Range(0, wallTileSets.Length)]
-                : null;
-            TileBase floorTile = floorTiles is { Length: > 0 }
-                ? floorTiles[Random.Range(0, floorTiles.Length)]
-                : defaultTile;
             DrawWalls(room, wallTileSet);
+            DrawOuterWallRows(room, wallTileSet);
             DrawFloor(room, floorTile);
         }
     }
@@ -121,6 +123,57 @@ public class RoomDrawer : DungeonTaskBase {
         }
 
         return defaultTile;
+    }
+
+    private void DrawOuterWallRows(Room room, WallTileSet wallTileSet) {
+        if (wallTileSet == null) {
+            return;
+        }
+
+        RectInt bounds = room.Bounds;
+
+        for (int x = bounds.xMin; x < bounds.xMax; x++) {
+            Vector2Int outerBottomPosition = new Vector2Int(x, bounds.yMin - 1);
+            if (!IsOccupiedByAnyRoom(outerBottomPosition)) {
+                TileBase tile = SelectOuterBottomTile(bounds, outerBottomPosition, wallTileSet);
+                wallTilemap.SetTile(new Vector3Int(x, bounds.yMin - 1), tile);
+            }
+
+            Vector2Int outerTopPosition = new Vector2Int(x, bounds.yMax);
+            if (!IsOccupiedByAnyRoom(outerTopPosition)) {
+                TileBase tile = SelectOuterTopTile(bounds, outerTopPosition, wallTileSet);
+                wallTilemap.SetTile(new Vector3Int(x, bounds.yMax), tile);
+            }
+        }
+    }
+
+    private TileBase SelectOuterBottomTile(RectInt bounds, Vector2Int position, WallTileSet wallTileSet) {
+        if (position.x == bounds.xMin) {
+            return wallTileSet.outerCornerBottomLeft != null ? wallTileSet.outerCornerBottomLeft : defaultTile;
+        }
+        if (position.x == bounds.xMax - 1) {
+            return wallTileSet.outerCornerBottomRight != null ? wallTileSet.outerCornerBottomRight : defaultTile;
+        }
+        return wallTileSet.outerWallBottom != null ? wallTileSet.outerWallBottom : defaultTile;
+    }
+
+    private TileBase SelectOuterTopTile(RectInt bounds, Vector2Int position, WallTileSet wallTileSet) {
+        if (position.x == bounds.xMin) {
+            return wallTileSet.outerCornerTopLeft != null ? wallTileSet.outerCornerTopLeft : defaultTile;
+        }
+        if (position.x == bounds.xMax - 1) {
+            return wallTileSet.outerCornerTopRight != null ? wallTileSet.outerCornerTopRight : defaultTile;
+        }
+        return wallTileSet.outerWallTop != null ? wallTileSet.outerWallTop : defaultTile;
+    }
+
+    private bool IsOccupiedByAnyRoom(Vector2Int position) {
+        foreach (Room room in context.createdRooms.Values) {
+            if (room.Bounds.Contains(position)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void DrawFloor(Room room, TileBase floorTile) {

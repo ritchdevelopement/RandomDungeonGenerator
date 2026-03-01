@@ -13,4 +13,12 @@ public class WallTileSet {
 
     public TileBase wallVerticalLeft;
     public TileBase wallVerticalRight;
+
+    public TileBase outerCornerTopLeft;
+    public TileBase outerWallTop;
+    public TileBase outerCornerTopRight;
+
+    public TileBase outerCornerBottomLeft;
+    public TileBase outerWallBottom;
+    public TileBase outerCornerBottomRight;
 }
