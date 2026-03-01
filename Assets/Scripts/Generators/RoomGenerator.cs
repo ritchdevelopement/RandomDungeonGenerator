@@ -67,6 +67,8 @@ public class RoomGenerator : DungeonTaskBase {
             roomsToCreate.Enqueue(chosen.Candidate);
             reservedBounds.Add(chosen.Candidate.Bounds);
             context.adjacencies.Add((currentRoom, chosen.Candidate, chosen.Dir));
+
+            available.RemoveAll(entry => OverlapsAnyReserved(entry.Candidate.Bounds));
         }
     }
 
