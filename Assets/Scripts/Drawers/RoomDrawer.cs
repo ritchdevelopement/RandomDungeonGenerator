@@ -4,7 +4,7 @@ using UnityEngine.Tilemaps;
 public class RoomDrawer : DungeonTaskBase {
     [SerializeField] private TileBase defaultTile;
     [SerializeField] private WallTileSet[] wallTileSets;
-    [SerializeField] private TileBase[] floorTiles;
+    [SerializeField] private WeightedFloorTile[] weightedFloorTiles;
     [SerializeField] private TileBase[] eastDoorTiles;
     [SerializeField] private TileBase[] westDoorTiles;
     private Tilemap wallTilemap;
@@ -23,18 +23,15 @@ public class RoomDrawer : DungeonTaskBase {
         CreateFloorTilemap();
 
         wallTilemap.color = wallTileSets is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
-        floorTilemap.color = floorTiles is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
+        floorTilemap.color = weightedFloorTiles is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
 
         WallTileSet wallTileSet = wallTileSets is { Length: > 0 }
             ? wallTileSets[Random.Range(0, wallTileSets.Length)]
             : null;
-        TileBase floorTile = floorTiles is { Length: > 0 }
-            ? floorTiles[Random.Range(0, floorTiles.Length)]
-            : defaultTile;
 
         foreach (Room room in context.createdRooms.Values) {
             DrawWalls(room, wallTileSet);
-            DrawFloor(room, floorTile);
+            DrawFloor(room);
         }
 
         foreach (Room room in context.createdRooms.Values) {
@@ -181,8 +178,9 @@ public class RoomDrawer : DungeonTaskBase {
         return false;
     }
 
-    private void DrawFloor(Room room, TileBase floorTile) {
+    private void DrawFloor(Room room) {
         RectInt roomBounds = room.Bounds;
+        float totalFloorTileWeight = CalculateTotalFloorTileWeight();
 
         for (int x = roomBounds.xMin; x < roomBounds.xMax; x++) {
             for (int y = roomBounds.yMin; y < roomBounds.yMax; y++) {
@@ -199,9 +197,34 @@ public class RoomDrawer : DungeonTaskBase {
                     continue;
                 }
 
-                floorTilemap.SetTile(new Vector3Int(x, y), floorTile);
+                floorTilemap.SetTile(new Vector3Int(x, y), SelectWeightedFloorTile(totalFloorTileWeight));
             }
         }
+    }
+
+    private float CalculateTotalFloorTileWeight() {
+        float totalWeight = 0f;
+        foreach (WeightedFloorTile weightedTile in weightedFloorTiles) {
+            totalWeight += weightedTile.weight;
+        }
+        return totalWeight;
+    }
+
+    private TileBase SelectWeightedFloorTile(float totalWeight) {
+        if (weightedFloorTiles is not { Length: > 0 }) {
+            return defaultTile;
+        }
+
+        float randomPoint = Random.Range(0f, totalWeight);
+        float cumulativeWeight = 0f;
+        foreach (WeightedFloorTile weightedTile in weightedFloorTiles) {
+            cumulativeWeight += weightedTile.weight;
+            if (randomPoint < cumulativeWeight) {
+                return weightedTile.tile != null ? weightedTile.tile : defaultTile;
+            }
+        }
+
+        return defaultTile;
     }
 
     private bool IsVerticalDoorEdge(Room room, Vector2Int position) {
