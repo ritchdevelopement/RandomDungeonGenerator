@@ -20,6 +20,10 @@ public class FogOfWarManager : DungeonTaskBase {
 
     public override void Execute() {
         SyncCameraBackground();
+
+        if (context.disableFogOfWar) {
+            return;
+        }
         roomFogs.Clear();
         Transform fogContainer = CreateFogContainer();
         Sprite whiteSquareSprite = CreateWhiteSquareSprite();
@@ -32,10 +36,12 @@ public class FogOfWarManager : DungeonTaskBase {
 
     private void SyncCameraBackground() {
         Camera mainCamera = Camera.main;
-        if (mainCamera != null) {
-            mainCamera.clearFlags = CameraClearFlags.SolidColor;
-            mainCamera.backgroundColor = fogColor;
+        if (mainCamera == null) {
+            return;
         }
+
+        mainCamera.clearFlags = CameraClearFlags.SolidColor;
+        mainCamera.backgroundColor = fogColor;
     }
 
     private RoomFog CreateRoomFog(Room room, Transform parent, Sprite sprite) {
