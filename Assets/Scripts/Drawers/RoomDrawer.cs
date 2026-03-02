@@ -5,6 +5,8 @@ public class RoomDrawer : DungeonTaskBase {
     [SerializeField] private TileBase defaultTile;
     [SerializeField] private WallTileSet[] wallTileSets;
     [SerializeField] private TileBase[] floorTiles;
+    [SerializeField] private TileBase[] eastDoorTiles;
+    [SerializeField] private TileBase[] westDoorTiles;
     private Tilemap wallTilemap;
     private Tilemap floorTilemap;
 
@@ -77,16 +79,44 @@ public class RoomDrawer : DungeonTaskBase {
 
         for (int x = roomBounds.xMin; x < roomBounds.xMax; x++) {
             for (int y = roomBounds.yMin; y < roomBounds.yMax; y++) {
-                Vector2Int position = new Vector2Int(x, y);
-
-                if (!room.IsWallTile(position)) {
-                    continue;
-                }
-
-                TileBase tile = SelectWallTile(roomBounds, position, wallTileSet);
-                wallTilemap.SetTile(new Vector3Int(x, y), tile);
+                DrawTileAt(room, roomBounds, new Vector2Int(x, y), wallTileSet);
             }
         }
+    }
+
+    private void DrawTileAt(Room room, RectInt roomBounds, Vector2Int position, WallTileSet wallTileSet) {
+        if (room.IsWallTile(position)) {
+            wallTilemap.SetTile(new Vector3Int(position.x, position.y), SelectWallTile(roomBounds, position, wallTileSet));
+            return;
+        }
+
+        if (!room.IsDoorTile(position)) {
+            return;
+        }
+
+        TileBase doorTile = SelectVerticalDoorTile(room, position);
+        if (doorTile == null) {
+            return;
+        }
+
+        wallTilemap.SetTile(new Vector3Int(position.x, position.y), doorTile);
+    }
+
+    private TileBase SelectVerticalDoorTile(Room room, Vector2Int position) {
+        foreach ((Direction dir, Door door) in room.Doors) {
+            if (dir != Direction.East && dir != Direction.West) {
+                continue;
+            }
+            if (!door.TilePositions.Contains(position)) {
+                continue;
+            }
+            int yOffset = position.y - door.MinBounds.y;
+            TileBase[] tiles = dir == Direction.East ? eastDoorTiles : westDoorTiles;
+            if (tiles != null && yOffset < tiles.Length) {
+                return tiles[yOffset];
+            }
+        }
+        return null;
     }
 
     private TileBase SelectWallTile(RectInt bounds, Vector2Int position, WallTileSet wallTileSet) {
@@ -165,8 +195,25 @@ public class RoomDrawer : DungeonTaskBase {
                     continue;
                 }
 
+                if (IsVerticalDoorEdge(room, position)) {
+                    continue;
+                }
+
                 floorTilemap.SetTile(new Vector3Int(x, y), floorTile);
             }
         }
+    }
+
+    private bool IsVerticalDoorEdge(Room room, Vector2Int position) {
+        foreach ((Direction dir, Door door) in room.Doors) {
+            if (dir != Direction.East && dir != Direction.West) {
+                continue;
+            }
+            if (!door.TilePositions.Contains(position)) {
+                continue;
+            }
+            return position.y == door.MinBounds.y || position.y == door.MaxBounds.y;
+        }
+        return false;
     }
 }

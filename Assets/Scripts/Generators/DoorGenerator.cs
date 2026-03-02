@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorGenerator : DungeonTaskBase {
-    [SerializeField] private int doorWidth = 3;
+    [SerializeField] private int horizontalDoorWidth = 3;
+    [SerializeField] private int verticalDoorWidth = 5;
     private const int DoorDepth = 2;
 
     public override void Execute() {
@@ -20,7 +21,7 @@ public class DoorGenerator : DungeonTaskBase {
             }
 
             List<Vector2Int> doorTiles = GetDoorTilePositions(roomA, roomB, dir);
-            Door door = new Door(doorTiles);
+            Door door = new Door(doorTiles, dir);
             door.SetConnectedRooms(roomA, roomB);
             roomA.Connect(roomB, door, dir);
             context.createdDoors.Add(door);
@@ -61,7 +62,8 @@ public class DoorGenerator : DungeonTaskBase {
         int perpendicularA = isNorthSouth ? room.RoomSize.x : room.RoomSize.y;
         int perpendicularB = isNorthSouth ? neighbor.RoomSize.x : neighbor.RoomSize.y;
         int maxAllowed = Mathf.Min(perpendicularA, perpendicularB) - 2;
-        int oddDoorWidth = doorWidth % 2 == 0 ? Mathf.Max(1, doorWidth - 1) : doorWidth;
+        int configuredWidth = isNorthSouth ? horizontalDoorWidth : verticalDoorWidth;
+        int oddDoorWidth = configuredWidth % 2 == 0 ? Mathf.Max(1, configuredWidth - 1) : configuredWidth;
         return Mathf.Clamp(oddDoorWidth, 1, maxAllowed);
     }
 }

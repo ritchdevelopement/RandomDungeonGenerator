@@ -9,8 +9,10 @@ public class Door {
     public Vector2Int MaxBounds { get; private set; }
     public Room RoomA { get; private set; }
     public Room RoomB { get; private set; }
+    public Direction Direction { get; private set; }
 
-    public Door(List<Vector2Int> tilePositions) {
+    public Door(List<Vector2Int> tilePositions, Direction direction) {
+        Direction = direction;
         if (tilePositions == null || tilePositions.Count == 0) {
             throw new System.ArgumentException("TilePositions cannot be null or empty", nameof(tilePositions));
         }

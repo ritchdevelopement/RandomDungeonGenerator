@@ -25,22 +25,51 @@ public class DoorDrawer : DungeonTaskBase {
         Color doorColor = doorSprites is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
 
         foreach (Door door in context.createdDoors) {
-            DrawDoor(door, doorColor);
+            bool isVertical = door.Direction == Direction.East || door.Direction == Direction.West;
+            if (isVertical) {
+                DrawVerticalDoor(door);
+            } else {
+                DrawHorizontalDoor(door, doorColor);
+            }
         }
     }
 
-    private void DrawDoor(Door door, Color doorColor) {
+    private void DrawHorizontalDoor(Door door, Color doorColor) {
         Vector3 worldPos = GetDoorWorldCenter(door);
         GameObject doorGameObject = Instantiate(doorPrefab, worldPos, Quaternion.identity, doorsParent);
 
-        if (doorGameObject.TryGetComponent(out SpriteRenderer spriteRenderer)) {
-            spriteRenderer.drawMode = SpriteDrawMode.Tiled;
-            spriteRenderer.size = door.Size;
-            spriteRenderer.color = doorColor;
+        SetupHorizontalDoorSprite(doorGameObject, door, doorColor);
 
-            if (doorSprites != null && doorSprites.Length > 0) {
-                spriteRenderer.sprite = doorSprites[Random.Range(0, doorSprites.Length)];
-            }
+        if (doorGameObject.TryGetComponent(out BoxCollider2D boxCollider)) {
+            boxCollider.size = new Vector2(door.Size.x, door.Size.y);
+        }
+
+        DoorController doorController = doorGameObject.GetComponent<DoorController>();
+        doorController.Initialize(door, door.RoomA, door.RoomB);
+    }
+
+    private void SetupHorizontalDoorSprite(GameObject doorGameObject, Door door, Color doorColor) {
+        if (!doorGameObject.TryGetComponent(out SpriteRenderer spriteRenderer)) {
+            return;
+        }
+
+        spriteRenderer.drawMode = SpriteDrawMode.Tiled;
+        spriteRenderer.size = door.Size;
+        spriteRenderer.color = doorColor;
+
+        if (doorSprites == null || doorSprites.Length == 0) {
+            return;
+        }
+
+        spriteRenderer.sprite = doorSprites[Random.Range(0, doorSprites.Length)];
+    }
+
+    private void DrawVerticalDoor(Door door) {
+        Vector3 worldPos = GetDoorWorldCenter(door);
+        GameObject doorGameObject = Instantiate(doorPrefab, worldPos, Quaternion.identity, doorsParent);
+
+        if (doorGameObject.TryGetComponent(out SpriteRenderer mainRenderer)) {
+            mainRenderer.enabled = false;
         }
 
         if (doorGameObject.TryGetComponent(out BoxCollider2D boxCollider)) {
