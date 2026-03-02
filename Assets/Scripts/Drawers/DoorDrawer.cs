@@ -1,8 +1,13 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class DoorDrawer : DungeonTaskBase {
     [SerializeField] private GameObject doorPrefab;
     [SerializeField] private Sprite[] doorSprites;
+    [SerializeField] private TileBase[] eastDoorTiles;
+    [SerializeField] private TileBase[] westDoorTiles;
+    [SerializeField] private GameObject verticalDoorPanelPrefab;
+    [SerializeField] private int[] additionalDoorPrefabYOffsets;
     private Transform doorsParent;
     private Grid dungeonGrid;
 
@@ -66,18 +71,78 @@ public class DoorDrawer : DungeonTaskBase {
 
     private void DrawVerticalDoor(Door door) {
         Vector3 worldPos = GetDoorWorldCenter(door);
-        GameObject doorGameObject = Instantiate(doorPrefab, worldPos, Quaternion.identity, doorsParent);
+        GameObject masterDoor = Instantiate(doorPrefab, worldPos, Quaternion.identity, doorsParent);
 
-        if (doorGameObject.TryGetComponent(out SpriteRenderer mainRenderer)) {
-            mainRenderer.enabled = false;
+        if (masterDoor.TryGetComponent(out SpriteRenderer masterRenderer)) {
+            masterRenderer.drawMode = SpriteDrawMode.Tiled;
+            masterRenderer.size = new Vector2(door.Size.x, door.Size.y);
+            masterRenderer.enabled = false;
         }
 
-        if (doorGameObject.TryGetComponent(out BoxCollider2D boxCollider)) {
+        if (masterDoor.TryGetComponent(out BoxCollider2D boxCollider)) {
             boxCollider.size = new Vector2(door.Size.x, door.Size.y);
         }
 
-        DoorController doorController = doorGameObject.GetComponent<DoorController>();
+        DoorController doorController = masterDoor.GetComponent<DoorController>();
         doorController.Initialize(door, door.RoomA, door.RoomB);
+
+        PlaceVerticalDoorTilesAndPanels(door, masterDoor);
+    }
+
+    private void PlaceVerticalDoorTilesAndPanels(Door door, GameObject masterDoor) {
+        for (int yOffset = 0; yOffset < door.Size.y; yOffset++) {
+            TileBase eastTile = eastDoorTiles != null && yOffset < eastDoorTiles.Length ? eastDoorTiles[yOffset] : null;
+            TileBase westTile = westDoorTiles != null && yOffset < westDoorTiles.Length ? westDoorTiles[yOffset] : null;
+
+            PlaceVerticalDoorTile(door.MinBounds.x, door.MinBounds.y + yOffset, eastTile);
+            PlaceVerticalDoorTile(door.MaxBounds.x, door.MinBounds.y + yOffset, westTile);
+
+            bool isNullSlot = eastTile == null;
+            bool isAdditionalOffset = IsAdditionalDoorPrefabOffset(yOffset);
+
+            if ((isNullSlot || isAdditionalOffset) && verticalDoorPanelPrefab != null) {
+                SpawnVerticalDoorPanel(door, masterDoor, yOffset);
+            }
+        }
+    }
+
+    private void PlaceVerticalDoorTile(int x, int y, TileBase tile) {
+        if (tile == null) {
+            return;
+        }
+
+        context.wallTilemap.SetTile(new Vector3Int(x, y), tile);
+    }
+
+    private bool IsAdditionalDoorPrefabOffset(int yOffset) {
+        if (additionalDoorPrefabYOffsets == null) {
+            return false;
+        }
+
+        foreach (int offset in additionalDoorPrefabYOffsets) {
+            if (offset == yOffset) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void SpawnVerticalDoorPanel(Door door, GameObject masterDoor, int yOffset) {
+        Vector3 panelWorldPos = GetDoorYOffsetWorldCenter(door, yOffset);
+        GameObject panel = Instantiate(verticalDoorPanelPrefab, panelWorldPos, Quaternion.identity, masterDoor.transform);
+
+        if (panel.TryGetComponent(out SpriteRenderer panelRenderer)) {
+            panelRenderer.drawMode = SpriteDrawMode.Tiled;
+            panelRenderer.size = new Vector2(door.Size.x, 1f);
+        }
+    }
+
+    private Vector3 GetDoorYOffsetWorldCenter(Door door, int yOffset) {
+        int tileY = door.MinBounds.y + yOffset;
+        Vector3 minWorld = dungeonGrid.CellToWorld(new Vector3Int(door.MinBounds.x, tileY));
+        Vector3 maxWorld = dungeonGrid.CellToWorld(new Vector3Int(door.MaxBounds.x + 1, tileY + 1));
+        return (minWorld + maxWorld) * 0.5f;
     }
 
     private Vector3 GetDoorWorldCenter(Door door) {

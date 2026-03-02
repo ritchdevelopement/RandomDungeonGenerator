@@ -5,8 +5,6 @@ public class RoomDrawer : DungeonTaskBase {
     [SerializeField] private TileBase defaultTile;
     [SerializeField] private WallTileSet[] wallTileSets;
     [SerializeField] private WeightedFloorTile[] weightedFloorTiles;
-    [SerializeField] private TileBase[] eastDoorTiles;
-    [SerializeField] private TileBase[] westDoorTiles;
     private Tilemap wallTilemap;
     private Tilemap floorTilemap;
 
@@ -52,6 +50,7 @@ public class RoomDrawer : DungeonTaskBase {
         rb.freezeRotation = true;
 
         wallTilemap = tilemapGameObject.AddComponent<Tilemap>();
+        context.wallTilemap = wallTilemap;
         TilemapRenderer tilemapRenderer = tilemapGameObject.AddComponent<TilemapRenderer>();
         tilemapRenderer.sortOrder = TilemapRenderer.SortOrder.TopLeft;
 
@@ -82,38 +81,11 @@ public class RoomDrawer : DungeonTaskBase {
     }
 
     private void DrawTileAt(Room room, RectInt roomBounds, Vector2Int position, WallTileSet wallTileSet) {
-        if (room.IsWallTile(position)) {
-            wallTilemap.SetTile(new Vector3Int(position.x, position.y), SelectWallTile(roomBounds, position, wallTileSet));
+        if (!room.IsWallTile(position)) {
             return;
         }
 
-        if (!room.IsDoorTile(position)) {
-            return;
-        }
-
-        TileBase doorTile = SelectVerticalDoorTile(room, position);
-        if (doorTile == null) {
-            return;
-        }
-
-        wallTilemap.SetTile(new Vector3Int(position.x, position.y), doorTile);
-    }
-
-    private TileBase SelectVerticalDoorTile(Room room, Vector2Int position) {
-        foreach ((Direction dir, Door door) in room.Doors) {
-            if (dir != Direction.East && dir != Direction.West) {
-                continue;
-            }
-            if (!door.TilePositions.Contains(position)) {
-                continue;
-            }
-            int yOffset = position.y - door.MinBounds.y;
-            TileBase[] tiles = dir == Direction.East ? eastDoorTiles : westDoorTiles;
-            if (tiles != null && yOffset < tiles.Length) {
-                return tiles[yOffset];
-            }
-        }
-        return null;
+        wallTilemap.SetTile(new Vector3Int(position.x, position.y), SelectWallTile(roomBounds, position, wallTileSet));
     }
 
     private TileBase SelectWallTile(RectInt bounds, Vector2Int position, WallTileSet wallTileSet) {

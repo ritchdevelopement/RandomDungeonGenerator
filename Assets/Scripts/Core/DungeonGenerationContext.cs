@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class DungeonGenerationContext {
     public Dictionary<Vector2Int, Room> createdRooms = new();
@@ -13,4 +14,5 @@ public class DungeonGenerationContext {
     public Room playerSpawnRoom;
     public PhysicsMaterial2D frictionlessMaterial;
     public bool disableFogOfWar;
+    public Tilemap wallTilemap;
 }
