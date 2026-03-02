@@ -1,26 +1,27 @@
 using UnityEngine;
 
 public class CameraController : MonoBehaviour {
-    [Header("Follow Settings")]
-
-    [SerializeField]
     private Transform playerTransform;
     private Vector3 offset = new Vector3(0, 0, -10f);
 
     private void LateUpdate() {
         if (playerTransform == null) {
+            TryFindPlayer();
+        }
+
+        if (playerTransform == null) {
             return;
         }
 
-        FollowPlayer();
+        transform.position = playerTransform.position + offset;
     }
 
-    private void FollowPlayer() {
-        Vector3 targetPosition = playerTransform.position + offset;
-        transform.position = targetPosition;
-    }
+    private void TryFindPlayer() {
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player == null) {
+            return;
+        }
 
-    public void SetPlayer(Transform newPlayer) {
-        playerTransform = newPlayer;
+        playerTransform = player.transform;
     }
 }
