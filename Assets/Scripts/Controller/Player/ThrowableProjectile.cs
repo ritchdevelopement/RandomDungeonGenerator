@@ -8,26 +8,29 @@ public class ThrowableProjectile : MonoBehaviour {
 
     private Rigidbody2D rigidbody2d;
     private bool isStuck = false;
-    private bool isActive = false;
+    private bool collisionEnabled = false;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
     }
 
     public void Launch(Vector2 direction) {
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.rotation = Quaternion.AngleAxis(CalculateRotationAngle(direction), Vector3.forward);
         rigidbody2d.linearVelocity = direction * flySpeed;
         StartCoroutine(ActivateAfterDelay());
     }
 
+    private float CalculateRotationAngle(Vector2 direction) {
+        return Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+    }
+
     private IEnumerator ActivateAfterDelay() {
         yield return new WaitForFixedUpdate();
-        isActive = true;
+        collisionEnabled = true;
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
-        if (!isActive) {
+        if (!collisionEnabled) {
             return;
         }
 
@@ -36,7 +39,7 @@ public class ThrowableProjectile : MonoBehaviour {
             return;
         }
 
-        if (other.CompareTag("Player")) {
+        if (IsPlayer(other)) {
             return;
         }
 
@@ -48,12 +51,16 @@ public class ThrowableProjectile : MonoBehaviour {
     }
 
     private void TryPickup(Collider2D other) {
-        if (!other.CompareTag("Player")) {
+        if (!IsPlayer(other)) {
             return;
         }
 
         ThrowController.Instance.ReturnAmmo();
         Destroy(gameObject);
+    }
+
+    private bool IsPlayer(Collider2D other) {
+        return other.CompareTag("Player");
     }
 
     private void Stick() {

@@ -7,12 +7,9 @@ public class ThrowController : MonoBehaviour {
     public static ThrowController Instance { get; private set; }
     public static int CurrentAmmo { get; private set; }
 
-    private int currentAmmo;
-
     private void Awake() {
         Instance = this;
-        currentAmmo = maxAmmo;
-        CurrentAmmo = currentAmmo;
+        CurrentAmmo = maxAmmo;
     }
 
     private void Update() {
@@ -22,7 +19,7 @@ public class ThrowController : MonoBehaviour {
     }
 
     private bool CanThrow() {
-        return Input.GetMouseButtonDown(0) && currentAmmo > 0;
+        return Input.GetMouseButtonDown(0) && CurrentAmmo > 0;
     }
 
     private void ThrowProjectile() {
@@ -33,17 +30,20 @@ public class ThrowController : MonoBehaviour {
             throwable.Launch(throwDirection);
         }
 
-        currentAmmo--;
-        CurrentAmmo = currentAmmo;
+        ConsumeAmmo();
     }
 
     private Vector2 GetThrowDirection() {
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        return ((Vector2) (mouseWorldPosition - transform.position)).normalized;
+        Vector2 directionToMouse = (Vector2) (mouseWorldPosition - transform.position);
+        return directionToMouse.normalized;
+    }
+
+    private void ConsumeAmmo() {
+        CurrentAmmo--;
     }
 
     public void ReturnAmmo() {
-        currentAmmo = Mathf.Min(currentAmmo + 1, maxAmmo);
-        CurrentAmmo = currentAmmo;
+        CurrentAmmo = Mathf.Min(CurrentAmmo + 1, maxAmmo);
     }
 }
