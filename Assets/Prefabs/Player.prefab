@@ -234,3 +234,4 @@ MonoBehaviour:
   throwablePrefab: {fileID: 4105023254236410065, guid: f2f26138b71e52c4cb026f8824a9420e,
     type: 3}
   maxAmmo: 3
+  projectileSpawnOffset: 0.4

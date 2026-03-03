@@ -7,10 +7,17 @@ public class ThrowController : MonoBehaviour {
 
     public static ThrowController Instance { get; private set; }
     public static int CurrentAmmo { get; private set; }
+    public static int MaxAmmo { get; private set; }
+    public static Sprite WeaponSprite { get; private set; }
 
     private void Awake() {
         Instance = this;
+        MaxAmmo = maxAmmo;
         CurrentAmmo = maxAmmo;
+        if (throwablePrefab != null) {
+            SpriteRenderer throwableSpriteRenderer = throwablePrefab.GetComponent<SpriteRenderer>();
+            WeaponSprite = throwableSpriteRenderer != null ? throwableSpriteRenderer.sprite : null;
+        }
     }
 
     private void Update() {
