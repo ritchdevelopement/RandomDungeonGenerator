@@ -12,7 +12,7 @@ All features listed below are in an early, rudimentary state and still being ite
 - **Variable room sizes** – Multiple room sizes can be defined in the Inspector; the generator picks randomly, and distribution bias controls how early outward spread kicks in
 - **Floor & wall rendering** – Rooms are drawn with separate tilemaps for walls (with collision) and floors (no collision, rendered beneath walls and fog)
 - **Fog of war** – Unexplored rooms are hidden by a fog overlay; the camera background is automatically synced to the fog color so the void always matches
-- **Sliding doors** – Doors physically slide open when a room is cleared and close again when the player enters a new room
+- **Animated doors** – Doors play an open/close animation (Animator-driven); horizontal doors are single-tile sprites, vertical doors consist of a master collider with animated child panels per tile row
 - **Enemy encounters** – An enemy spawns in each room the player enters; doors close until the enemy is defeated
 - **Edit mode preview** – The dungeon can be previewed in the Unity Editor without entering Play mode
 
@@ -22,8 +22,8 @@ All features listed below are in an early, rudimentary state and still being ite
 |---|---|
 | `RoomGenerator` | Procedurally places rooms on a grid using BFS with AABB overlap detection |
 | `DoorGenerator` | Creates doors between adjacent rooms using stored adjacency pairs |
-| `RoomDrawer` | Draws wall and floor tilemaps for all rooms |
-| `DoorDrawer` | Instantiates door prefabs at shared room edges |
+| `RoomDrawer` | Draws wall and floor tilemaps for all rooms; floor tiles are selected per-position using weighted random selection |
+| `DoorDrawer` | Instantiates door prefabs at shared room edges; places tilemap tiles and animated panel prefabs for vertical (E/W) doors |
 | `PlayerGenerator` | Spawns the player (center, random, or edge room) |
 | `EnemyManager` | Spawns and tracks enemies per room |
 | `DoorManager` | Opens/closes doors based on game state |
@@ -41,7 +41,7 @@ Dungeon parameters are controlled via the `DungeonConfig` ScriptableObject:
 Per-component settings (set directly on the component in the Inspector):
 
 - **Door width** – Configurable on `DoorGenerator`, default 4 tiles (capped to the smaller of the two connected rooms)
-- **Wall tile / Floor tile** – Tile assets assigned on `RoomDrawer`
+- **Wall tile sets / Weighted floor tiles** – Tile assets assigned on `RoomDrawer`; floor tiles use weighted random selection per position (e.g. 70% stone, 20% moss, 10% cracks)
 - **Fog color** – Assigned on `FogOfWarManager`; automatically applied to the camera background
 
 ## Project Structure
@@ -65,13 +65,14 @@ Per-component settings (set directly on the component in the Inspector):
   - `DoorManager.cs` — Opens and closes doors based on game state
   - `FogOfWarManager.cs` — Manages fog overlays; syncs camera background to fog color
 - `Controller/`
-  - `DoorController.cs` — Sliding door animation logic
+  - `DoorController.cs` — Animator-based door open/close logic; manages BoxCollider2D and all child Animators
   - `EnemyController.cs` — Enemy AI, health, and death events
   - `PlayerController.cs` — WASD movement and animation
   - `CameraController.cs` — Smooth camera follow
 - `Models/`
   - `Room.cs` — Room data: position, size, bounds, neighbors, doors
   - `Door.cs` — Door data: tile positions, connected rooms
+  - `WeightedFloorTile.cs` — Serializable tile + weight pair for weighted floor tile selection
 
 ## Setup
 
