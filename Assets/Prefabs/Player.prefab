@@ -180,7 +180,7 @@ MonoBehaviour:
   moveSpeed: 5.5
   dashSpeed: 20
   dashDuration: 0.15
-  dashCooldown: 1
+  dashCooldown: 2
 --- !u!95 &4892171455569769408
 Animator:
   serializedVersion: 7

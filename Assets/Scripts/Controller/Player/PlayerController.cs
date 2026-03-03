@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour {
     private bool isDashing = false;
     private float dashCooldownRemaining = 0f;
 
+    public static float DashCooldownFraction { get; private set; }
+
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -78,6 +80,8 @@ public class PlayerController : MonoBehaviour {
         if (dashCooldownRemaining > 0f) {
             dashCooldownRemaining -= Time.deltaTime;
         }
+
+        DashCooldownFraction = dashCooldown > 0f ? dashCooldownRemaining / dashCooldown : 0f;
     }
 
     private IEnumerator PerformDash() {
