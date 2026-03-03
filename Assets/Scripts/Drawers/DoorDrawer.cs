@@ -83,10 +83,10 @@ public class DoorDrawer : DungeonTaskBase {
             boxCollider.size = new Vector2(door.Size.x, door.Size.y);
         }
 
+        PlaceVerticalDoorTilesAndPanels(door, masterDoor);
+
         DoorController doorController = masterDoor.GetComponent<DoorController>();
         doorController.Initialize(door, door.RoomA, door.RoomB);
-
-        PlaceVerticalDoorTilesAndPanels(door, masterDoor);
     }
 
     private void PlaceVerticalDoorTilesAndPanels(Door door, GameObject masterDoor) {

@@ -1,77 +1,40 @@
-using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
 public class DoorController : MonoBehaviour {
-    [SerializeField] private float slideSpeed = 5f;
-    [SerializeField] private float minPlayerDistanceToClose = 3f;
-
     private BoxCollider2D mainCollider;
-    private SpriteRenderer spriteRenderer;
-    private Vector2 closedPosition;
-    private Vector2 openPosition;
-    private Coroutine slideCoroutine;
-    private Transform playerTransform;
+    private Animator[] allAnimators;
+
+    private static readonly int IsOpenParam = Animator.StringToHash("IsOpen");
 
     private void Awake() {
         mainCollider = GetComponent<BoxCollider2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     public void Initialize(Door door, Room roomA, Room roomB) {
         mainCollider = GetComponent<BoxCollider2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        closedPosition = transform.position;
-        openPosition = CalculateOpenPosition();
+        allAnimators = GetComponentsInChildren<Animator>(true);
         DoorManager.Instance.RegisterDoor(door, this);
     }
 
-    private Vector2 CalculateOpenPosition() {
-        Vector2 doorSize = spriteRenderer.size;
-        bool isHorizontal = doorSize.x > doorSize.y;
-        return isHorizontal
-            ? closedPosition + new Vector2(doorSize.x, 0f)
-            : closedPosition + new Vector2(0f, doorSize.y);
-    }
-
     public void Open() {
-        if (slideCoroutine != null) {
-            StopCoroutine(slideCoroutine);
-        }
-        slideCoroutine = StartCoroutine(SlideTo(openPosition));
+        mainCollider.enabled = false;
+        SetIsOpen(true);
     }
 
     public void Close() {
-        if (slideCoroutine != null) {
-            StopCoroutine(slideCoroutine);
-        }
-        slideCoroutine = StartCoroutine(CloseWhenPlayerClear());
+        SetIsOpen(false);
+        mainCollider.enabled = true;
     }
 
-    private IEnumerator CloseWhenPlayerClear() {
-        if (playerTransform == null) {
-            GameObject playerGO = GameObject.FindWithTag("Player");
-            if (playerGO != null) {
-                playerTransform = playerGO.transform;
-            }
+    private void SetIsOpen(bool isOpen) {
+        if (allAnimators == null) {
+            return;
         }
 
-        if (playerTransform != null) {
-            yield return new WaitUntil(() =>
-                Vector2.Distance(playerTransform.position, transform.position) >= minPlayerDistanceToClose
-            );
+        foreach (Animator animator in allAnimators) {
+            animator.SetBool(IsOpenParam, isOpen);
         }
-
-        yield return StartCoroutine(SlideTo(closedPosition));
-    }
-
-    private IEnumerator SlideTo(Vector2 target) {
-        mainCollider.enabled = false;
-        while ((Vector2) transform.position != target) {
-            transform.position = Vector2.MoveTowards(transform.position, target, slideSpeed * Time.deltaTime);
-            yield return null;
-        }
-        mainCollider.enabled = target == closedPosition;
     }
 }
