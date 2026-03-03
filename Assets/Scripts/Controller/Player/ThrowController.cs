@@ -27,7 +27,7 @@ public class ThrowController : MonoBehaviour {
     }
 
     private bool CanThrow() {
-        return Input.GetMouseButtonDown(0) && CurrentAmmo > 0;
+        return Input.GetMouseButtonDown(0) && CurrentAmmo > 0 && Time.timeScale > 0f;
     }
 
     private void ThrowProjectile() {
