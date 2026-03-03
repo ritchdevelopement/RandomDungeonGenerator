@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -8,7 +7,6 @@ public class ThrowableProjectile : MonoBehaviour {
 
     private Rigidbody2D rigidbody2d;
     private bool isStuck = false;
-    private bool collisionEnabled = false;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
@@ -17,23 +15,13 @@ public class ThrowableProjectile : MonoBehaviour {
     public void Launch(Vector2 direction) {
         transform.rotation = Quaternion.AngleAxis(CalculateRotationAngle(direction), Vector3.forward);
         rigidbody2d.linearVelocity = direction * flySpeed;
-        StartCoroutine(ActivateAfterDelay());
     }
 
     private float CalculateRotationAngle(Vector2 direction) {
         return Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
     }
 
-    private IEnumerator ActivateAfterDelay() {
-        yield return new WaitForFixedUpdate();
-        collisionEnabled = true;
-    }
-
     private void OnTriggerEnter2D(Collider2D other) {
-        if (!collisionEnabled) {
-            return;
-        }
-
         if (isStuck) {
             TryPickup(other);
             return;

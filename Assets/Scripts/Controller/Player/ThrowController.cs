@@ -3,6 +3,7 @@ using UnityEngine;
 public class ThrowController : MonoBehaviour {
     [SerializeField] private GameObject throwablePrefab;
     [SerializeField] private int maxAmmo = 3;
+    [SerializeField] private float projectileSpawnOffset = 0.4f;
 
     public static ThrowController Instance { get; private set; }
     public static int CurrentAmmo { get; private set; }
@@ -24,7 +25,8 @@ public class ThrowController : MonoBehaviour {
 
     private void ThrowProjectile() {
         Vector2 throwDirection = GetThrowDirection();
-        GameObject projectile = Instantiate(throwablePrefab, transform.position, Quaternion.identity);
+        Vector3 spawnPosition = transform.position + (Vector3) (throwDirection * projectileSpawnOffset);
+        GameObject projectile = Instantiate(throwablePrefab, spawnPosition, Quaternion.identity);
 
         if (projectile.TryGetComponent(out ThrowableProjectile throwable)) {
             throwable.Launch(throwDirection);
