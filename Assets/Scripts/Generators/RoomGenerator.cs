@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class RoomGenerator : DungeonTaskBase {
     private List<RectInt> reservedBounds = new();
+    private List<Vector2Int> sizePool = new();
 
     public override void Execute() {
         reservedBounds.Clear();
+        sizePool = BuildSizePool();
         CreateRooms();
 
         Debug.Log($"Generated {context.createdRooms.Count} rooms out of requested {context.numberOfRooms}.");
@@ -93,11 +95,23 @@ public class RoomGenerator : DungeonTaskBase {
         available.Remove(closest);
     }
 
-    private Vector2Int PickRandomSize() {
+    private List<Vector2Int> BuildSizePool() {
         if (context.roomSizes == null || context.roomSizes.Count == 0) {
             throw new System.InvalidOperationException("DungeonConfig.roomSizes must contain at least one entry.");
         }
-        return context.roomSizes[Random.Range(0, context.roomSizes.Count)];
+
+        List<Vector2Int> pool = new();
+        foreach (Vector2Int size in context.roomSizes) {
+            pool.Add(size);
+            if (size.x != size.y) {
+                pool.Add(new Vector2Int(size.y, size.x));
+            }
+        }
+        return pool;
+    }
+
+    private Vector2Int PickRandomSize() {
+        return sizePool[Random.Range(0, sizePool.Count)];
     }
 
 }
