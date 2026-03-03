@@ -1,11 +1,13 @@
 using System.Collections;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour, IDamageable {
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float dashSpeed = 20f;
     [SerializeField] private float dashDuration = 0.15f;
     [SerializeField] private float dashCooldown = 1f;
+    [SerializeField] private int maxHealth = 3;
+    [SerializeField] private float invulnerabilityDuration = 1f;
 
     private static readonly int IsMovingParam = Animator.StringToHash("IsMoving");
 
@@ -17,14 +19,20 @@ public class PlayerController : MonoBehaviour {
     private bool isFacingRight = true;
     private bool isDashing = false;
     private float dashCooldownRemaining = 0f;
+    private bool isInvulnerable = false;
 
     public static float DashCooldownFraction { get; private set; }
+    public static int CurrentHealth { get; private set; }
+    public static int MaxHealth { get; private set; }
+    public static event System.Action OnDeath;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         dashGhostTrail = GetComponent<DashGhostTrail>();
+        MaxHealth = maxHealth;
+        CurrentHealth = maxHealth;
     }
 
     private void Update() {
@@ -41,6 +49,36 @@ public class PlayerController : MonoBehaviour {
         if (other.TryGetComponent(out IDamageable damageable)) {
             damageable.TakeDamage(1);
         }
+    }
+
+    public void TakeDamage(int damage) {
+        if (isInvulnerable) {
+            return;
+        }
+
+        CurrentHealth -= damage;
+
+        if (CurrentHealth <= 0) {
+            spriteRenderer.enabled = false;
+            OnDeath?.Invoke();
+            return;
+        }
+
+        StartCoroutine(HandleInvulnerability());
+    }
+
+    private IEnumerator HandleInvulnerability() {
+        isInvulnerable = true;
+        InvokeRepeating(nameof(FlashSprite), 0f, 0.1f);
+        yield return new WaitForSeconds(invulnerabilityDuration);
+        CancelInvoke(nameof(FlashSprite));
+        spriteRenderer.color = Color.white;
+        isInvulnerable = false;
+    }
+
+    private void FlashSprite() {
+        bool isVisible = spriteRenderer.color.a > 0.5f;
+        spriteRenderer.color = isVisible ? new Color(1f, 1f, 1f, 0.3f) : Color.white;
     }
 
     private void HandleInput() {
@@ -60,7 +98,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     private bool CanDash() {
-        return Input.GetKeyDown(KeyCode.Space) && !isDashing && dashCooldownRemaining <= 0f;
+        return Input.GetKeyDown(KeyCode.Space) && !isDashing && dashCooldownRemaining <= 0f && Time.timeScale > 0f;
     }
 
     private void HandleAnimation() {

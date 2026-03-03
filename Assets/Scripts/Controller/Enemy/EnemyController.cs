@@ -29,6 +29,16 @@ public class EnemyController : MonoBehaviour, IDamageable {
         MoveTowardsPlayer();
     }
 
+    private void OnTriggerEnter2D(Collider2D other) {
+        if (!other.CompareTag("Player")) {
+            return;
+        }
+
+        if (other.TryGetComponent(out IDamageable damageable)) {
+            damageable.TakeDamage(1);
+        }
+    }
+
     private void MoveTowardsPlayer() {
         if (playerTransform == null) {
             return;

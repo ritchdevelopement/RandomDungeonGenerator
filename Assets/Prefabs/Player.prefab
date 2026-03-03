@@ -182,6 +182,8 @@ MonoBehaviour:
   dashSpeed: 20
   dashDuration: 0.15
   dashCooldown: 2
+  maxHealth: 1
+  invulnerabilityDuration: 1
 --- !u!95 &4892171455569769408
 Animator:
   serializedVersion: 7
