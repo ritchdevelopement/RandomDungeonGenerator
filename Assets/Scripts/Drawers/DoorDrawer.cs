@@ -27,16 +27,27 @@ public class DoorDrawer : DungeonTaskBase {
     }
 
     private void DrawDoors() {
-        Color doorColor = doorSprites is { Length: > 0 } ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
+        Color doorColor = GetDoorColor();
 
         foreach (Door door in context.createdDoors) {
-            bool isVertical = door.Direction == Direction.East || door.Direction == Direction.West;
-            if (isVertical) {
+            if (IsVerticalDoor(door)) {
                 DrawVerticalDoor(door);
             } else {
                 DrawHorizontalDoor(door, doorColor);
             }
         }
+    }
+
+    private bool HasDoorSprites() {
+        return doorSprites is { Length: > 0 };
+    }
+
+    private Color GetDoorColor() {
+        return HasDoorSprites() ? Color.white : Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
+    }
+
+    private bool IsVerticalDoor(Door door) {
+        return door.Direction == Direction.East || door.Direction == Direction.West;
     }
 
     private void DrawHorizontalDoor(Door door, Color doorColor) {
@@ -62,7 +73,7 @@ public class DoorDrawer : DungeonTaskBase {
         spriteRenderer.size = new Vector2(door.Size.x, 1f);
         spriteRenderer.color = doorColor;
 
-        if (doorSprites == null || doorSprites.Length == 0) {
+        if (!HasDoorSprites()) {
             return;
         }
 
@@ -91,19 +102,35 @@ public class DoorDrawer : DungeonTaskBase {
 
     private void PlaceVerticalDoorTilesAndPanels(Door door, GameObject masterDoor) {
         for (int yOffset = 0; yOffset < door.Size.y; yOffset++) {
-            TileBase eastTile = eastDoorTiles != null && yOffset < eastDoorTiles.Length ? eastDoorTiles[yOffset] : null;
-            TileBase westTile = westDoorTiles != null && yOffset < westDoorTiles.Length ? westDoorTiles[yOffset] : null;
+            TileBase eastTile = GetTileAtOffset(eastDoorTiles, yOffset);
+            TileBase westTile = GetTileAtOffset(westDoorTiles, yOffset);
 
             PlaceVerticalDoorTile(door.MinBounds.x, door.MinBounds.y + yOffset, eastTile);
             PlaceVerticalDoorTile(door.MaxBounds.x, door.MinBounds.y + yOffset, westTile);
 
-            bool isNullSlot = eastTile == null;
-            bool isAdditionalOffset = IsAdditionalDoorPrefabOffset(yOffset);
-
-            if ((isNullSlot || isAdditionalOffset) && verticalDoorPanelPrefab != null) {
+            if (NeedsDoorPanel(eastTile, yOffset)) {
                 SpawnVerticalDoorPanel(door, masterDoor, yOffset);
             }
         }
+    }
+
+    private TileBase GetTileAtOffset(TileBase[] tiles, int yOffset) {
+        if (tiles == null || yOffset >= tiles.Length) {
+            return null;
+        }
+
+        return tiles[yOffset];
+    }
+
+    private bool NeedsDoorPanel(TileBase eastTile, int yOffset) {
+        if (verticalDoorPanelPrefab == null) {
+            return false;
+        }
+
+        bool hasNoEastTile = eastTile == null;
+        bool isAdditionalOffset = IsAdditionalDoorPrefabOffset(yOffset);
+
+        return hasNoEastTile || isAdditionalOffset;
     }
 
     private void PlaceVerticalDoorTile(int x, int y, TileBase tile) {
@@ -135,7 +162,20 @@ public class DoorDrawer : DungeonTaskBase {
         if (panel.TryGetComponent(out SpriteRenderer panelRenderer)) {
             panelRenderer.drawMode = SpriteDrawMode.Tiled;
             panelRenderer.size = new Vector2(door.Size.x, 1f);
+            panelRenderer.sortingOrder = GetPanelSortingOrder(yOffset);
         }
+    }
+
+    private int GetPanelSortingOrder(int yOffset) {
+        return IsLastAdditionalDoorPrefabOffset(yOffset) ? -1 : 0;
+    }
+
+    private bool IsLastAdditionalDoorPrefabOffset(int yOffset) {
+        if (additionalDoorPrefabYOffsets == null || additionalDoorPrefabYOffsets.Length == 0) {
+            return false;
+        }
+
+        return additionalDoorPrefabYOffsets[^1] == yOffset;
     }
 
     private Vector3 GetDoorYOffsetWorldCenter(Door door, int yOffset) {
