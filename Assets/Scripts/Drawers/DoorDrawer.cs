@@ -135,7 +135,16 @@ public class DoorDrawer : DungeonTaskBase {
         if (panel.TryGetComponent(out SpriteRenderer panelRenderer)) {
             panelRenderer.drawMode = SpriteDrawMode.Tiled;
             panelRenderer.size = new Vector2(door.Size.x, 1f);
+            panelRenderer.sortingOrder = IsLastAdditionalDoorPrefabOffset(yOffset) ? -1 : 0;
         }
+    }
+
+    private bool IsLastAdditionalDoorPrefabOffset(int yOffset) {
+        if (additionalDoorPrefabYOffsets == null || additionalDoorPrefabYOffsets.Length == 0) {
+            return false;
+        }
+
+        return additionalDoorPrefabYOffsets[^1] == yOffset;
     }
 
     private Vector3 GetDoorYOffsetWorldCenter(Door door, int yOffset) {
