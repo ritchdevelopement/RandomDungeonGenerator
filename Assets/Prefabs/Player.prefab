@@ -182,7 +182,7 @@ MonoBehaviour:
   dashSpeed: 20
   dashDuration: 0.15
   dashCooldown: 2
-  maxHealth: 1
+  maxHealth: 3
   invulnerabilityDuration: 1
 --- !u!95 &4892171455569769408
 Animator:

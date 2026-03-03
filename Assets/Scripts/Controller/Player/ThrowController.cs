@@ -5,6 +5,8 @@ public class ThrowController : MonoBehaviour {
     [SerializeField] private int maxAmmo = 3;
     [SerializeField] private float projectileSpawnOffset = 0.4f;
 
+    private Camera mainCamera;
+
     public static ThrowController Instance { get; private set; }
     public static int CurrentAmmo { get; private set; }
     public static int MaxAmmo { get; private set; }
@@ -12,6 +14,7 @@ public class ThrowController : MonoBehaviour {
 
     private void Awake() {
         Instance = this;
+        mainCamera = Camera.main;
         MaxAmmo = maxAmmo;
         CurrentAmmo = maxAmmo;
         if (throwablePrefab != null) {
@@ -43,7 +46,7 @@ public class ThrowController : MonoBehaviour {
     }
 
     private Vector2 GetThrowDirection() {
-        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         Vector2 directionToMouse = (Vector2) (mouseWorldPosition - transform.position);
         return directionToMouse.normalized;
     }

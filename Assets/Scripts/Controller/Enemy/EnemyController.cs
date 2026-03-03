@@ -1,23 +1,18 @@
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour, IDamageable {
-    [SerializeField]
-    private float moveSpeed = 2f;
-
-    [SerializeField]
-    private int health = 5;
-
-    [SerializeField]
-    private float invulnerabilityTime = 1f;
+    [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private int health = 5;
+    [SerializeField] private float invulnerabilityTime = 1f;
 
     private Transform playerTransform;
-    private Rigidbody2D rb;
+    private Rigidbody2D rigidBody;
     private SpriteRenderer spriteRenderer;
 
     public event System.Action OnDeath;
 
     private void Awake() {
-        rb = GetComponent<Rigidbody2D>();
+        rigidBody = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
@@ -45,15 +40,14 @@ public class EnemyController : MonoBehaviour, IDamageable {
         }
 
         Vector2 direction = (playerTransform.position - transform.position).normalized;
-        rb.linearVelocity = direction * moveSpeed;
+        rigidBody.linearVelocity = direction * moveSpeed;
     }
 
     public void TakeDamage(int damage) {
         health -= damage;
-        Debug.Log($"Enemy took {damage} damage! Health: {health}");
 
         if (health <= 0) {
-            OnDeath.Invoke();
+            OnDeath?.Invoke();
             Destroy(gameObject);
         } else {
             StartInvulnerability();
@@ -68,7 +62,7 @@ public class EnemyController : MonoBehaviour, IDamageable {
     private void EndInvulnerability() {
         CancelInvoke(nameof(FlashSprite));
         if (spriteRenderer != null) {
-            spriteRenderer.color = Color.purple;
+            spriteRenderer.color = Color.white;
         }
     }
 

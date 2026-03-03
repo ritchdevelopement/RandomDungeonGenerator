@@ -17,14 +17,15 @@ public class PlayerController : MonoBehaviour, IDamageable {
     private Animator animator;
     private DashGhostTrail dashGhostTrail;
     private bool isFacingRight = true;
-    private bool isDashing = false;
-    private float dashCooldownRemaining = 0f;
-    private bool isInvulnerable = false;
+    private bool isDashing;
+    private float dashCooldownRemaining;
+    private bool isInvulnerable;
 
     public static float DashCooldownFraction { get; private set; }
     public static int CurrentHealth { get; private set; }
     public static int MaxHealth { get; private set; }
     public static event System.Action OnDeath;
+    public static event System.Action<int> OnHealthChanged;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
@@ -57,6 +58,7 @@ public class PlayerController : MonoBehaviour, IDamageable {
         }
 
         CurrentHealth -= damage;
+        OnHealthChanged?.Invoke(CurrentHealth);
 
         if (CurrentHealth <= 0) {
             spriteRenderer.enabled = false;

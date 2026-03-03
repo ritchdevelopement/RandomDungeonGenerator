@@ -9,16 +9,29 @@ public class HealthUI : MonoBehaviour {
     [SerializeField] private Color activeColor = Color.white;
     [SerializeField] private Color depletedColor = new Color(1f, 1f, 1f, 0.3f);
 
+    private HorizontalLayoutGroup layoutGroup;
+    private RectTransform containerRect;
     private Image[] heartIcons;
+
+    private void Awake() {
+        layoutGroup = GetComponent<HorizontalLayoutGroup>();
+        containerRect = (RectTransform) transform;
+    }
 
     private IEnumerator Start() {
         yield return new WaitUntil(() => PlayerController.MaxHealth > 0);
         CreateHeartIcons();
+        RefreshHeartColors(PlayerController.CurrentHealth);
+        PlayerController.OnHealthChanged += RefreshHeartColors;
+    }
+
+    private void OnDestroy() {
+        PlayerController.OnHealthChanged -= RefreshHeartColors;
     }
 
     private void CreateHeartIcons() {
-        float iconSize = GetContainerHeight();
-        ApplyLayoutGroupSettings(iconSize);
+        float iconSize = containerRect.rect.height;
+        ConfigureLayoutGroup();
 
         heartIcons = new Image[PlayerController.MaxHealth];
         for (int i = 0; i < PlayerController.MaxHealth; i++) {
@@ -28,17 +41,12 @@ public class HealthUI : MonoBehaviour {
         FitContainerWidthToIcons(iconSize);
     }
 
-    private float GetContainerHeight() {
-        return ((RectTransform) transform).rect.height;
-    }
-
-    private void ApplyLayoutGroupSettings(float iconSize) {
-        HorizontalLayoutGroup hlg = GetComponent<HorizontalLayoutGroup>();
-        hlg.spacing = iconSpacing;
-        hlg.childControlWidth = false;
-        hlg.childControlHeight = false;
-        hlg.childForceExpandWidth = false;
-        hlg.childForceExpandHeight = false;
+    private void ConfigureLayoutGroup() {
+        layoutGroup.spacing = iconSpacing;
+        layoutGroup.childControlWidth = false;
+        layoutGroup.childControlHeight = false;
+        layoutGroup.childForceExpandWidth = false;
+        layoutGroup.childForceExpandHeight = false;
     }
 
     private Image CreateHeartIcon(int index, float size) {
@@ -55,23 +63,17 @@ public class HealthUI : MonoBehaviour {
     }
 
     private void FitContainerWidthToIcons(float iconSize) {
-        HorizontalLayoutGroup hlg = GetComponent<HorizontalLayoutGroup>();
-        float horizontalPadding = hlg.padding.left + hlg.padding.right;
+        float horizontalPadding = layoutGroup.padding.left + layoutGroup.padding.right;
         float totalSpacing = iconSpacing * (PlayerController.MaxHealth - 1);
         float totalWidth = iconSize * PlayerController.MaxHealth + totalSpacing + horizontalPadding;
 
-        RectTransform containerRt = (RectTransform) transform;
-        containerRt.sizeDelta = new Vector2(totalWidth, containerRt.sizeDelta.y);
+        containerRect.sizeDelta = new Vector2(totalWidth, containerRect.sizeDelta.y);
     }
 
-    private void Update() {
-        if (heartIcons == null) {
-            return;
-        }
-
+    private void RefreshHeartColors(int currentHealth) {
         for (int i = 0; i < heartIcons.Length; i++) {
-            bool isAlive = i < PlayerController.CurrentHealth;
-            heartIcons[i].color = isAlive ? activeColor : depletedColor;
+            bool isHeartFilled = i < currentHealth;
+            heartIcons[i].color = isHeartFilled ? activeColor : depletedColor;
         }
     }
 }
