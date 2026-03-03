@@ -8,6 +8,9 @@ public class DungeonComposer : MonoBehaviour {
     private DungeonConfig dungeonConfig;
 
     [SerializeField]
+    private bool disableFogOfWar;
+
+    [SerializeField]
     private List<DungeonTaskBase> dungeonTasks;
 
     private GameObject dungeonGameObject;
@@ -31,7 +34,8 @@ public class DungeonComposer : MonoBehaviour {
             createdRooms = new Dictionary<Vector2Int, Room>(),
             adjacencies = new List<(Room, Room, Direction)>(),
             dungeonGameObject = dungeonGameObject,
-            frictionlessMaterial = dungeonConfig.frictionlessMaterial
+            frictionlessMaterial = dungeonConfig.frictionlessMaterial,
+            disableFogOfWar = disableFogOfWar
         };
 
         foreach (DungeonTaskBase dungeonTask in dungeonTasks) {

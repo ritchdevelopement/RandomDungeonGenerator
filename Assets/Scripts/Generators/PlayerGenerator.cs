@@ -76,8 +76,6 @@ public class PlayerGenerator : DungeonTaskBase {
         spawnedPlayer.name = "Player";
         spawnedPlayer.transform.SetParent(context.dungeonGameObject.transform);
 
-        FindFirstObjectByType<CameraController>().SetPlayer(spawnedPlayer.transform);
-
         EnemyManager.Instance.SetPlayer(spawnedPlayer.transform);
     }
 }

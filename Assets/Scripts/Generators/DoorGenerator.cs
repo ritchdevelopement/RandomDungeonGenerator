@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorGenerator : DungeonTaskBase {
-    [SerializeField] private int doorWidth = 4;
+    [SerializeField] private int horizontalDoorWidth = 3;
+    [SerializeField] private int verticalDoorWidth = 5;
     private const int DoorDepth = 2;
 
     public override void Execute() {
@@ -11,12 +12,16 @@ public class DoorGenerator : DungeonTaskBase {
 
     private void GenerateDoors() {
         foreach ((Room roomA, Room roomB, Direction dir) in context.adjacencies) {
+            if (!context.createdRooms.ContainsKey(roomB.Center)) {
+                continue;
+            }
+
             if (roomA.Neighbors.ContainsValue(roomB)) {
                 continue;
             }
 
             List<Vector2Int> doorTiles = GetDoorTilePositions(roomA, roomB, dir);
-            Door door = new Door(doorTiles);
+            Door door = new Door(doorTiles, dir);
             door.SetConnectedRooms(roomA, roomB);
             roomA.Connect(roomB, door, dir);
             context.createdDoors.Add(door);
@@ -25,7 +30,7 @@ public class DoorGenerator : DungeonTaskBase {
 
     private List<Vector2Int> GetDoorTilePositions(Room room, Room neighbor, Direction direction) {
         List<Vector2Int> tiles = new();
-        int halfWidth = EffectiveDoorWidth(room, neighbor, direction) / 2;
+        int halfWidth = (EffectiveDoorWidth(room, neighbor, direction) - 1) / 2;
         Vector2Int center = room.Center;
 
         Vector2Int basePos = direction switch {
@@ -57,6 +62,8 @@ public class DoorGenerator : DungeonTaskBase {
         int perpendicularA = isNorthSouth ? room.RoomSize.x : room.RoomSize.y;
         int perpendicularB = isNorthSouth ? neighbor.RoomSize.x : neighbor.RoomSize.y;
         int maxAllowed = Mathf.Min(perpendicularA, perpendicularB) - 2;
-        return Mathf.Clamp(doorWidth, 1, maxAllowed);
+        int configuredWidth = isNorthSouth ? horizontalDoorWidth : verticalDoorWidth;
+        int oddDoorWidth = configuredWidth % 2 == 0 ? Mathf.Max(1, configuredWidth - 1) : configuredWidth;
+        return Mathf.Clamp(oddDoorWidth, 1, maxAllowed);
     }
 }
