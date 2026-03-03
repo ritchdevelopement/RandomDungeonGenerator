@@ -29,7 +29,7 @@ public class HealthUI : MonoBehaviour {
     }
 
     private float GetContainerHeight() {
-        return ((RectTransform)transform).rect.height;
+        return ((RectTransform) transform).rect.height;
     }
 
     private void ApplyLayoutGroupSettings(float iconSize) {
@@ -60,7 +60,7 @@ public class HealthUI : MonoBehaviour {
         float totalSpacing = iconSpacing * (PlayerController.MaxHealth - 1);
         float totalWidth = iconSize * PlayerController.MaxHealth + totalSpacing + horizontalPadding;
 
-        RectTransform containerRt = (RectTransform)transform;
+        RectTransform containerRt = (RectTransform) transform;
         containerRt.sizeDelta = new Vector2(totalWidth, containerRt.sizeDelta.y);
     }
 
