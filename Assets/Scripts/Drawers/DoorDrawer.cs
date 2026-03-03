@@ -40,13 +40,13 @@ public class DoorDrawer : DungeonTaskBase {
     }
 
     private void DrawHorizontalDoor(Door door, Color doorColor) {
-        Vector3 worldPos = GetDoorWorldCenter(door);
+        Vector3 worldPos = GetDoorYOffsetWorldCenter(door, 0);
         GameObject doorGameObject = Instantiate(doorPrefab, worldPos, Quaternion.identity, doorsParent);
 
         SetupHorizontalDoorSprite(doorGameObject, door, doorColor);
 
         if (doorGameObject.TryGetComponent(out BoxCollider2D boxCollider)) {
-            boxCollider.size = new Vector2(door.Size.x, door.Size.y);
+            boxCollider.size = new Vector2(door.Size.x, 1f);
         }
 
         DoorController doorController = doorGameObject.GetComponent<DoorController>();
@@ -59,7 +59,7 @@ public class DoorDrawer : DungeonTaskBase {
         }
 
         spriteRenderer.drawMode = SpriteDrawMode.Tiled;
-        spriteRenderer.size = door.Size;
+        spriteRenderer.size = new Vector2(door.Size.x, 1f);
         spriteRenderer.color = doorColor;
 
         if (doorSprites == null || doorSprites.Length == 0) {
