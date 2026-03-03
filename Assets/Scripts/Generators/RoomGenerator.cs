@@ -103,9 +103,6 @@ public class RoomGenerator : DungeonTaskBase {
         List<Vector2Int> pool = new();
         foreach (Vector2Int size in context.roomSizes) {
             pool.Add(size);
-            if (size.x != size.y) {
-                pool.Add(new Vector2Int(size.y, size.x));
-            }
         }
         return pool;
     }
