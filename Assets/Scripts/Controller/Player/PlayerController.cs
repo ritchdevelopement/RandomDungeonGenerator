@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour {
     private Vector2 moveInput;
     private SpriteRenderer spriteRenderer;
     private Animator animator;
-    private bool facingRight = false;
+    private bool isFacingRight = true;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
@@ -36,16 +36,9 @@ public class PlayerController : MonoBehaviour {
 
         moveInput = new Vector2(horizontal, vertical).normalized;
 
-
-        if (horizontal == 0) {
-            return;
-
-        }
-
-        bool shouldFaceRight = horizontal > 0;
-        if (shouldFaceRight != facingRight) {
-            facingRight = shouldFaceRight;
-            spriteRenderer.flipX = !spriteRenderer.flipX;
+        if (horizontal != 0) {
+            isFacingRight = horizontal > 0;
+            spriteRenderer.flipX = !isFacingRight;
         }
     }
 
