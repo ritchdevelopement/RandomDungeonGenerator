@@ -22,7 +22,8 @@ public class WeaponController : MonoBehaviour {
     public static int MaxAmmo { get; private set; }
     public static Sprite WeaponSprite {
         get {
-            if (CurrentWeapon == null || CurrentWeapon.weaponPrefab == null) return null;
+            if (CurrentWeapon == null || CurrentWeapon.weaponPrefab == null)
+                return null;
             SpriteRenderer spriteRenderer = CurrentWeapon.weaponPrefab.GetComponent<SpriteRenderer>();
             return spriteRenderer != null ? spriteRenderer.sprite : null;
         }
