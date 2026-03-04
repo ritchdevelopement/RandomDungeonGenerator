@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5115246456641760701}
   - component: {fileID: 4521089734108771351}
   - component: {fileID: 8039352242594288847}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Knife
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -176,3 +176,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   flySpeed: 15
+  stuckSpreadRadius: 0.15
