@@ -87,6 +87,8 @@ public class RoomManager : MonoBehaviour {
         trigger.SetEventType(RoomEventType.Normal);
     }
 
+    public int ClearedRoomCount => clearedRooms.Count;
+
     public bool IsRoomCleared(Room room) {
         return clearedRooms.Contains(room);
     }
