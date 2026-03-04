@@ -21,6 +21,7 @@ public class WeaponData : ScriptableObject {
     [Header("Slash Arc")]
     public Vector2 slashOriginOffset;
     public float slashArcAngle = 60f;
+    public Color slashColor = Color.white;
     public float slashAlpha = 0.6f;
     public float slashSweepDuration = 0.08f;
 }

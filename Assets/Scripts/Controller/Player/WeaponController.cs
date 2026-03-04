@@ -95,26 +95,24 @@ public class WeaponController : MonoBehaviour {
         Vector2 attackDirection = GetDirectionToMouse();
         Vector2 meleeCenter = GetMeleeCenter();
         float attackAngle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
-        float halfArcAngle = CurrentWeapon.slashArcAngle * 0.5f;
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(meleeCenter, CurrentWeapon.meleeRange);
         foreach (Collider2D hit in hits) {
-            if (hit.gameObject == gameObject) {
+            if (hit.gameObject == gameObject)
                 continue;
-            }
-
-            Vector2 directionToHit = (Vector2) hit.transform.position - meleeCenter;
-            float angleToHit = Mathf.Atan2(directionToHit.y, directionToHit.x) * Mathf.Rad2Deg;
-            if (Mathf.Abs(Mathf.DeltaAngle(attackAngle, angleToHit)) > halfArcAngle) {
+            if (!IsWithinMeleeArc(hit, meleeCenter, attackAngle))
                 continue;
-            }
 
-            if (hit.GetComponentInParent<IDamageable>() is IDamageable damageable) {
-                damageable.TakeDamage(CurrentWeapon.meleeDamage);
-            }
+            hit.GetComponentInParent<IDamageable>()?.TakeDamage(CurrentWeapon.meleeDamage);
         }
 
         StartCoroutine(DrawSlashArc(attackDirection, meleeCenter));
+    }
+
+    private bool IsWithinMeleeArc(Collider2D hit, Vector2 meleeCenter, float attackAngle) {
+        Vector2 directionToHit = (Vector2) hit.bounds.center - meleeCenter;
+        float angleToHit = Mathf.Atan2(directionToHit.y, directionToHit.x) * Mathf.Rad2Deg;
+        return Mathf.Abs(Mathf.DeltaAngle(attackAngle, angleToHit)) <= CurrentWeapon.slashArcAngle * 0.5f;
     }
 
     private Vector2 GetMeleeCenter() {
@@ -145,7 +143,8 @@ public class WeaponController : MonoBehaviour {
         Material instanceMaterial = new(slashMaterial);
         meshRenderer.material = instanceMaterial;
         meshRenderer.sortingOrder = slashSortingOrder;
-        instanceMaterial.color = new Color(1f, 1f, 1f, CurrentWeapon.slashAlpha);
+        Color baseColor = CurrentWeapon.slashColor;
+        instanceMaterial.color = new Color(baseColor.r, baseColor.g, baseColor.b, CurrentWeapon.slashAlpha);
 
         Mesh mesh = new();
         meshFilter.mesh = mesh;
@@ -160,13 +159,15 @@ public class WeaponController : MonoBehaviour {
     private Vector3[] BuildSlashVertices(Vector2 direction, Vector3 center) {
         float baseAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - CurrentWeapon.slashArcAngle * 0.5f;
 
-        // inner arc [0..SlashSegments], outer arc [SlashSegments+1..2*SlashSegments+1]
         // sweep runs right to left: angle decreases with index
+        // inner radius tapers from meleeRange (tip) to meleeInnerRadius (full width at tail)
         Vector3[] allVertices = new Vector3[(SlashSegments + 1) * 2];
         for (int i = 0; i <= SlashSegments; i++) {
             float angle = (baseAngle + CurrentWeapon.slashArcAngle * (1f - (float) i / SlashSegments)) * Mathf.Deg2Rad;
             Vector3 arcDirection = new(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
-            allVertices[i] = center + arcDirection * CurrentWeapon.meleeInnerRadius;
+            float t = (float) i / SlashSegments;
+            float innerRadius = Mathf.Lerp(CurrentWeapon.meleeRange, CurrentWeapon.meleeInnerRadius, t);
+            allVertices[i] = center + arcDirection * innerRadius;
             allVertices[SlashSegments + 1 + i] = center + arcDirection * CurrentWeapon.meleeRange;
         }
 
@@ -178,31 +179,31 @@ public class WeaponController : MonoBehaviour {
 
         while (elapsed < CurrentWeapon.slashSweepDuration) {
             int visibleSegments = Mathf.Max(1, Mathf.CeilToInt(elapsed / CurrentWeapon.slashSweepDuration * SlashSegments));
-            UpdateMeshSegments(mesh, allVertices, 0, visibleSegments);
+            UpdateMeshSegments(mesh, allVertices, visibleSegments);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        UpdateMeshSegments(mesh, allVertices, 0, SlashSegments);
+        UpdateMeshSegments(mesh, allVertices, SlashSegments);
     }
 
     private IEnumerator AnimateFade(Material instanceMaterial) {
+        Color baseColor = CurrentWeapon.slashColor;
         float elapsed = 0f;
 
         while (elapsed < SlashFadeDuration) {
             float alpha = (1f - elapsed / SlashFadeDuration) * CurrentWeapon.slashAlpha;
-            instanceMaterial.color = new Color(1f, 1f, 1f, alpha);
+            instanceMaterial.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha);
             elapsed += Time.deltaTime;
             yield return null;
         }
     }
 
-    private void UpdateMeshSegments(Mesh mesh, Vector3[] allVertices, int startSegment, int endSegment) {
+    private void UpdateMeshSegments(Mesh mesh, Vector3[] allVertices, int segmentCount) {
         // allVertices layout: inner[0..SlashSegments], outer[SlashSegments+1..2*SlashSegments+1]
-        int segmentCount = endSegment - startSegment;
         Vector3[] vertices = new Vector3[(segmentCount + 1) * 2];
-        System.Array.Copy(allVertices, startSegment, vertices, 0, segmentCount + 1);
-        System.Array.Copy(allVertices, SlashSegments + 1 + startSegment, vertices, segmentCount + 1, segmentCount + 1);
+        System.Array.Copy(allVertices, 0, vertices, 0, segmentCount + 1);
+        System.Array.Copy(allVertices, SlashSegments + 1, vertices, segmentCount + 1, segmentCount + 1);
 
         int[] triangles = new int[segmentCount * 6];
         for (int i = 0; i < segmentCount; i++) {
@@ -219,8 +220,17 @@ public class WeaponController : MonoBehaviour {
             triangles[i * 6 + 5] = outerRight;
         }
 
+        // Vertex colors: inner edge fully transparent, outer fades from tip (alpha 0) to tail (alpha 1)
+        Color[] colors = new Color[(segmentCount + 1) * 2];
+        for (int i = 0; i <= segmentCount; i++) {
+            float t = (float) i / segmentCount;
+            colors[i] = Color.clear;
+            colors[segmentCount + 1 + i] = new Color(1f, 1f, 1f, t);
+        }
+
         mesh.Clear();
         mesh.vertices = vertices;
+        mesh.colors = colors;
         mesh.triangles = triangles;
     }
 }

@@ -234,6 +234,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingWeapon: {fileID: 11400000, guid: f579617d1302f784e82d2338623ecd9d, type: 2}
-  slashOrigin: {fileID: 0}
   slashMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   slashSortingOrder: 100
