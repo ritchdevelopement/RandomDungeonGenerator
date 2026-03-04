@@ -65,10 +65,13 @@ public class EnemyController : MonoBehaviour, IDamageable {
         Collider2D[] neighbors = Physics2D.OverlapCircleAll(transform.position, separationRadius);
 
         foreach (Collider2D neighbor in neighbors) {
-            if (neighbor.gameObject == gameObject)
+            if (neighbor.gameObject == gameObject) {
                 continue;
-            if (!neighbor.TryGetComponent(out EnemyController _))
+            }
+
+            if (!neighbor.TryGetComponent(out EnemyController _)) {
                 continue;
+            }
 
             Vector2 awayFromNeighbor = (Vector2) transform.position - (Vector2) neighbor.transform.position;
             float distance = awayFromNeighbor.magnitude;

@@ -22,8 +22,9 @@ public class WeaponController : MonoBehaviour {
     public static int MaxAmmo { get; private set; }
     public static Sprite WeaponSprite {
         get {
-            if (CurrentWeapon == null || CurrentWeapon.weaponPrefab == null)
+            if (CurrentWeapon == null || CurrentWeapon.weaponPrefab == null) {
                 return null;
+            }
             SpriteRenderer spriteRenderer = CurrentWeapon.weaponPrefab.GetComponent<SpriteRenderer>();
             return spriteRenderer != null ? spriteRenderer.sprite : null;
         }
@@ -98,10 +99,13 @@ public class WeaponController : MonoBehaviour {
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(meleeCenter, CurrentWeapon.meleeRange);
         foreach (Collider2D hit in hits) {
-            if (hit.gameObject == gameObject)
+            if (hit.gameObject == gameObject) {
                 continue;
-            if (!IsWithinMeleeArc(hit, meleeCenter, attackAngle))
+            }
+
+            if (!IsWithinMeleeArc(hit, meleeCenter, attackAngle)) {
                 continue;
+            }
 
             hit.GetComponentInParent<IDamageable>()?.TakeDamage(CurrentWeapon.meleeDamage);
         }

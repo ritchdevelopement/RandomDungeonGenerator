@@ -32,10 +32,13 @@ public class EnemyManager : MonoBehaviour {
     }
 
     public void StartRoomEncounter(Room room, EncounterMode mode = EncounterMode.Wave) {
-        if (!Application.isPlaying)
+        if (!Application.isPlaying) {
             return;
-        if (room == null || dungeonContext == null || activeEnemies.ContainsKey(room))
+        }
+
+        if (room == null || dungeonContext == null || activeEnemies.ContainsKey(room)) {
             return;
+        }
 
         if (room == dungeonContext.playerSpawnRoom) {
             DoorManager.Instance.OpenRoomDoors(room);
@@ -93,8 +96,9 @@ public class EnemyManager : MonoBehaviour {
     }
 
     private void SpawnEnemy(Room room, EnemyData data, System.Action onDeath) {
-        if (data == null || data.prefab == null)
+        if (data == null || data.prefab == null) {
             return;
+        }
 
         List<Vector2> occupiedPositions = GetOccupiedPositions(room);
         Vector3 spawnPosition = GetRandomSpawnPosition(room, occupiedPositions);
@@ -115,8 +119,9 @@ public class EnemyManager : MonoBehaviour {
         List<Vector2> positions = new List<Vector2>();
         if (activeEnemies.TryGetValue(room, out List<EnemyController> enemies)) {
             foreach (EnemyController enemy in enemies) {
-                if (enemy != null)
+                if (enemy != null) {
                     positions.Add(enemy.transform.position);
+                }
             }
         }
         return positions;
@@ -146,12 +151,14 @@ public class EnemyManager : MonoBehaviour {
     }
 
     private static bool IsValidSpawnPosition(Vector2 candidate, Room room, List<Vector2> occupiedPositions, float centerClearance, float enemySpacing) {
-        if (Vector2.Distance(candidate, room.Center) < centerClearance)
+        if (Vector2.Distance(candidate, room.Center) < centerClearance) {
             return false;
+        }
 
         foreach (Vector2 occupied in occupiedPositions) {
-            if (Vector2.Distance(candidate, occupied) < enemySpacing)
+            if (Vector2.Distance(candidate, occupied) < enemySpacing) {
                 return false;
+            }
         }
 
         return true;
@@ -164,8 +171,9 @@ public class EnemyManager : MonoBehaviour {
     }
 
     private EnemyData[] GetEnemiesForCurrentFaction() {
-        if (allEnemyData == null || allEnemyData.Length == 0)
+        if (allEnemyData == null || allEnemyData.Length == 0) {
             return new EnemyData[0];
+        }
 
         EnemyFaction faction = WorldManager.Instance != null
             ? WorldManager.Instance.ActiveFaction

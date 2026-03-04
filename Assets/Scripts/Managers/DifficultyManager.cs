@@ -44,8 +44,9 @@ public class DifficultyManager : MonoBehaviour {
 
     // Weighted random selection — rarity chance increases as more rooms are cleared
     public EnemyData SelectEnemy(EnemyData[] candidates) {
-        if (candidates == null || candidates.Length == 0)
+        if (candidates == null || candidates.Length == 0) {
             return null;
+        }
 
         float totalWeight = 0f;
         float[] weights = new float[candidates.Length];
@@ -58,8 +59,9 @@ public class DifficultyManager : MonoBehaviour {
         float accumulated = 0f;
         for (int i = 0; i < candidates.Length; i++) {
             accumulated += weights[i];
-            if (roll <= accumulated)
+            if (roll <= accumulated) {
                 return candidates[i];
+            }
         }
 
         return candidates[candidates.Length - 1];
