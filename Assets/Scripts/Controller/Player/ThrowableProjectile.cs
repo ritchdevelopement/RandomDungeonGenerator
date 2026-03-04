@@ -4,9 +4,10 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class ThrowableProjectile : MonoBehaviour {
     [SerializeField] private float flySpeed = 15f;
+    [SerializeField] private float stuckSpreadRadius = 0.15f;
 
     private Rigidbody2D rigidbody2d;
-    private bool isStuck = false;
+    private bool isStuck;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
@@ -31,11 +32,16 @@ public class ThrowableProjectile : MonoBehaviour {
             return;
         }
 
+        // Must stick before dealing damage so DetachFromEnemy runs before the enemy is destroyed
+        if (other.TryGetComponent(out EnemyController enemy)) {
+            StickToEnemy(enemy);
+        } else {
+            Stick();
+        }
+
         if (other.TryGetComponent(out IDamageable damageable)) {
             damageable.TakeDamage(1);
         }
-
-        Stick();
     }
 
     private void TryPickup(Collider2D other) {
@@ -49,6 +55,17 @@ public class ThrowableProjectile : MonoBehaviour {
 
     private bool IsPlayer(Collider2D other) {
         return other.CompareTag("Player");
+    }
+
+    private void StickToEnemy(EnemyController enemy) {
+        Stick();
+        transform.SetParent(enemy.transform);
+        transform.localPosition += (Vector3) (Random.insideUnitCircle * stuckSpreadRadius);
+        enemy.OnDeath += DetachFromEnemy;
+    }
+
+    private void DetachFromEnemy() {
+        transform.SetParent(null);
     }
 
     private void Stick() {

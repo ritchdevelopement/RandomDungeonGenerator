@@ -1,11 +1,11 @@
 using UnityEngine;
 
 public class EnemyGenerator : DungeonTaskBase {
-    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private EnemyData[] enemyData;
 
     public override void Execute() {
-        if (enemyPrefab == null) {
-            Debug.LogError("Enemy prefab not assigned!");
+        if (enemyData == null || enemyData.Length == 0) {
+            Debug.LogError("No EnemyData assigned to EnemyGenerator!");
             return;
         }
 
@@ -14,8 +14,6 @@ public class EnemyGenerator : DungeonTaskBase {
         EnemyManager enemyManager = enemiesGameObject.AddComponent<EnemyManager>();
 
         enemyManager.SetDungeonContext(context);
-        enemyManager.SetEnemyPrefab(enemyPrefab);
-
-        Debug.Log("Enemy manager initialized");
+        enemyManager.SetEnemyData(enemyData);
     }
 }

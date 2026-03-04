@@ -57,7 +57,7 @@ public class RoomManager : MonoBehaviour {
     }
 
     private static RoomEventType RandomEventType() {
-        RoomEventType[] events = { RoomEventType.Empty, RoomEventType.Cursed, RoomEventType.Bonus };
+        RoomEventType[] events = { RoomEventType.Empty, RoomEventType.Cursed, RoomEventType.Perk };
         return events[Random.Range(0, events.Length)];
     }
 
@@ -86,6 +86,8 @@ public class RoomManager : MonoBehaviour {
         }
         trigger.SetEventType(RoomEventType.Normal);
     }
+
+    public int ClearedRoomCount => clearedRooms.Count;
 
     public bool IsRoomCleared(Room room) {
         return clearedRooms.Contains(room);

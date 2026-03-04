@@ -20,10 +20,12 @@ MonoBehaviour:
     type: 3}
   spawnOffset: 0
   primaryCooldown: 0
-  meleeRange: 1
-  meleeInnerRadius: 0.4
+  meleeRange: 1.3
+  meleeInnerRadius: 0.75
   meleeDamage: 1
-  meleeCooldown: 0.5
-  slashArcAngle: 60
-  slashAlpha: 0.6
-  slashSweepDuration: 0.08
+  meleeCooldown: 0.4
+  slashOriginOffset: {x: 0, y: -0.4}
+  slashArcAngle: 120
+  slashColor: {r: 1, g: 1, b: 1, a: 1}
+  slashAlpha: 0.75
+  slashSweepDuration: 0.07

@@ -5,6 +5,7 @@ using UnityEngine;
 public class RoomTrigger : MonoBehaviour {
     private Room room;
     private RoomEventType eventType = RoomEventType.Normal;
+    private EncounterMode encounterMode = EncounterMode.Wave;
     private SpriteRenderer spriteRenderer;
 
     private void Awake() {
@@ -20,6 +21,10 @@ public class RoomTrigger : MonoBehaviour {
         spriteRenderer.color = EventColor(type);
     }
 
+    public void SetEncounterMode(EncounterMode mode) {
+        encounterMode = mode;
+    }
+
     private void OnTriggerEnter2D(Collider2D other) {
         if (!other.CompareTag("Player")) {
             return;
@@ -30,16 +35,20 @@ public class RoomTrigger : MonoBehaviour {
 
     private void ActivateRoom() {
         RoomManager.Instance.AssignRandomEventsToSiblings(room);
-        if (eventType != RoomEventType.Empty) {
-            EnemyManager.Instance.StartRoomEncounter(room);
+
+        if (eventType == RoomEventType.Perk) {
+            PerkManager.Instance.ShowPerkSelection(room, encounterMode);
+        } else if (eventType != RoomEventType.Empty) {
+            EnemyManager.Instance.StartRoomEncounter(room, encounterMode);
         }
+
         Destroy(gameObject);
     }
 
     private static Color EventColor(RoomEventType type) => type switch {
         RoomEventType.Empty => Color.gray,
         RoomEventType.Cursed => Color.red,
-        RoomEventType.Bonus => Color.yellow,
+        RoomEventType.Perk => Color.yellow,
         _ => Color.white,
     };
 }
