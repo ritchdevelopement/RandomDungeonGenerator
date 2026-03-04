@@ -1,120 +1,87 @@
 # Random Dungeon Generator
 
-> **Work in Progress** – This project is actively being developed. Features may be incomplete or subject to change.
+> Work in progress — things break, change, and get rewritten regularly.
 
-A 2D procedural dungeon game built in Unity. The goal is to create a fully explorable dungeon with dynamic room layouts, enemies, weapons, and atmospheric effects.
+A 2D dungeon crawler built in Unity. Procedurally generated rooms, enemies, weapons, and a progression system built around perk selection. Still early, but the core loop is taking shape.
 
-## Implemented so far
+## What's in so far
 
-All features listed below are in an early, rudimentary state and still being iterated on.
+**Dungeon generation**
+Rooms are placed via BFS — each one picks a random size from a configurable list, with AABB overlap checks so nothing intersects. Distribution bias controls how aggressively the generator spreads outward before filling in gaps.
 
-- **Procedural dungeon generation** – Rooms are placed using a queue-based BFS algorithm; each room picks a random size from a configurable list, with AABB overlap detection to prevent collisions
-- **Variable room sizes** – Multiple room sizes can be defined in the Inspector; the generator picks randomly, and distribution bias controls how early outward spread kicks in
-- **Floor & wall rendering** – Rooms are drawn with separate tilemaps for walls (with collision) and floors (no collision, rendered beneath walls and fog)
-- **Fog of war** – Unexplored rooms are hidden by a fog overlay; the camera background is automatically synced to the fog color so the void always matches
-- **Animated doors** – Doors play an open/close animation (Animator-driven); horizontal doors are single-tile sprites, vertical doors consist of a master collider with animated child panels per tile row
-- **Room progression** – The first room entered from any cleared room (or the spawn) is always a **Perk Room**. Entering it reveals siblings and assigns them random event types (Normal, Cursed, Empty). After a room is cleared, its unvisited neighbors reset and follow the same pattern when next entered
-- **Perk rooms** – Always the first room entered from a cleared area; presents a perk trigger at the room center and starts the encounter after the player interacts with it
-- **Enemy encounters** – Enemies spawn when the player activates a room; doors close until the encounter is cleared
-- **Wave & survival encounters** – Wave spawns all enemies at once; Survival spawns enemies continuously for a set duration
-- **Faction-based enemies** – Enemies are grouped by faction (Undead, Orc, Demon); active faction is determined by the current world
-- **Difficulty scaling** – Enemy count, survival duration, and spawn interval all scale with the number of cleared rooms; rare enemy types become more likely over time
-- **Throwable weapon** – The player throws a weapon on left click; it sticks into whatever it hits, follows enemies when embedded, and drops to the floor on enemy death so it can be picked up
-- **Melee attack** – Right click performs a melee slash in the direction of the cursor; uses an arc-shaped hitbox with a taper and soft-edge visual effect
-- **Enemy separation** – Enemies push each other apart while chasing the player to avoid stacking
-- **Edit mode preview** – The dungeon can be previewed in the Unity Editor without entering Play mode
+**Rendering & atmosphere**
+Rooms get separate tilemaps for walls (with collision) and floors (weighted random tile selection per position). Unexplored rooms are hidden behind a fog overlay; the camera background syncs to the fog color automatically.
 
-## Systems Overview
+**Doors**
+Animator-driven open/close animations. Horizontal doors are a single sprite; vertical doors use a master collider with animated panel children per tile row.
 
-| System | Description |
+**Room progression**
+The first room you enter from any cleared area is always a perk room — you pick a perk there before the encounter starts. The moment you step in, the sibling rooms (other neighbors of the room you came from) become visible and get assigned random event types. After clearing a room, that same pattern resets for the next set of neighbors.
+
+**Combat**
+Doors close when a room activates. Wave mode spawns everything at once, survival mode drips enemies in over a timer and waits for stragglers before opening the doors. Difficulty scales with cleared room count — more rooms cleared means more enemies, shorter spawn intervals, and a higher chance of rarer enemy types.
+
+**Enemies**
+Grouped by faction (Undead / Orc / Demon) based on the current world. Each enemy type has its own stats and spawn weight. Enemies push each other apart while chasing so they don't all clump into one sprite.
+
+**Weapons**
+Left click throws, right click melees. The thrown weapon sticks into whatever it hits — if that's an enemy, it follows them around and drops on death so you can pick it up. Melee uses a physics arc with a tapered shape and soft edges. Both attacks share the ammo pool.
+
+## Key systems
+
+| System | What it does |
 |---|---|
-| `RoomGenerator` | Procedurally places rooms on a grid using BFS with AABB overlap detection |
-| `DoorGenerator` | Creates doors between adjacent rooms using stored adjacency pairs |
-| `RoomDrawer` | Draws wall and floor tilemaps for all rooms; floor tiles are selected per-position using weighted random selection |
-| `DoorDrawer` | Instantiates door prefabs at shared room edges; places tilemap tiles and animated panel prefabs for vertical (E/W) doors |
-| `PlayerGenerator` | Spawns the player (center, random, or edge room) |
-| `EnemyManager` | Spawns and tracks enemies per room; runs wave or survival encounter coroutines |
-| `DifficultyManager` | Scales enemy count, spawn interval and survival duration by cleared room count; selects enemies by weighted rarity |
-| `WorldManager` | Tracks the current world and level; maps world number to enemy faction |
-| `PerkManager` | Spawns a perk selection trigger in bonus rooms; starts the encounter after the player interacts |
+| `RoomGenerator` | BFS room placement with AABB overlap detection |
+| `RoomManager` | Tracks cleared rooms, assigns events to newly revealed neighbors |
+| `EnemyManager` | Runs wave/survival encounters, spawns enemies, handles room clear |
+| `DifficultyManager` | Scales encounter parameters by cleared room count |
+| `WorldManager` | Current world/level → active enemy faction |
+| `PerkManager` | Spawns the perk trigger in perk rooms |
+| `WeaponController` | Throw + melee input, ammo management, arc mesh |
 | `DoorManager` | Opens/closes doors based on encounter state |
-| `FogOfWarManager` | Manages fog overlays; syncs camera background to fog color |
-| `RoomManager` | Tracks the player's current room and cleared rooms |
+| `FogOfWarManager` | Fog overlays, camera background sync |
 
 ## Configuration
 
-Dungeon parameters are controlled via the `DungeonConfig` ScriptableObject:
+`DungeonConfig` ScriptableObject controls dungeon layout:
+- **Room sizes** — list of odd-numbered sizes, picked randomly per room
+- **Room count** — default 25
+- **Distribution bias** — `[0..1]`, how early the generator spreads outward (0 = always, 1 = never, default 0.25)
 
-- **Room sizes** – List of allowed room sizes; each room picks one randomly (all values must be odd)
-- **Number of rooms** – Default 25
-- **Distribution bias** – Float [0..1]; controls when outward spread kicks in relative to total room count (0 = always spread, 1 = never spread, default 0.25)
+Other things set per-component in the Inspector:
+- Door width on `DoorGenerator` (default 4, capped to the smaller room)
+- Wall tiles and weighted floor tiles on `RoomDrawer`
+- Fog color on `FogOfWarManager`
+- `EnemyData` assets on `EnemyGenerator` — create via `Create → Enemies → EnemyData`
 
-Per-component settings (set directly on the component in the Inspector):
+## Project structure
 
-- **Door width** – Configurable on `DoorGenerator`, default 4 tiles (capped to the smaller of the two connected rooms)
-- **Wall tile sets / Weighted floor tiles** – Tile assets assigned on `RoomDrawer`; floor tiles use weighted random selection per position (e.g. 70% stone, 20% moss, 10% cracks)
-- **Fog color** – Assigned on `FogOfWarManager`; automatically applied to the camera background
-- **EnemyData assets** – ScriptableObjects (Create → Enemies → EnemyData) assigned to `EnemyGenerator`; each defines faction, rarity, prefab, stats and spawn weight
-
-## Project Structure
-
-- `Core/`
-  - `DungeonComposer.cs` — Orchestrates the full generation pipeline
-  - `DungeonConfig.cs` — ScriptableObject with dungeon parameters
-  - `DungeonGenerationContext.cs` — Shared data passed between pipeline tasks
-- `Generators/`
-  - `RoomGenerator.cs` — Procedurally places rooms using BFS; records adjacency pairs
-  - `DoorGenerator.cs` — Creates doors between rooms using stored adjacency pairs
-  - `PlayerGenerator.cs` — Spawns the player and initializes runtime managers
-  - `EnemyGenerator.cs` — Sets up the enemy system with EnemyData assets
-- `Drawers/`
-  - `RoomDrawer.cs` — Draws wall and floor tilemaps for all rooms
-  - `DoorDrawer.cs` — Instantiates door prefabs at shared room edges
-  - `RoomTriggerDrawer.cs` — Places room activation triggers
-- `Managers/`
-  - `RoomManager.cs` — Tracks the player's current room and cleared rooms
-  - `EnemyManager.cs` — Spawns and manages enemies per room encounter
-  - `DifficultyManager.cs` — Scales difficulty based on cleared room count
-  - `WorldManager.cs` — Tracks current world/level; determines active enemy faction
-  - `PerkManager.cs` — Handles perk trigger placement in bonus rooms
-  - `DoorManager.cs` — Opens and closes doors based on game state
-  - `FogOfWarManager.cs` — Manages fog overlays; syncs camera background to fog color
-- `Controller/`
-  - `DoorController.cs` — Animator-based door open/close logic; manages BoxCollider2D and all child Animators
-  - `EnemyController.cs` — Enemy movement (with separation steering), health, and death events
-  - `PlayerController.cs` — WASD movement and animation
-  - `WeaponController.cs` — Handles throw (LMB) and melee (RMB) attacks; manages ammo
-  - `ThrowableProjectile.cs` — Projectile that sticks into surfaces and enemies; pickable by the player
-  - `CameraController.cs` — Smooth camera follow
-  - `PerkSelectionTrigger.cs` — Trigger placed in bonus rooms; starts encounter on player contact
-- `Models/`
-  - `Room.cs` — Room data: position, size, bounds, neighbors, doors
-  - `Door.cs` — Door data: tile positions, connected rooms
-  - `EnemyData.cs` — ScriptableObject defining enemy identity, faction, rarity, prefab and stats
-  - `WeaponData.cs` — ScriptableObject defining weapon stats for throw and melee attacks
-  - `WeightedFloorTile.cs` — Serializable tile + weight pair for weighted floor tile selection
-- `Enums/`
-  - `EnemyFaction.cs` — Undead, Orc, Demon
-  - `EnemyRarity.cs` — Normal, Uncommon, Rare, Boss
-  - `EncounterMode.cs` — Wave, Survival
+```
+Core/         DungeonComposer, DungeonConfig, DungeonGenerationContext
+Generators/   RoomGenerator, DoorGenerator, PlayerGenerator, EnemyGenerator
+Drawers/      RoomDrawer, DoorDrawer, RoomTriggerDrawer
+Managers/     RoomManager, EnemyManager, DifficultyManager, WorldManager,
+              PerkManager, DoorManager, FogOfWarManager
+Controllers/  PlayerController, EnemyController, DoorController,
+              WeaponController, ThrowableProjectile, CameraController,
+              PerkSelectionTrigger
+Models/       Room, Door, EnemyData, WeaponData, WeightedFloorTile
+Enums/        EnemyFaction, EnemyRarity, EncounterMode, RoomEventType
+```
 
 ## Setup
 
-After cloning the repository, run the setup script **once**:
+Run once after cloning:
 
 ```sh
 ./setup.sh
 ```
 
-This activates two Git hooks:
-- **commit-msg** – enforces the [Conventional Commits](https://www.conventionalcommits.org/) format
-- **pre-commit** – checks C# formatting via `dotnet format`
+Installs two git hooks — one enforces [Conventional Commits](https://www.conventionalcommits.org/), the other runs `dotnet format` on C# files before each commit.
 
-To fix formatting issues automatically before committing:
+To fix formatting manually:
 ```sh
 dotnet format whitespace Assembly-CSharp.csproj
 ```
 
-## Requirements
-
-- Unity 2022.3 or newer
+**Requires Unity 2022.3+**
