@@ -36,7 +36,7 @@ public class RoomTrigger : MonoBehaviour {
     private void ActivateRoom() {
         RoomManager.Instance.AssignRandomEventsToSiblings(room);
 
-        if (eventType == RoomEventType.Bonus) {
+        if (eventType == RoomEventType.Perk) {
             PerkManager.Instance.ShowPerkSelection(room, encounterMode);
         } else if (eventType != RoomEventType.Empty) {
             EnemyManager.Instance.StartRoomEncounter(room, encounterMode);
@@ -48,7 +48,7 @@ public class RoomTrigger : MonoBehaviour {
     private static Color EventColor(RoomEventType type) => type switch {
         RoomEventType.Empty => Color.gray,
         RoomEventType.Cursed => Color.red,
-        RoomEventType.Bonus => Color.yellow,
+        RoomEventType.Perk => Color.yellow,
         _ => Color.white,
     };
 }
