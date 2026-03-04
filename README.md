@@ -56,18 +56,46 @@ Other things set per-component in the Inspector:
 
 ## Project structure
 
-```
-Core/         DungeonComposer, DungeonConfig, DungeonGenerationContext
-Generators/   RoomGenerator, DoorGenerator, PlayerGenerator, EnemyGenerator
-Drawers/      RoomDrawer, DoorDrawer, RoomTriggerDrawer
-Managers/     RoomManager, EnemyManager, DifficultyManager, WorldManager,
-              PerkManager, DoorManager, FogOfWarManager
-Controllers/  PlayerController, EnemyController, DoorController,
-              WeaponController, ThrowableProjectile, CameraController,
-              PerkSelectionTrigger
-Models/       Room, Door, EnemyData, WeaponData, WeightedFloorTile
-Enums/        EnemyFaction, EnemyRarity, EncounterMode, RoomEventType
-```
+- `Core/`
+  - `DungeonComposer.cs` — Orchestrates the full generation pipeline
+  - `DungeonConfig.cs` — ScriptableObject with dungeon parameters
+  - `DungeonGenerationContext.cs` — Shared data passed between pipeline tasks
+- `Generators/`
+  - `RoomGenerator.cs` — Procedurally places rooms using BFS; records adjacency pairs
+  - `DoorGenerator.cs` — Creates doors between rooms using stored adjacency pairs
+  - `PlayerGenerator.cs` — Spawns the player and initializes runtime managers
+  - `EnemyGenerator.cs` — Sets up the enemy system with EnemyData assets
+- `Drawers/`
+  - `RoomDrawer.cs` — Draws wall and floor tilemaps for all rooms
+  - `DoorDrawer.cs` — Instantiates door prefabs at shared room edges
+  - `RoomTriggerDrawer.cs` — Places room activation triggers
+- `Managers/`
+  - `RoomManager.cs` — Tracks cleared rooms, assigns events to newly revealed neighbors
+  - `EnemyManager.cs` — Spawns and manages enemies per room encounter
+  - `DifficultyManager.cs` — Scales difficulty based on cleared room count
+  - `WorldManager.cs` — Tracks current world/level; determines active enemy faction
+  - `PerkManager.cs` — Spawns the perk trigger in perk rooms
+  - `DoorManager.cs` — Opens and closes doors based on encounter state
+  - `FogOfWarManager.cs` — Manages fog overlays; syncs camera background to fog color
+- `Controllers/`
+  - `PlayerController.cs` — WASD movement and animation
+  - `EnemyController.cs` — Enemy movement (with separation steering), health, and death events
+  - `DoorController.cs` — Animator-based door open/close logic
+  - `WeaponController.cs` — Throw (LMB) and melee (RMB) attacks; ammo management
+  - `ThrowableProjectile.cs` — Sticks into surfaces and enemies; pickable by the player
+  - `CameraController.cs` — Smooth camera follow
+  - `PerkSelectionTrigger.cs` — Spawned in perk rooms; starts the encounter on player contact
+- `Models/`
+  - `Room.cs` — Room data: position, size, bounds, neighbors, doors
+  - `Door.cs` — Door data: tile positions, connected rooms
+  - `EnemyData.cs` — ScriptableObject: faction, rarity, prefab, stats, spawn weight
+  - `WeaponData.cs` — ScriptableObject: throw and melee stats
+  - `WeightedFloorTile.cs` — Tile + weight pair for weighted floor tile selection
+- `Enums/`
+  - `EnemyFaction.cs` — Undead, Orc, Demon
+  - `EnemyRarity.cs` — Normal, Uncommon, Rare, Boss
+  - `EncounterMode.cs` — Wave, Survival
+  - `RoomEventType.cs` — Normal, Empty, Cursed, Perk
 
 ## Setup
 
