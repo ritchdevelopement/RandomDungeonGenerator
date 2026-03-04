@@ -9,6 +9,7 @@ public class EnemyController : MonoBehaviour, IDamageable {
     [SerializeField] private int contactDamage = 1;
     [SerializeField] private float separationRadius = 1.2f;
     [SerializeField] private float separationStrength = 1.5f;
+    [SerializeField] private float stopDistance = 0.5f;
 
     private Transform playerTransform;
     private Rigidbody2D rigidBody;
@@ -50,16 +51,22 @@ public class EnemyController : MonoBehaviour, IDamageable {
             return;
         }
 
-        Vector2 toPlayer = ((Vector2) playerTransform.position - (Vector2) transform.position).normalized;
+        Vector2 toPlayer = (Vector2) playerTransform.position - (Vector2) transform.position;
+
+        if (toPlayer.magnitude <= stopDistance) {
+            rigidBody.linearVelocity = Vector2.zero;
+            SetWalking(false);
+            return;
+        }
+
         Vector2 separation = CalculateSeparationForce();
-        Vector2 moveDirection = (toPlayer + separation).normalized;
+        Vector2 moveDirection = (toPlayer.normalized + separation).normalized;
 
         rigidBody.linearVelocity = moveDirection * moveSpeed;
         SetWalking(true);
-        FaceMovementDirection();
+        FacePlayer();
     }
 
-    // Pushes this enemy away from nearby enemies to prevent stacking
     private Vector2 CalculateSeparationForce() {
         Vector2 totalSeparation = Vector2.zero;
         Collider2D[] neighbors = Physics2D.OverlapCircleAll(transform.position, separationRadius);
@@ -90,7 +97,7 @@ public class EnemyController : MonoBehaviour, IDamageable {
         }
     }
 
-    private void FaceMovementDirection() {
+    private void FacePlayer() {
         spriteRenderer.flipX = playerTransform.position.x < transform.position.x;
     }
 
@@ -98,11 +105,15 @@ public class EnemyController : MonoBehaviour, IDamageable {
         health -= damage;
 
         if (health <= 0) {
-            OnDeath?.Invoke();
-            Destroy(gameObject);
+            Die();
         } else {
             StartCoroutine(FlashHitColor());
         }
+    }
+
+    private void Die() {
+        OnDeath?.Invoke();
+        Destroy(gameObject);
     }
 
     private IEnumerator FlashHitColor() {
