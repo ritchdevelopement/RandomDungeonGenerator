@@ -8,36 +8,51 @@ public class AmmoUI : MonoBehaviour {
     [SerializeField] private Color activeColor = Color.white;
     [SerializeField] private Color depletedColor = new Color(1f, 1f, 1f, 0.3f);
 
+    private HorizontalLayoutGroup layoutGroup;
+    private RectTransform containerRect;
     private Image[] ammoIcons;
 
-    private IEnumerator Start() {
-        yield return new WaitUntil(() => ThrowController.Instance != null);
-        CreateIcons();
+    private void Awake() {
+        layoutGroup = GetComponent<HorizontalLayoutGroup>();
+        containerRect = (RectTransform) transform;
     }
 
-    private void CreateIcons() {
-        float iconSize = GetContainerHeight();
-        ApplySpacing();
+    private IEnumerator Start() {
+        yield return new WaitUntil(() => WeaponController.Instance != null);
+        BuildIcons();
+        WeaponController.OnWeaponChanged += RebuildIcons;
+    }
 
-        ammoIcons = new Image[ThrowController.MaxAmmo];
-        for (int i = 0; i < ThrowController.MaxAmmo; i++) {
+    private void OnDestroy() {
+        WeaponController.OnWeaponChanged -= RebuildIcons;
+    }
+
+    private void RebuildIcons() {
+        foreach (Transform child in transform) {
+            Destroy(child.gameObject);
+        }
+
+        BuildIcons();
+    }
+
+    private void BuildIcons() {
+        float iconSize = containerRect.rect.height;
+        ConfigureLayoutGroup();
+
+        ammoIcons = new Image[WeaponController.MaxAmmo];
+        for (int i = 0; i < WeaponController.MaxAmmo; i++) {
             ammoIcons[i] = CreateIcon(i, iconSize);
         }
 
         FitContainerWidthToIcons(iconSize);
     }
 
-    private float GetContainerHeight() {
-        return ((RectTransform) transform).rect.height;
-    }
-
-    private void ApplySpacing() {
-        HorizontalLayoutGroup hlg = GetComponent<HorizontalLayoutGroup>();
-        hlg.spacing = iconSpacing;
-        hlg.childControlWidth = false;
-        hlg.childControlHeight = false;
-        hlg.childForceExpandWidth = false;
-        hlg.childForceExpandHeight = false;
+    private void ConfigureLayoutGroup() {
+        layoutGroup.spacing = iconSpacing;
+        layoutGroup.childControlWidth = false;
+        layoutGroup.childControlHeight = false;
+        layoutGroup.childForceExpandWidth = false;
+        layoutGroup.childForceExpandHeight = false;
     }
 
     private Image CreateIcon(int index, float size) {
@@ -48,20 +63,18 @@ public class AmmoUI : MonoBehaviour {
         rectTransform.sizeDelta = new Vector2(size, size);
 
         Image icon = iconObject.GetComponent<Image>();
-        icon.sprite = ThrowController.WeaponSprite;
+        icon.sprite = WeaponController.WeaponSprite;
         icon.preserveAspect = true;
         return icon;
     }
 
     private void FitContainerWidthToIcons(float iconSize) {
-        HorizontalLayoutGroup hlg = GetComponent<HorizontalLayoutGroup>();
-        float horizontalPadding = hlg.padding.left + hlg.padding.right;
-        float totalSpacing = iconSpacing * (ThrowController.MaxAmmo - 1);
-        float totalWidth = iconSize * ThrowController.MaxAmmo + totalSpacing + horizontalPadding;
+        float horizontalPadding = layoutGroup.padding.left + layoutGroup.padding.right;
+        float totalSpacing = iconSpacing * (WeaponController.MaxAmmo - 1);
+        float totalWidth = iconSize * WeaponController.MaxAmmo + totalSpacing + horizontalPadding;
 
-        RectTransform containerRt = (RectTransform) transform;
-        containerRt.pivot = new Vector2(1f, containerRt.pivot.y);
-        containerRt.sizeDelta = new Vector2(totalWidth, containerRt.sizeDelta.y);
+        containerRect.pivot = new Vector2(1f, containerRect.pivot.y);
+        containerRect.sizeDelta = new Vector2(totalWidth, containerRect.sizeDelta.y);
     }
 
     private void Update() {
@@ -70,7 +83,7 @@ public class AmmoUI : MonoBehaviour {
         }
 
         for (int i = 0; i < ammoIcons.Length; i++) {
-            bool isActive = i >= ammoIcons.Length - ThrowController.CurrentAmmo;
+            bool isActive = i >= ammoIcons.Length - WeaponController.CurrentAmmo;
             ammoIcons[i].color = isActive ? activeColor : depletedColor;
         }
     }

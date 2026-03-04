@@ -43,7 +43,7 @@ public class ThrowableProjectile : MonoBehaviour {
             return;
         }
 
-        ThrowController.Instance.ReturnAmmo();
+        WeaponController.Instance.ReturnAmmo();
         Destroy(gameObject);
     }
 
