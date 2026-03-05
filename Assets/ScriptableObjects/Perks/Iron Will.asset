@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   perkName: Iron Will
   description: 
-  rarity: 0
   icon: {fileID: 21300000, guid: aca2082a0768cc24fb9a3e032fe06b71, type: 3}
+  rarity: 1
   type: 1
   value: 1
