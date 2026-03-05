@@ -35,11 +35,10 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: StandaloneWindows64
-          unityVersion: 6000.1.4f1
+          unityVersion: 6000.3.10f1
           buildName: RandomDungeonGenerator
           buildsPath: build
           versioning: Tag
-          customParameters: '-nographics'
 
       - name: Create ZIP
         run: |
