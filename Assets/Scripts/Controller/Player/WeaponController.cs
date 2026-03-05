@@ -59,7 +59,13 @@ public class WeaponController : MonoBehaviour {
     }
 
     public void ReturnAmmo() {
-        CurrentAmmo = Mathf.Min(CurrentAmmo + 1, CurrentWeapon.maxAmmo);
+        CurrentAmmo = Mathf.Min(CurrentAmmo + 1, MaxAmmo);
+    }
+
+    public void AddMaxAmmo(int amount) {
+        MaxAmmo += amount;
+        CurrentAmmo = Mathf.Min(CurrentAmmo + amount, MaxAmmo);
+        OnWeaponChanged?.Invoke();
     }
 
     private bool CanUsePrimary() {

@@ -8,6 +8,7 @@ public class ThrowableProjectile : MonoBehaviour {
 
     private Rigidbody2D rigidbody2d;
     private bool isStuck;
+    private EnemyController stuckEnemy;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
@@ -49,6 +50,9 @@ public class ThrowableProjectile : MonoBehaviour {
             return;
         }
 
+        if (stuckEnemy != null) {
+            stuckEnemy.OnDeath -= DetachFromEnemy;
+        }
         WeaponController.Instance.ReturnAmmo();
         Destroy(gameObject);
     }
@@ -58,6 +62,7 @@ public class ThrowableProjectile : MonoBehaviour {
     }
 
     private void StickToEnemy(EnemyController enemy) {
+        stuckEnemy = enemy;
         Stick();
         transform.SetParent(enemy.transform);
         transform.localPosition += (Vector3) (Random.insideUnitCircle * stuckSpreadRadius);
