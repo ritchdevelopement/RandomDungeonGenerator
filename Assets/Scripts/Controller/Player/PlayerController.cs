@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour, IDamageable {
         dashGhostTrail = GetComponent<DashGhostTrail>();
         MaxHealth = maxHealth;
         CurrentHealth = maxHealth;
+        OnHealthChanged?.Invoke(CurrentHealth);
     }
 
     private void Update() {
