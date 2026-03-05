@@ -55,6 +55,9 @@ public class PerkManager : MonoBehaviour {
             case PerkType.MaxAmmo:
             WeaponController.Instance.AddMaxAmmo((int) perk.value);
             break;
+            case PerkType.Piercing:
+            WeaponController.Instance.EnablePiercing();
+            break;
         }
     }
 }

@@ -2554,6 +2554,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7dee3bd2434893c4eb4137d85d2fd1aa, type: 2}
   - {fileID: 11400000, guid: a8f174af7ab5b5a4f965056d5c586b9e, type: 2}
   - {fileID: 11400000, guid: a0620bbac62aa7f489db8f3d741b7e8e, type: 2}
+  - {fileID: 11400000, guid: a5e850c1906b1b648aa8003eb23bbeee, type: 2}
   perkSelectionUI: {fileID: 1365098757}
 --- !u!1 &1412133542
 GameObject:
