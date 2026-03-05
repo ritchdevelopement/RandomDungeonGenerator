@@ -15,10 +15,6 @@ public class DungeonComposer : MonoBehaviour {
 
     private GameObject dungeonGameObject;
 
-    private void Start() {
-        ComposeDungeon();
-    }
-
     public void ComposeDungeon() {
         if (dungeonConfig == null) {
             throw new MissingReferenceException($"Dungeon configuration not assigned to GameObject: {gameObject.name}");
