@@ -1,16 +1,9 @@
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
-[RequireComponent(typeof(SpriteRenderer))]
 public class RoomTrigger : MonoBehaviour {
     private Room room;
-    private RoomEventType eventType = RoomEventType.Normal;
-    private EncounterMode encounterMode = EncounterMode.Wave;
-    private SpriteRenderer spriteRenderer;
-
-    private void Awake() {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-    }
+    private RoomEventType eventType = RoomEventType.Wave;
 
     public void Initialize(Room room) {
         this.room = room;
@@ -18,11 +11,6 @@ public class RoomTrigger : MonoBehaviour {
 
     public void SetEventType(RoomEventType type) {
         eventType = type;
-        spriteRenderer.color = EventColor(type);
-    }
-
-    public void SetEncounterMode(EncounterMode mode) {
-        encounterMode = mode;
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
@@ -34,21 +22,9 @@ public class RoomTrigger : MonoBehaviour {
     }
 
     private void ActivateRoom() {
+        Debug.Log($"[RoomTrigger] Room {room.Center} → {eventType}");
         RoomManager.Instance.AssignRandomEventsToSiblings(room);
-
-        if (eventType == RoomEventType.Perk) {
-            PerkManager.Instance.ShowPerkSelection(room, encounterMode);
-        } else if (eventType != RoomEventType.Empty) {
-            EnemyManager.Instance.StartRoomEncounter(room, encounterMode);
-        }
-
+        EnemyManager.Instance.StartRoomEncounter(room, eventType);
         Destroy(gameObject);
     }
-
-    private static Color EventColor(RoomEventType type) => type switch {
-        RoomEventType.Empty => Color.gray,
-        RoomEventType.Cursed => Color.red,
-        RoomEventType.Perk => Color.yellow,
-        _ => Color.white,
-    };
 }

@@ -1,6 +1,4 @@
 public enum RoomEventType {
-    Normal,
-    Empty,
-    Cursed,
-    Perk,
+    Wave,
+    Survival,
 }

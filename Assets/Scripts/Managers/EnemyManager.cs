@@ -2,15 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteAlways]
 public class EnemyManager : MonoBehaviour {
     public static EnemyManager Instance { get; private set; }
+
+    public static event System.Action<string> OnEncounterInfoChanged;
 
     private EnemyData[] allEnemyData;
     private DungeonGenerationContext dungeonContext;
     private Transform playerTransform;
 
-    // Tracks all living enemies per room — room is considered active until list is empty
     private Dictionary<Room, List<EnemyController>> activeEnemies = new();
 
     private void Awake() {
@@ -31,7 +31,7 @@ public class EnemyManager : MonoBehaviour {
         dungeonContext = context;
     }
 
-    public void StartRoomEncounter(Room room, EncounterMode mode = EncounterMode.Wave) {
+    public void StartRoomEncounter(Room room, RoomEventType eventType) {
         if (!Application.isPlaying) {
             return;
         }
@@ -48,60 +48,92 @@ public class EnemyManager : MonoBehaviour {
         activeEnemies[room] = new List<EnemyController>();
         DoorManager.Instance.CloseRoomDoors(room);
 
-        if (mode == EncounterMode.Wave) {
-            StartCoroutine(RunWaveEncounter(room));
-        } else {
+        if (eventType == RoomEventType.Survival) {
             StartCoroutine(RunSurvivalEncounter(room));
+        } else {
+            StartCoroutine(RunMultiWaveEncounter(room));
         }
     }
 
-    // Spawns all enemies at once — room clears when the last one dies
-    private IEnumerator RunWaveEncounter(Room room) {
+    private IEnumerator RunMultiWaveEncounter(Room room) {
         EnemyData[] factionEnemies = GetEnemiesForCurrentFaction();
-        int spawnCount = DifficultyManager.Instance.GetWaveEnemyCount();
-        int remainingEnemies = spawnCount;
+        int totalWaves = DifficultyManager.Instance.WavesPerRoom;
 
-        for (int i = 0; i < spawnCount; i++) {
-            EnemyData data = DifficultyManager.Instance.SelectEnemy(factionEnemies);
-            SpawnEnemy(room, data, onDeath: () => {
-                remainingEnemies--;
-                if (remainingEnemies <= 0) {
-                    HandleEncounterCleared(room);
-                }
-            });
+        for (int waveIndex = 0; waveIndex < totalWaves; waveIndex++) {
+            OnEncounterInfoChanged?.Invoke($"Wave {waveIndex + 1} / {totalWaves}");
+
+            int spawnCount = DifficultyManager.Instance.GetWaveEnemyCount(waveIndex);
+            int remaining = spawnCount;
+            bool waveCleared = false;
+
+            for (int i = 0; i < spawnCount; i++) {
+                EnemyData data = DifficultyManager.Instance.SelectEnemyForWave(factionEnemies, waveIndex);
+                SpawnEnemy(room, data, onDeath: () => {
+                    remaining--;
+                    if (remaining <= 0) {
+                        waveCleared = true;
+                    }
+                });
+            }
+
+            yield return new WaitUntil(() => waveCleared);
         }
 
-        yield break;
+        TransitionToPerkSelection(room);
     }
 
-    // Spawns enemies continuously for a set duration — room clears when timer ends and all remaining enemies die
     private IEnumerator RunSurvivalEncounter(Room room) {
         EnemyData[] factionEnemies = GetEnemiesForCurrentFaction();
-        float spawnInterval = DifficultyManager.Instance.GetSpawnInterval();
-        float duration = DifficultyManager.Instance.GetSurvivalDuration();
+        float duration = DifficultyManager.Instance.SurvivalDuration;
+        float spawnInterval = DifficultyManager.Instance.SurvivalSpawnInterval;
         float elapsed = 0f;
+        float timeSinceLastSpawn = spawnInterval; // pre-filled so the first wave spawns immediately
+        int spawnIndex = 0;
 
         while (elapsed < duration) {
-            EnemyData data = DifficultyManager.Instance.SelectEnemy(factionEnemies);
-            SpawnEnemy(room, data, onDeath: null);
-            yield return new WaitForSeconds(spawnInterval);
-            elapsed += spawnInterval;
-        }
+            float remaining = duration - elapsed;
+            int minutes = (int) (remaining / 60f);
+            int seconds = (int) (remaining % 60f);
+            OnEncounterInfoChanged?.Invoke($"Survive: {minutes}:{seconds:00}");
 
-        while (activeEnemies.TryGetValue(room, out List<EnemyController> enemies) && enemies.Count > 0) {
+            timeSinceLastSpawn += Time.deltaTime;
+            if (timeSinceLastSpawn >= spawnInterval) {
+                timeSinceLastSpawn = 0f;
+                int spawnCount = DifficultyManager.Instance.GetSurvivalSpawnCount(spawnIndex);
+                for (int i = 0; i < spawnCount; i++) {
+                    EnemyData data = DifficultyManager.Instance.SelectEnemyForWave(factionEnemies, spawnIndex);
+                    SpawnEnemy(room, data, onDeath: () => { });
+                }
+                spawnIndex++;
+            }
+
+            elapsed += Time.deltaTime;
             yield return null;
         }
 
-        HandleEncounterCleared(room);
+        TransitionToPerkSelection(room);
+    }
+
+    private void TransitionToPerkSelection(Room room) {
+        OnEncounterInfoChanged?.Invoke(null);
+        PerkManager.Instance.ShowPerkSelectionUI(room);
+    }
+
+    public void FinalizeEncounter(Room room) {
+        activeEnemies.Remove(room);
+        RoomManager.Instance.AddClearedRoom(room);
+        DoorManager.Instance.OpenRoomDoors(room);
     }
 
     private void SpawnEnemy(Room room, EnemyData data, System.Action onDeath) {
         if (data == null || data.prefab == null) {
+            onDeath?.Invoke();
             return;
         }
 
         List<Vector2> occupiedPositions = GetOccupiedPositions(room);
-        Vector3 spawnPosition = GetRandomSpawnPosition(room, occupiedPositions);
+        Vector2 playerPosition = playerTransform != null ? (Vector2) playerTransform.position : (Vector2) room.Center;
+        Vector3 spawnPosition = GetRandomSpawnPosition(room, occupiedPositions, playerPosition);
         GameObject enemyObject = Instantiate(data.prefab, spawnPosition, Quaternion.identity, transform);
         EnemyController enemy = enemyObject.GetComponent<EnemyController>();
         enemy.Initialize(playerTransform, data);
@@ -127,10 +159,9 @@ public class EnemyManager : MonoBehaviour {
         return positions;
     }
 
-    // Picks a random floor position inside the room, keeping distance from walls, center trigger, and other enemies
-    private static Vector3 GetRandomSpawnPosition(Room room, List<Vector2> occupiedPositions) {
+    private static Vector3 GetRandomSpawnPosition(Room room, List<Vector2> occupiedPositions, Vector2 playerPosition) {
         const float wallMargin = 1.5f;
-        const float centerClearance = 2f;
+        const float playerClearance = 3f;
         const float enemySpacing = 1.5f;
 
         float xMin = room.Bounds.xMin + wallMargin;
@@ -145,13 +176,13 @@ public class EnemyManager : MonoBehaviour {
             float y = Random.Range(yMin, yMax);
             candidate = new Vector2(x, y);
             attempts++;
-        } while (attempts < 20 && !IsValidSpawnPosition(candidate, room, occupiedPositions, centerClearance, enemySpacing));
+        } while (attempts < 20 && !IsValidSpawnPosition(candidate, occupiedPositions, playerPosition, playerClearance, enemySpacing));
 
         return new Vector3(candidate.x, candidate.y, 0f);
     }
 
-    private static bool IsValidSpawnPosition(Vector2 candidate, Room room, List<Vector2> occupiedPositions, float centerClearance, float enemySpacing) {
-        if (Vector2.Distance(candidate, room.Center) < centerClearance) {
+    private static bool IsValidSpawnPosition(Vector2 candidate, List<Vector2> occupiedPositions, Vector2 playerPosition, float playerClearance, float enemySpacing) {
+        if (Vector2.Distance(candidate, playerPosition) < playerClearance) {
             return false;
         }
 
@@ -164,15 +195,9 @@ public class EnemyManager : MonoBehaviour {
         return true;
     }
 
-    private void HandleEncounterCleared(Room room) {
-        activeEnemies.Remove(room);
-        RoomManager.Instance.AddClearedRoom(room);
-        DoorManager.Instance.OpenRoomDoors(room);
-    }
-
     private EnemyData[] GetEnemiesForCurrentFaction() {
         if (allEnemyData == null || allEnemyData.Length == 0) {
-            return new EnemyData[0];
+            return System.Array.Empty<EnemyData>();
         }
 
         EnemyFaction faction = WorldManager.Instance != null

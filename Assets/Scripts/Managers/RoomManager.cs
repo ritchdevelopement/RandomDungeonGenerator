@@ -5,6 +5,12 @@ using UnityEngine;
 public class RoomManager : MonoBehaviour {
     public static RoomManager Instance { get; private set; }
 
+    [SerializeField]
+    private RoomTypeWeight[] roomTypeWeights = {
+        new RoomTypeWeight { type = RoomEventType.Wave,     weight = 3f },
+        new RoomTypeWeight { type = RoomEventType.Survival, weight = 1f },
+    };
+
     private readonly HashSet<Room> clearedRooms = new();
     private readonly Dictionary<Room, RoomTrigger> roomTriggers = new();
     private Room playerSpawnRoom;
@@ -17,9 +23,6 @@ public class RoomManager : MonoBehaviour {
 
     public void SetContext(DungeonGenerationContext ctx) {
         playerSpawnRoom = ctx.playerSpawnRoom;
-        if (FogOfWarManager.Instance != null) {
-            FogOfWarManager.Instance.RevealRoom(ctx.playerSpawnRoom);
-        }
     }
 
     public void RegisterTrigger(Room room, RoomTrigger trigger) {
@@ -27,13 +30,22 @@ public class RoomManager : MonoBehaviour {
     }
 
     public void AssignRandomEventsToSiblings(Room activatedRoom) {
+        ForEachUnclearedSibling(activatedRoom, AssignRandomEvent);
+    }
+
+    public void AddClearedRoom(Room room) {
+        clearedRooms.Add(room);
+        roomTriggers.Remove(room);
+    }
+
+    private void ForEachUnclearedSibling(Room excludedRoom, System.Action<Room> action) {
         foreach (Room parentRoom in ClearedRoomsIncludingSpawn()) {
-            if (!parentRoom.Neighbors.ContainsValue(activatedRoom)) {
+            if (!parentRoom.Neighbors.ContainsValue(excludedRoom)) {
                 continue;
             }
             foreach (Room sibling in parentRoom.Neighbors.Values) {
-                if (sibling != activatedRoom && !clearedRooms.Contains(sibling)) {
-                    AssignRandomEvent(sibling);
+                if (sibling != excludedRoom && !clearedRooms.Contains(sibling)) {
+                    action(sibling);
                 }
             }
         }
@@ -48,43 +60,44 @@ public class RoomManager : MonoBehaviour {
         }
     }
 
+    public void AssignInitialEvents() {
+        if (playerSpawnRoom == null) {
+            return;
+        }
+
+        foreach (Room neighbor in playerSpawnRoom.Neighbors.Values) {
+            AssignRandomEvent(neighbor);
+        }
+    }
+
     private void AssignRandomEvent(Room room) {
-        if (!roomTriggers.TryGetValue(room, out RoomTrigger trigger) || trigger == null) {
+        bool found = roomTriggers.TryGetValue(room, out RoomTrigger trigger);
+        Debug.Log($"[RoomManager] AssignRandomEvent: room={room.Center}, found={found}, triggerNull={trigger == null}");
+        if (!found || trigger == null) {
             return;
         }
-        trigger.SetEventType(RandomEventType());
-        FogOfWarManager.Instance.RevealRoom(room);
+
+        RoomEventType type = RandomEventType();
+        Debug.Log($"[RoomManager] AssignRandomEvent: → {type} to room {room.Center}");
+        trigger.SetEventType(type);
     }
 
-    private static RoomEventType RandomEventType() {
-        RoomEventType[] events = { RoomEventType.Empty, RoomEventType.Cursed, RoomEventType.Perk };
-        return events[Random.Range(0, events.Length)];
-    }
+    private RoomEventType RandomEventType() {
+        float totalWeight = 0f;
+        foreach (RoomTypeWeight entry in roomTypeWeights) {
+            totalWeight += entry.weight;
+        }
 
-    public void AddClearedRoom(Room room) {
-        clearedRooms.Add(room);
-        roomTriggers.Remove(room);
-        ResetSiblingEvents(room);
-    }
-
-    private void ResetSiblingEvents(Room clearedRoom) {
-        foreach (Room parentRoom in ClearedRoomsIncludingSpawn()) {
-            if (!parentRoom.Neighbors.ContainsValue(clearedRoom)) {
-                continue;
-            }
-            foreach (Room sibling in parentRoom.Neighbors.Values) {
-                if (sibling != clearedRoom && !clearedRooms.Contains(sibling)) {
-                    ResetToNormalEvent(sibling);
-                }
+        float roll = Random.Range(0f, totalWeight);
+        float accumulated = 0f;
+        foreach (RoomTypeWeight entry in roomTypeWeights) {
+            accumulated += entry.weight;
+            if (roll <= accumulated) {
+                return entry.type;
             }
         }
-    }
 
-    private void ResetToNormalEvent(Room room) {
-        if (!roomTriggers.TryGetValue(room, out RoomTrigger trigger) || trigger == null) {
-            return;
-        }
-        trigger.SetEventType(RoomEventType.Normal);
+        return roomTypeWeights[roomTypeWeights.Length - 1].type;
     }
 
     public int ClearedRoomCount => clearedRooms.Count;

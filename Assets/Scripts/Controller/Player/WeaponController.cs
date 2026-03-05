@@ -15,6 +15,7 @@ public class WeaponController : MonoBehaviour {
     private Camera mainCamera;
     private float primaryCooldownRemaining;
     private float secondaryCooldownRemaining;
+    private bool isPiercing;
 
     public static WeaponController Instance { get; private set; }
     public static WeaponData CurrentWeapon { get; private set; }
@@ -59,7 +60,17 @@ public class WeaponController : MonoBehaviour {
     }
 
     public void ReturnAmmo() {
-        CurrentAmmo = Mathf.Min(CurrentAmmo + 1, CurrentWeapon.maxAmmo);
+        CurrentAmmo = Mathf.Min(CurrentAmmo + 1, MaxAmmo);
+    }
+
+    public void AddMaxAmmo(int amount) {
+        MaxAmmo += amount;
+        CurrentAmmo = Mathf.Min(CurrentAmmo + amount, MaxAmmo);
+        OnWeaponChanged?.Invoke();
+    }
+
+    public void EnablePiercing() {
+        isPiercing = true;
     }
 
     private bool CanUsePrimary() {
@@ -84,7 +95,7 @@ public class WeaponController : MonoBehaviour {
         GameObject projectile = Instantiate(CurrentWeapon.projectilePrefab, spawnPosition, Quaternion.identity);
 
         if (projectile.TryGetComponent(out ThrowableProjectile throwable)) {
-            throwable.Launch(throwDirection);
+            throwable.Launch(throwDirection, isPiercing);
         }
 
         CurrentAmmo--;

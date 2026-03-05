@@ -8,12 +8,15 @@ public class ThrowableProjectile : MonoBehaviour {
 
     private Rigidbody2D rigidbody2d;
     private bool isStuck;
+    private bool isPiercing;
+    private EnemyController stuckEnemy;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
     }
 
-    public void Launch(Vector2 direction) {
+    public void Launch(Vector2 direction, bool piercing = false) {
+        isPiercing = piercing;
         transform.rotation = Quaternion.AngleAxis(CalculateRotationAngle(direction), Vector3.forward);
         rigidbody2d.linearVelocity = direction * flySpeed;
     }
@@ -34,7 +37,9 @@ public class ThrowableProjectile : MonoBehaviour {
 
         // Must stick before dealing damage so DetachFromEnemy runs before the enemy is destroyed
         if (other.TryGetComponent(out EnemyController enemy)) {
-            StickToEnemy(enemy);
+            if (!isPiercing) {
+                StickToEnemy(enemy);
+            }
         } else {
             Stick();
         }
@@ -49,6 +54,9 @@ public class ThrowableProjectile : MonoBehaviour {
             return;
         }
 
+        if (stuckEnemy != null) {
+            stuckEnemy.OnDeath -= DetachFromEnemy;
+        }
         WeaponController.Instance.ReturnAmmo();
         Destroy(gameObject);
     }
@@ -58,6 +66,7 @@ public class ThrowableProjectile : MonoBehaviour {
     }
 
     private void StickToEnemy(EnemyController enemy) {
+        stuckEnemy = enemy;
         Stick();
         transform.SetParent(enemy.transform);
         transform.localPosition += (Vector3) (Random.insideUnitCircle * stuckSpreadRadius);

@@ -8,16 +8,9 @@ public class DungeonComposer : MonoBehaviour {
     private DungeonConfig dungeonConfig;
 
     [SerializeField]
-    private bool disableFogOfWar;
-
-    [SerializeField]
     private List<DungeonTaskBase> dungeonTasks;
 
     private GameObject dungeonGameObject;
-
-    private void Start() {
-        ComposeDungeon();
-    }
 
     public void ComposeDungeon() {
         if (dungeonConfig == null) {
@@ -35,10 +28,12 @@ public class DungeonComposer : MonoBehaviour {
             adjacencies = new List<(Room, Room, Direction)>(),
             dungeonGameObject = dungeonGameObject,
             frictionlessMaterial = dungeonConfig.frictionlessMaterial,
-            disableFogOfWar = disableFogOfWar
         };
 
         foreach (DungeonTaskBase dungeonTask in dungeonTasks) {
+            if (dungeonTask == null) {
+                continue;
+            }
             dungeonTask.SetContext(context);
             dungeonTask.Execute();
         }

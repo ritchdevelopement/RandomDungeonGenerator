@@ -13,6 +13,5 @@ public class DungeonGenerationContext {
     public Vector2 playerSpawnPosition;
     public Room playerSpawnRoom;
     public PhysicsMaterial2D frictionlessMaterial;
-    public bool disableFogOfWar;
     public Tilemap wallTilemap;
 }

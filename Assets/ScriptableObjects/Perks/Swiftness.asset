@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf95fd81d79981146a6b1fb2c40e497e, type: 3}
+  m_Name: Swiftness
+  m_EditorClassIdentifier: 
+  perkName: Swiftness
+  description: 
+  rarity: 0
+  icon: {fileID: 21300000, guid: 2f54e84724b30464b9b1bed4637e0494, type: 3}
+  type: 2
+  value: 1
