@@ -16,13 +16,19 @@ Rooms get separate tilemaps for walls (with collision) and floors (weighted rand
 Animator-driven open/close animations. Horizontal doors are a single sprite; vertical doors use a master collider with animated panel children per tile row.
 
 **Room progression**
-The first room you enter from any cleared area is always a perk room — you pick a perk there before the encounter starts. The moment you step in, the sibling rooms (other neighbors of the room you came from) become visible and get assigned random event types. After clearing a room, that same pattern resets for the next set of neighbors.
+When you step into a room, the other exits from where you came from become visible and get assigned a random event type — wave or survival. Perk rooms pause the game and show three perk choices before the encounter starts. The same thing repeats every time you move deeper into the dungeon.
+
+**Perks**
+After clearing a perk room you pick one of three randomly drawn perks: extra max health (also fills the new heart), more ammo, faster dash, higher move speed, or piercing shots that pass through enemies.
 
 **Combat**
 Doors close when a room activates. Wave mode spawns everything at once, survival mode drips enemies in over a timer and waits for stragglers before opening the doors. Difficulty scales with cleared room count — more rooms cleared means more enemies, shorter spawn intervals, and a higher chance of rarer enemy types.
 
 **Enemies**
 Grouped by faction (Undead / Orc / Demon) based on the current world. Each enemy type has its own stats and spawn weight. Enemies push each other apart while chasing so they don't all clump into one sprite.
+
+**Player**
+WASD to move, space to dash. Dashing makes you invulnerable and lets you pass through enemies without taking contact damage. Health, ammo, and dash cooldown are shown in the HUD.
 
 **Weapons**
 Left click throws, right click melees. The thrown weapon sticks into whatever it hits — if that's an enemy, it follows them around and drops on death so you can pick it up. Melee uses a physics arc with a tapered shape and soft edges. Both attacks share the ammo pool.
@@ -36,7 +42,7 @@ Left click throws, right click melees. The thrown weapon sticks into whatever it
 | `EnemyManager` | Runs wave/survival encounters, spawns enemies, handles room clear |
 | `DifficultyManager` | Scales encounter parameters by cleared room count |
 | `WorldManager` | Current world/level → active enemy faction |
-| `PerkManager` | Spawns the perk trigger in perk rooms |
+| `PerkManager` | Shows perk selection UI, applies chosen perk |
 | `WeaponController` | Throw + melee input, ammo management, arc mesh |
 | `DoorManager` | Opens/closes doors based on encounter state |
 | `FogOfWarManager` | Fog overlays, camera background sync |
@@ -84,18 +90,20 @@ Other things set per-component in the Inspector:
   - `WeaponController.cs` — Throw (LMB) and melee (RMB) attacks; ammo management
   - `ThrowableProjectile.cs` — Sticks into surfaces and enemies; pickable by the player
   - `CameraController.cs` — Smooth camera follow
-  - `PerkSelectionTrigger.cs` — Spawned in perk rooms; starts the encounter on player contact
+  - `PerkOptionTrigger.cs` — Spawned in perk rooms; opens perk selection UI on player contact
 - `Models/`
   - `Room.cs` — Room data: position, size, bounds, neighbors, doors
   - `Door.cs` — Door data: tile positions, connected rooms
   - `EnemyData.cs` — ScriptableObject: faction, rarity, prefab, stats, spawn weight
   - `WeaponData.cs` — ScriptableObject: throw and melee stats
+  - `PerkData.cs` — ScriptableObject: perk type, value, icon, name, description
   - `WeightedFloorTile.cs` — Tile + weight pair for weighted floor tile selection
 - `Enums/`
   - `EnemyFaction.cs` — Undead, Orc, Demon
   - `EnemyRarity.cs` — Normal, Uncommon, Rare, Boss
   - `EncounterMode.cs` — Wave, Survival
   - `RoomEventType.cs` — Normal, Empty, Cursed, Perk
+  - `PerkType.cs` — MaxHealth, MaxAmmo, MoveSpeed, DashCooldown, Piercing, ...
 
 ## Setup
 
