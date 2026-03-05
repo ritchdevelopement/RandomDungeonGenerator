@@ -71,9 +71,21 @@ public class HealthUI : MonoBehaviour {
     }
 
     private void RefreshHeartColors(int currentHealth) {
+        if (heartIcons.Length != PlayerController.MaxHealth) {
+            RebuildHeartIcons();
+        }
+
         for (int i = 0; i < heartIcons.Length; i++) {
             bool isHeartFilled = i < currentHealth;
             heartIcons[i].color = isHeartFilled ? activeColor : depletedColor;
         }
+    }
+
+    private void RebuildHeartIcons() {
+        foreach (Image icon in heartIcons) {
+            Destroy(icon.gameObject);
+        }
+
+        CreateHeartIcons();
     }
 }

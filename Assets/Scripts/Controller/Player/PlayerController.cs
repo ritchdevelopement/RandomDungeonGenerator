@@ -181,6 +181,7 @@ public class PlayerController : MonoBehaviour, IDamageable {
     public void AddMaxHealth(int amount) {
         maxHealth += amount;
         MaxHealth = maxHealth;
+        CurrentHealth = Mathf.Min(CurrentHealth + amount, MaxHealth);
         OnHealthChanged?.Invoke(CurrentHealth);
     }
 
