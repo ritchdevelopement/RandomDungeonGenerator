@@ -1,9 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PerkManager : MonoBehaviour {
     public static PerkManager Instance { get; private set; }
 
-    [SerializeField] private Sprite perkTriggerSprite;
+    private const int PerkChoiceCount = 3;
+
+    [SerializeField] private PerkData[] allPerks;
+    [SerializeField] private PerkSelectionUI perkSelectionUI;
 
     private void Awake() {
         if (Instance == null) {
@@ -14,26 +18,43 @@ public class PerkManager : MonoBehaviour {
         }
     }
 
-    public void ShowPerkSelection(Room room, EncounterMode encounterMode) {
-        GameObject triggerObject = CreatePerkTriggerObject(room);
-        PerkSelectionTrigger perkTrigger = triggerObject.AddComponent<PerkSelectionTrigger>();
-        perkTrigger.Initialize(room, encounterMode);
+    public void ShowPerkSelectionUI(Room room) {
+        List<PerkData> choices = PickRandomPerks(PerkChoiceCount);
+        perkSelectionUI.Show(room, choices);
     }
 
-    public void OnPerkSelected(Room room, EncounterMode encounterMode) {
-        EnemyManager.Instance.StartRoomEncounter(room, encounterMode);
+    public void SelectPerk(PerkData perk, Room room) {
+        ApplyPerk(perk);
+        EnemyManager.Instance.FinalizeEncounter(room);
     }
 
-    private GameObject CreatePerkTriggerObject(Room room) {
-        GameObject triggerObject = new("PerkSelectionTrigger");
-        triggerObject.transform.position = new Vector3(room.Center.x, room.Center.y, 0f);
+    private List<PerkData> PickRandomPerks(int count) {
+        List<PerkData> pool = new List<PerkData>(allPerks);
+        List<PerkData> result = new List<PerkData>();
 
-        SpriteRenderer spriteRenderer = triggerObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = perkTriggerSprite;
-        spriteRenderer.color = Color.yellow;
+        for (int i = 0; i < count && pool.Count > 0; i++) {
+            int index = Random.Range(0, pool.Count);
+            result.Add(pool[index]);
+            pool.RemoveAt(index);
+        }
 
-        triggerObject.AddComponent<BoxCollider2D>();
+        return result;
+    }
 
-        return triggerObject;
+    private static void ApplyPerk(PerkData perk) {
+        switch (perk.type) {
+            case PerkType.MaxHealth:
+            PlayerController.Instance.AddMaxHealth((int) perk.value);
+            break;
+            case PerkType.MoveSpeed:
+            PlayerController.Instance.AddMoveSpeed(perk.value);
+            break;
+            case PerkType.DashCooldown:
+            PlayerController.Instance.ReduceDashCooldown(perk.value);
+            break;
+            case PerkType.MaxAmmo:
+            WeaponController.Instance.AddMaxAmmo((int) perk.value);
+            break;
+        }
     }
 }
