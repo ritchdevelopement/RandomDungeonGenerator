@@ -7,4 +7,5 @@ public enum PerkType {
     Thorns,
     Piercing,
     DoubleDash,
+    Ricochet,
 }

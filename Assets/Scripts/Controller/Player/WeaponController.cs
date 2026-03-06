@@ -17,6 +17,7 @@ public class WeaponController : MonoBehaviour {
     private float primaryCooldownRemaining;
     private float secondaryCooldownRemaining;
     private bool isPiercing;
+    private bool isRicochet;
     private int extraProjectiles;
 
     public static WeaponController Instance { get; private set; }
@@ -74,6 +75,10 @@ public class WeaponController : MonoBehaviour {
         isPiercing = true;
     }
 
+    public void EnableRicochet() {
+        isRicochet = true;
+    }
+
     public void AddProjectile() {
         extraProjectiles++;
     }
@@ -113,7 +118,7 @@ public class WeaponController : MonoBehaviour {
         GameObject projectile = Instantiate(CurrentWeapon.projectilePrefab, spawnPosition, Quaternion.identity);
 
         if (projectile.TryGetComponent(out ThrowableProjectile throwable)) {
-            throwable.Launch(direction, isPiercing);
+            throwable.Launch(direction, isPiercing, isRicochet);
         }
     }
 

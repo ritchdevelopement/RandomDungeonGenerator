@@ -105,6 +105,9 @@ public class PerkManager : MonoBehaviour {
             case PerkType.Multishot:
             WeaponController.Instance.AddProjectile();
             break;
+            case PerkType.Ricochet:
+            WeaponController.Instance.EnableRicochet();
+            break;
         }
     }
 }
