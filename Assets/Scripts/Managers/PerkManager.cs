@@ -53,11 +53,18 @@ public class PerkManager : MonoBehaviour {
     }
 
     private List<PerkData> PickRandomPerks(int count) {
+        HashSet<PerkType> excludedTypes = new();
+        foreach (PerkData chosen in chosenUniquePerks) {
+            foreach (PerkType excluded in chosen.incompatibleWith) {
+                excludedTypes.Add(excluded);
+            }
+        }
+
         List<PerkData> pool = new List<PerkData>();
         foreach (PerkData perk in allPerks) {
-            if (!perk.isUnique || !chosenUniquePerks.Contains(perk)) {
-                pool.Add(perk);
-            }
+            if (perk.isUnique && chosenUniquePerks.Contains(perk)) { continue; }
+            if (excludedTypes.Contains(perk.type)) { continue; }
+            pool.Add(perk);
         }
 
         List<PerkData> result = new List<PerkData>();

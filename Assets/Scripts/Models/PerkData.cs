@@ -9,4 +9,5 @@ public class PerkData : ScriptableObject {
     public PerkType type;
     public float value;
     public bool isUnique;
+    public PerkType[] incompatibleWith;
 }
