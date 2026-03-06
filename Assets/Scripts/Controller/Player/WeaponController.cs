@@ -11,11 +11,13 @@ public class WeaponController : MonoBehaviour {
 
     private const int SlashSegments = 12;
     private const float SlashFadeDuration = 0.1f;
+    private const float ProjectileSpreadAngle = 15f;
 
     private Camera mainCamera;
     private float primaryCooldownRemaining;
     private float secondaryCooldownRemaining;
     private bool isPiercing;
+    private int extraProjectiles;
 
     public static WeaponController Instance { get; private set; }
     public static WeaponData CurrentWeapon { get; private set; }
@@ -23,9 +25,7 @@ public class WeaponController : MonoBehaviour {
     public static int MaxAmmo { get; private set; }
     public static Sprite WeaponSprite {
         get {
-            if (CurrentWeapon == null || CurrentWeapon.weaponPrefab == null) {
-                return null;
-            }
+            if (CurrentWeapon == null || CurrentWeapon.weaponPrefab == null) { return null; }
             SpriteRenderer spriteRenderer = CurrentWeapon.weaponPrefab.GetComponent<SpriteRenderer>();
             return spriteRenderer != null ? spriteRenderer.sprite : null;
         }
@@ -61,6 +61,7 @@ public class WeaponController : MonoBehaviour {
 
     public void ReturnAmmo() {
         CurrentAmmo = Mathf.Min(CurrentAmmo + 1, MaxAmmo);
+        OnWeaponChanged?.Invoke();
     }
 
     public void AddMaxAmmo(int amount) {
@@ -73,17 +74,21 @@ public class WeaponController : MonoBehaviour {
         isPiercing = true;
     }
 
+    public void AddProjectile() {
+        extraProjectiles++;
+    }
+
     private bool CanUsePrimary() {
-        return Input.GetMouseButtonDown(0) && IsAttackReady(primaryCooldownRemaining);
+        return Input.GetMouseButtonDown(0)
+            && CurrentAmmo > 0
+            && primaryCooldownRemaining <= 0f
+            && Time.timeScale > 0f;
     }
 
     private bool CanUseSecondary() {
-        return Input.GetMouseButtonDown(1) && IsAttackReady(secondaryCooldownRemaining);
-    }
-
-    private bool IsAttackReady(float cooldownRemaining) {
-        return CurrentAmmo > 0
-            && cooldownRemaining <= 0f
+        return Input.GetMouseButtonDown(1)
+            && CurrentAmmo > 0
+            && secondaryCooldownRemaining <= 0f
             && Time.timeScale > 0f;
     }
 
@@ -91,14 +96,25 @@ public class WeaponController : MonoBehaviour {
         primaryCooldownRemaining = CurrentWeapon.primaryCooldown;
 
         Vector2 throwDirection = GetDirectionToMouse();
-        Vector3 spawnPosition = transform.position + (Vector3) (throwDirection * CurrentWeapon.spawnOffset);
+
+        int projectileCount = Mathf.Min(1 + extraProjectiles, CurrentAmmo);
+        float totalSpread = (projectileCount - 1) * ProjectileSpreadAngle;
+        for (int i = 0; i < projectileCount; i++) {
+            float angleOffset = -totalSpread / 2f + i * ProjectileSpreadAngle;
+            SpawnProjectile(throwDirection, angleOffset);
+        }
+
+        CurrentAmmo -= projectileCount;
+    }
+
+    private void SpawnProjectile(Vector2 baseDirection, float angleOffset) {
+        Vector2 direction = Quaternion.Euler(0f, 0f, angleOffset) * baseDirection;
+        Vector3 spawnPosition = transform.position + (Vector3) (direction * CurrentWeapon.spawnOffset);
         GameObject projectile = Instantiate(CurrentWeapon.projectilePrefab, spawnPosition, Quaternion.identity);
 
         if (projectile.TryGetComponent(out ThrowableProjectile throwable)) {
-            throwable.Launch(throwDirection, isPiercing);
+            throwable.Launch(direction, isPiercing);
         }
-
-        CurrentAmmo--;
     }
 
     private void ExecuteSecondaryAttack() {
@@ -136,18 +152,12 @@ public class WeaponController : MonoBehaviour {
 
     private Vector2 GetDirectionToMouse() {
         Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 directionToMouse = (Vector2) (mouseWorldPosition - transform.position);
-        return directionToMouse.normalized;
+        return ((Vector2) (mouseWorldPosition - transform.position)).normalized;
     }
 
     private void TickCooldowns() {
-        if (primaryCooldownRemaining > 0f) {
-            primaryCooldownRemaining -= Time.deltaTime;
-        }
-
-        if (secondaryCooldownRemaining > 0f) {
-            secondaryCooldownRemaining -= Time.deltaTime;
-        }
+        primaryCooldownRemaining = Mathf.Max(0f, primaryCooldownRemaining - Time.deltaTime);
+        secondaryCooldownRemaining = Mathf.Max(0f, secondaryCooldownRemaining - Time.deltaTime);
     }
 
     private IEnumerator DrawSlashArc(Vector2 direction, Vector2 center) {
