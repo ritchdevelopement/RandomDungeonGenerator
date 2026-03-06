@@ -193,6 +193,7 @@ public class EnemyManager : MonoBehaviour {
         const float wallMargin = 1.5f;
         const float playerClearance = 3f;
         const float enemySpacing = 1.5f;
+        const int maxAttempts = 20;
 
         float xMin = room.Bounds.xMin + wallMargin;
         float xMax = room.Bounds.xMax - wallMargin;
@@ -206,7 +207,7 @@ public class EnemyManager : MonoBehaviour {
             float y = Random.Range(yMin, yMax);
             candidate = new Vector2(x, y);
             attempts++;
-        } while (attempts < 20 && !IsValidSpawnPosition(candidate, occupiedPositions, playerPosition, playerClearance, enemySpacing));
+        } while (attempts < maxAttempts && !IsValidSpawnPosition(candidate, occupiedPositions, playerPosition, playerClearance, enemySpacing));
 
         return new Vector3(candidate.x, candidate.y, 0f);
     }

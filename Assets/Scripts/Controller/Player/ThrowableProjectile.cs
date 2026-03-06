@@ -47,7 +47,7 @@ public class ThrowableProjectile : MonoBehaviour {
 
         // Must stick before dealing damage so DetachFromEnemy runs before the enemy is destroyed
         if (other.TryGetComponent(out EnemyController enemy)) {
-            if (!isPiercing && !isRicochet) {
+            if (!CanPassThroughEnemy()) {
                 StickToEnemy(enemy);
             }
         } else {
@@ -73,6 +73,10 @@ public class ThrowableProjectile : MonoBehaviour {
         }
         WeaponController.Instance.ReturnAmmo();
         Destroy(gameObject);
+    }
+
+    private bool CanPassThroughEnemy() {
+        return isPiercing || isRicochet;
     }
 
     private bool IsPlayer(Collider2D other) {
