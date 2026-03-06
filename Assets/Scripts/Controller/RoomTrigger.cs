@@ -4,9 +4,11 @@ using UnityEngine;
 public class RoomTrigger : MonoBehaviour {
     private Room room;
     private RoomEventType eventType = RoomEventType.Wave;
+    private bool hasBeenActivated;
 
-    public void Initialize(Room room) {
+    public void Initialize(Room room, bool preActivated = false) {
         this.room = room;
+        hasBeenActivated = preActivated;
     }
 
     public void SetEventType(RoomEventType type) {
@@ -18,13 +20,13 @@ public class RoomTrigger : MonoBehaviour {
             return;
         }
 
-        ActivateRoom();
-    }
+        RoomManager.Instance.NotifyRoomEntered(room);
 
-    private void ActivateRoom() {
-        Debug.Log($"[RoomTrigger] Room {room.Center} → {eventType}");
-        RoomManager.Instance.AssignRandomEventsToSiblings(room);
-        EnemyManager.Instance.StartRoomEncounter(room, eventType);
-        Destroy(gameObject);
+        if (!hasBeenActivated) {
+            hasBeenActivated = true;
+            Debug.Log($"[RoomTrigger] Room {room.Center} → {eventType}");
+            RoomManager.Instance.AssignRandomEventsToSiblings(room);
+            EnemyManager.Instance.StartRoomEncounter(room, eventType);
+        }
     }
 }

@@ -41,6 +41,10 @@ public class ThrowableProjectile : MonoBehaviour {
             return;
         }
 
+        if (other.TryGetComponent(out RoomTrigger _)) {
+            return;
+        }
+
         // Must stick before dealing damage so DetachFromEnemy runs before the enemy is destroyed
         if (other.TryGetComponent(out EnemyController enemy)) {
             if (!isPiercing && !isRicochet) {
