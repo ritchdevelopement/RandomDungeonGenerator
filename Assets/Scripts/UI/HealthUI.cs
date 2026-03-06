@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,14 +17,14 @@ public class HealthUI : MonoBehaviour {
         containerRect = (RectTransform) transform;
     }
 
-    private IEnumerator Start() {
-        yield return new WaitUntil(() => PlayerController.MaxHealth > 0);
-        CreateHeartIcons();
-        RefreshHeartColors(PlayerController.CurrentHealth);
+    private void OnEnable() {
         PlayerController.OnHealthChanged += RefreshHeartColors;
+        if (PlayerController.MaxHealth > 0) {
+            RefreshHeartColors(PlayerController.CurrentHealth);
+        }
     }
 
-    private void OnDestroy() {
+    private void OnDisable() {
         PlayerController.OnHealthChanged -= RefreshHeartColors;
     }
 
@@ -71,7 +70,7 @@ public class HealthUI : MonoBehaviour {
     }
 
     private void RefreshHeartColors(int currentHealth) {
-        if (heartIcons.Length != PlayerController.MaxHealth) {
+        if (heartIcons == null || heartIcons.Length != PlayerController.MaxHealth) {
             RebuildHeartIcons();
         }
 
@@ -82,8 +81,10 @@ public class HealthUI : MonoBehaviour {
     }
 
     private void RebuildHeartIcons() {
-        foreach (Image icon in heartIcons) {
-            Destroy(icon.gameObject);
+        if (heartIcons != null) {
+            foreach (Image icon in heartIcons) {
+                Destroy(icon.gameObject);
+            }
         }
 
         CreateHeartIcons();

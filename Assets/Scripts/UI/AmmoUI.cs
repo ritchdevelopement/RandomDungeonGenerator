@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,13 +16,14 @@ public class AmmoUI : MonoBehaviour {
         containerRect = (RectTransform) transform;
     }
 
-    private IEnumerator Start() {
-        yield return new WaitUntil(() => WeaponController.Instance != null);
-        BuildIcons();
+    private void OnEnable() {
         WeaponController.OnWeaponChanged += RebuildIcons;
+        if (WeaponController.Instance != null) {
+            BuildIcons();
+        }
     }
 
-    private void OnDestroy() {
+    private void OnDisable() {
         WeaponController.OnWeaponChanged -= RebuildIcons;
     }
 

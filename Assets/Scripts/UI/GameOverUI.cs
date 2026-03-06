@@ -6,12 +6,10 @@ public class GameOverUI : MonoBehaviour {
 
     private void Awake() {
         gameOverPanel.SetActive(false);
-        PlayerController.OnDeath += ShowGameOver;
     }
 
-    private void OnDestroy() {
-        PlayerController.OnDeath -= ShowGameOver;
-    }
+    private void OnEnable() { PlayerController.OnDeath += ShowGameOver; }
+    private void OnDisable() { PlayerController.OnDeath -= ShowGameOver; }
 
     private void ShowGameOver() {
         Time.timeScale = 0f;
