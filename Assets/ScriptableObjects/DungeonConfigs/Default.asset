@@ -18,6 +18,6 @@ MonoBehaviour:
   - {x: 45, y: 23}
   - {x: 23, y: 43}
   numberOfRooms: 25
-  distributionBias: 1
+  distributionBias: 0.65
   frictionlessMaterial: {fileID: 6200000, guid: ebf0609166e5714479b45d917fd4d06b,
     type: 2}

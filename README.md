@@ -120,4 +120,4 @@ To fix formatting manually:
 dotnet format whitespace Assembly-CSharp.csproj
 ```
 
-**Requires Unity 2022.3+**
+**Requires Unity 6000.3.10f1**

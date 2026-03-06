@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf95fd81d79981146a6b1fb2c40e497e, type: 3}
-  m_Name: Iron Will
-  m_EditorClassIdentifier: 
-  perkName: Iron Will
+  m_Name: Multishot
+  m_EditorClassIdentifier: Assembly-CSharp::PerkData
+  perkName: Multishot
   description: 
-  icon: {fileID: 21300000, guid: aca2082a0768cc24fb9a3e032fe06b71, type: 3}
+  icon: {fileID: 21300000, guid: b81cbe81b84e2c74a94d91d36a7f7c01, type: 3}
   rarity: 1
-  type: 1
-  value: 1
+  type: 4
+  value: 0
+  isUnique: 0

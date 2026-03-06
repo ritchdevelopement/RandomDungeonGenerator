@@ -6,17 +6,23 @@ public class ThrowableProjectile : MonoBehaviour {
     [SerializeField] private float flySpeed = 15f;
     [SerializeField] private float stuckSpreadRadius = 0.15f;
 
+    private const int MaxBounces = 3;
+
     private Rigidbody2D rigidbody2d;
     private bool isStuck;
     private bool isPiercing;
+    private bool isRicochet;
+    private int remainingBounces;
     private EnemyController stuckEnemy;
 
     private void Awake() {
         rigidbody2d = GetComponent<Rigidbody2D>();
     }
 
-    public void Launch(Vector2 direction, bool piercing = false) {
+    public void Launch(Vector2 direction, bool piercing = false, bool ricochet = false) {
         isPiercing = piercing;
+        isRicochet = ricochet;
+        remainingBounces = ricochet ? MaxBounces : 0;
         transform.rotation = Quaternion.AngleAxis(CalculateRotationAngle(direction), Vector3.forward);
         rigidbody2d.linearVelocity = direction * flySpeed;
     }
@@ -37,10 +43,14 @@ public class ThrowableProjectile : MonoBehaviour {
 
         // Must stick before dealing damage so DetachFromEnemy runs before the enemy is destroyed
         if (other.TryGetComponent(out EnemyController enemy)) {
-            if (!isPiercing) {
+            if (!isPiercing && !isRicochet) {
                 StickToEnemy(enemy);
             }
         } else {
+            if (isRicochet && remainingBounces > 0) {
+                Bounce(other);
+                return;
+            }
             Stick();
         }
 
@@ -75,6 +85,18 @@ public class ThrowableProjectile : MonoBehaviour {
 
     private void DetachFromEnemy() {
         transform.SetParent(null);
+    }
+
+    private void Bounce(Collider2D wall) {
+        remainingBounces--;
+
+        Vector2 closestPoint = wall.ClosestPoint(transform.position);
+        Vector2 surfaceNormal = ((Vector2) transform.position - closestPoint).normalized;
+        Vector2 incomingDirection = rigidbody2d.linearVelocity.normalized;
+        Vector2 reflectedDirection = Vector2.Reflect(incomingDirection, surfaceNormal);
+
+        transform.rotation = Quaternion.AngleAxis(CalculateRotationAngle(reflectedDirection), Vector3.forward);
+        rigidbody2d.linearVelocity = reflectedDirection * flySpeed;
     }
 
     private void Stick() {
