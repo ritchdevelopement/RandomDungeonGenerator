@@ -19,3 +19,4 @@ MonoBehaviour:
   type: 8
   value: 0
   isUnique: 1
+  incompatibleWith: 06000000
