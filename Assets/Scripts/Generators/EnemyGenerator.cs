@@ -9,11 +9,12 @@ public class EnemyGenerator : DungeonTaskBase {
             return;
         }
 
-        GameObject enemiesGameObject = new GameObject("Enemies");
-        enemiesGameObject.transform.SetParent(context.dungeonGameObject.transform);
-        EnemyManager enemyManager = enemiesGameObject.AddComponent<EnemyManager>();
+        if (EnemyManager.Instance == null) {
+            Debug.LogError("EnemyManager not found in scene!");
+            return;
+        }
 
-        enemyManager.SetDungeonContext(context);
-        enemyManager.SetEnemyData(enemyData);
+        EnemyManager.Instance.SetDungeonContext(context);
+        EnemyManager.Instance.SetEnemyData(enemyData);
     }
 }

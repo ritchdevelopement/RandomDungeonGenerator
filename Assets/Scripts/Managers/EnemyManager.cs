@@ -7,7 +7,7 @@ public class EnemyManager : MonoBehaviour {
 
     public static event System.Action<string> OnEncounterInfoChanged;
 
-    private EnemyData[] allEnemyData;
+    [SerializeField] private EnemyData[] allEnemyData;
     private DungeonGenerationContext dungeonContext;
     private Transform playerTransform;
 
@@ -16,7 +16,24 @@ public class EnemyManager : MonoBehaviour {
     private void Awake() {
         if (Instance == null) {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+        } else {
+            Destroy(gameObject);
         }
+    }
+
+    private void OnEnable() {
+        PlayerController.OnDeath += HandlePlayerDeath;
+    }
+
+    private void OnDisable() {
+        PlayerController.OnDeath -= HandlePlayerDeath;
+    }
+
+    private void HandlePlayerDeath() {
+        StopAllCoroutines();
+        DestroyAllActiveEnemies();
+        OnEncounterInfoChanged?.Invoke(null);
     }
 
     public void SetEnemyData(EnemyData[] data) {
@@ -111,7 +128,19 @@ public class EnemyManager : MonoBehaviour {
             yield return null;
         }
 
+        DestroyAllActiveEnemies();
         TransitionToPerkSelection(room);
+    }
+
+    private void DestroyAllActiveEnemies() {
+        foreach (List<EnemyController> enemies in activeEnemies.Values) {
+            foreach (EnemyController enemy in enemies) {
+                if (enemy != null) {
+                    Destroy(enemy.gameObject);
+                }
+            }
+        }
+        activeEnemies.Clear();
     }
 
     private void TransitionToPerkSelection(Room room) {
