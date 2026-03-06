@@ -21,8 +21,18 @@ public class RoomManager : MonoBehaviour {
         }
     }
 
+    public static event System.Action<Room> OnDungeonLoaded;
+    public static event System.Action<Room> OnRoomEntered;
+
     public void SetContext(DungeonGenerationContext ctx) {
         playerSpawnRoom = ctx.playerSpawnRoom;
+        if (Application.isPlaying && playerSpawnRoom != null) {
+            OnDungeonLoaded?.Invoke(playerSpawnRoom);
+        }
+    }
+
+    public void NotifyRoomEntered(Room room) {
+        OnRoomEntered?.Invoke(room);
     }
 
     public void RegisterTrigger(Room room, RoomTrigger trigger) {
