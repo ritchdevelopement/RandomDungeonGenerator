@@ -18,3 +18,4 @@ MonoBehaviour:
   rarity: 2
   type: 6
   value: 0
+  isUnique: 1
