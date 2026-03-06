@@ -27,6 +27,18 @@ public class PerkManager : MonoBehaviour {
         }
     }
 
+    private void OnEnable() {
+        PlayerController.OnDeath += ResetUniquePerks;
+    }
+
+    private void OnDisable() {
+        PlayerController.OnDeath -= ResetUniquePerks;
+    }
+
+    private void ResetUniquePerks() {
+        chosenUniquePerks.Clear();
+    }
+
     public void ShowPerkSelectionUI(Room room) {
         List<PerkData> choices = PickRandomPerks(PerkChoiceCount);
         perkSelectionUI.Show(room, choices);
