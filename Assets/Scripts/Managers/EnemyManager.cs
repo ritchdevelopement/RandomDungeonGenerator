@@ -81,7 +81,7 @@ public class EnemyManager : MonoBehaviour {
 
             int spawnCount = DifficultyManager.Instance.GetWaveEnemyCount(waveIndex);
             int remaining = spawnCount;
-            bool waveCleared = false;
+            bool waveCleared = spawnCount == 0;
 
             for (int i = 0; i < spawnCount; i++) {
                 EnemyData data = DifficultyManager.Instance.SelectEnemyForWave(factionEnemies, waveIndex);
@@ -96,6 +96,7 @@ public class EnemyManager : MonoBehaviour {
             yield return new WaitUntil(() => waveCleared);
         }
 
+        DestroyAllActiveEnemies();
         TransitionToPerkSelection(room);
     }
 
