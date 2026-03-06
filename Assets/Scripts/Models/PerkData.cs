@@ -8,4 +8,5 @@ public class PerkData : ScriptableObject {
     public PerkRarity rarity;
     public PerkType type;
     public float value;
+    public bool isUnique;
 }
