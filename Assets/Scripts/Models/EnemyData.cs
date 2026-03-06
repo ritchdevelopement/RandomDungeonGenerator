@@ -17,6 +17,6 @@ public class EnemyData : ScriptableObject {
 
     [Header("Spawn Weight")]
     [Tooltip("Relative probability of this enemy being selected. Higher = more common.")]
-    [Range(0f, 1f)]
+    [Range(0f, 10f)]
     public float spawnWeight = 1f;
 }

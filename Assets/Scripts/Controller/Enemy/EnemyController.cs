@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour, IDamageable {
-    private const string AnimatorWalkingParam = "IsWalking";
+    private static readonly int AnimatorWalkingParam = Animator.StringToHash("IsWalking");
 
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private int health = 5;

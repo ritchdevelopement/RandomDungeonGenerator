@@ -100,11 +100,7 @@ public class RoomGenerator : DungeonTaskBase {
             throw new System.InvalidOperationException("DungeonConfig.roomSizes must contain at least one entry.");
         }
 
-        List<Vector2Int> pool = new();
-        foreach (Vector2Int size in context.roomSizes) {
-            pool.Add(size);
-        }
-        return pool;
+        return new List<Vector2Int>(context.roomSizes);
     }
 
     private Vector2Int PickRandomSize() {

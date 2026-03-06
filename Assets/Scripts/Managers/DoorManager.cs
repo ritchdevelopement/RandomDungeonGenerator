@@ -14,11 +14,7 @@ public class DoorManager : MonoBehaviour {
     }
 
     public void RegisterDoor(Door model, DoorController doorController) {
-        if (doorLookup.ContainsKey(model)) {
-            return;
-        }
-
-        doorLookup.Add(model, doorController);
+        doorLookup.TryAdd(model, doorController);
     }
 
     public void OpenRoomDoors(Room room) {
