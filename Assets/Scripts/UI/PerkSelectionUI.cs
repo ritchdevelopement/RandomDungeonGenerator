@@ -12,7 +12,9 @@ public class PerkSelectionUI : MonoBehaviour {
     }
 
     public void Show(Room room, List<PerkData> perks) {
-        perkCards ??= panel.GetComponentsInChildren<PerkUI>(true);
+        if (perkCards == null || perkCards.Length == 0 || perkCards[0] == null) {
+            perkCards = panel.GetComponentsInChildren<PerkUI>(true);
+        }
         currentRoom = room;
 
         for (int i = 0; i < Mathf.Min(perkCards.Length, perks.Count); i++) {

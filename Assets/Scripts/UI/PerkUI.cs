@@ -9,8 +9,8 @@ public class PerkUI : MonoBehaviour {
     private Button button;
 
     public void Setup(PerkData data, System.Action onSelected) {
-        icon ??= GetComponent<Image>();
-        button ??= GetComponent<Button>();
+        if (icon == null) { icon = GetComponent<Image>(); }
+        if (button == null) { button = GetComponent<Button>(); }
 
         icon.sprite = data.icon;
         perkNameText.text = data.perkName;

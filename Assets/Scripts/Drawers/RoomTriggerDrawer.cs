@@ -7,17 +7,14 @@ public class RoomTriggerDrawer : DungeonTaskBase {
         DoorManager.Instance.OpenRoomDoors(context.playerSpawnRoom);
 
         foreach (Room room in context.createdRooms.Values) {
-            if (room == context.playerSpawnRoom) {
-                continue;
-            }
-
-            PlaceTrigger(room);
+            bool isSpawnRoom = room == context.playerSpawnRoom;
+            PlaceTrigger(room, isSpawnRoom);
         }
 
         RoomManager.Instance.AssignInitialEvents();
     }
 
-    private void PlaceTrigger(Room room) {
+    private void PlaceTrigger(Room room, bool preActivated = false) {
         GameObject triggerObject = new($"RoomTrigger_{room.Center}");
         triggerObject.transform.SetParent(context.dungeonGameObject.transform);
         triggerObject.transform.position = new Vector3(room.Center.x, room.Center.y, 0);
@@ -27,7 +24,7 @@ public class RoomTriggerDrawer : DungeonTaskBase {
         triggerCollider.size = new Vector2(room.Bounds.width - triggerInset * 2f, room.Bounds.height - triggerInset * 2f);
 
         RoomTrigger roomTrigger = triggerObject.AddComponent<RoomTrigger>();
-        roomTrigger.Initialize(room);
+        roomTrigger.Initialize(room, preActivated);
         RoomManager.Instance.RegisterTrigger(room, roomTrigger);
     }
 }
