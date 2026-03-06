@@ -53,21 +53,9 @@ public class PerkManager : MonoBehaviour {
     }
 
     private List<PerkData> PickRandomPerks(int count) {
-        HashSet<PerkType> excludedTypes = new();
-        foreach (PerkData chosen in chosenUniquePerks) {
-            foreach (PerkType excluded in chosen.incompatibleWith) {
-                excludedTypes.Add(excluded);
-            }
-        }
-
-        List<PerkData> pool = new List<PerkData>();
-        foreach (PerkData perk in allPerks) {
-            if (perk.isUnique && chosenUniquePerks.Contains(perk)) { continue; }
-            if (excludedTypes.Contains(perk.type)) { continue; }
-            pool.Add(perk);
-        }
-
+        List<PerkData> pool = BuildEligiblePerkPool();
         List<PerkData> result = new List<PerkData>();
+
         while (result.Count < count && pool.Count > 0) {
             PerkData picked = PickWeighted(pool);
             result.Add(picked);
@@ -75,6 +63,29 @@ public class PerkManager : MonoBehaviour {
         }
 
         return result;
+    }
+
+    private List<PerkData> BuildEligiblePerkPool() {
+        HashSet<PerkType> excludedTypes = BuildExcludedPerkTypes();
+
+        List<PerkData> pool = new();
+        foreach (PerkData perk in allPerks) {
+            if (perk.isUnique && chosenUniquePerks.Contains(perk)) { continue; }
+            if (excludedTypes.Contains(perk.type)) { continue; }
+            pool.Add(perk);
+        }
+
+        return pool;
+    }
+
+    private HashSet<PerkType> BuildExcludedPerkTypes() {
+        HashSet<PerkType> excluded = new();
+        foreach (PerkData chosen in chosenUniquePerks) {
+            foreach (PerkType type in chosen.incompatibleWith) {
+                excluded.Add(type);
+            }
+        }
+        return excluded;
     }
 
     private PerkData PickWeighted(List<PerkData> pool) {

@@ -40,7 +40,9 @@ public class RoomManager : MonoBehaviour {
     }
 
     public void AssignRandomEventsToSiblings(Room activatedRoom) {
-        ForEachUnclearedSibling(activatedRoom, AssignRandomEvent);
+        foreach (Room sibling in UnclearedSiblings(activatedRoom)) {
+            AssignRandomEvent(sibling);
+        }
     }
 
     public void AddClearedRoom(Room room) {
@@ -48,14 +50,14 @@ public class RoomManager : MonoBehaviour {
         roomTriggers.Remove(room);
     }
 
-    private void ForEachUnclearedSibling(Room excludedRoom, System.Action<Room> action) {
+    private IEnumerable<Room> UnclearedSiblings(Room excludedRoom) {
         foreach (Room parentRoom in ClearedRoomsIncludingSpawn()) {
             if (!parentRoom.Neighbors.ContainsValue(excludedRoom)) {
                 continue;
             }
             foreach (Room sibling in parentRoom.Neighbors.Values) {
                 if (sibling != excludedRoom && !clearedRooms.Contains(sibling)) {
-                    action(sibling);
+                    yield return sibling;
                 }
             }
         }
@@ -81,18 +83,14 @@ public class RoomManager : MonoBehaviour {
     }
 
     private void AssignRandomEvent(Room room) {
-        bool found = roomTriggers.TryGetValue(room, out RoomTrigger trigger);
-        Debug.Log($"[RoomManager] AssignRandomEvent: room={room.Center}, found={found}, triggerNull={trigger == null}");
-        if (!found || trigger == null) {
+        if (!roomTriggers.TryGetValue(room, out RoomTrigger trigger) || trigger == null) {
             return;
         }
 
-        RoomEventType type = RandomEventType();
-        Debug.Log($"[RoomManager] AssignRandomEvent: → {type} to room {room.Center}");
-        trigger.SetEventType(type);
+        trigger.SetEventType(PickRandomEventType());
     }
 
-    private RoomEventType RandomEventType() {
+    private RoomEventType PickRandomEventType() {
         float totalWeight = 0f;
         foreach (RoomTypeWeight entry in roomTypeWeights) {
             totalWeight += entry.weight;
