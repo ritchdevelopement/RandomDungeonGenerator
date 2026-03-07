@@ -2696,7 +2696,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allPerks:
-  - {fileID: 11400000, guid: 7dee3bd2434893c4eb4137d85d2fd1aa, type: 2}
   - {fileID: 11400000, guid: a8f174af7ab5b5a4f965056d5c586b9e, type: 2}
   - {fileID: 11400000, guid: a0620bbac62aa7f489db8f3d741b7e8e, type: 2}
   - {fileID: 11400000, guid: a5e850c1906b1b648aa8003eb23bbeee, type: 2}
@@ -2848,7 +2847,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1430724081}
   - component: {fileID: 1430724083}
-  - component: {fileID: 1430724082}
   m_Layer: 5
   m_Name: AmmoIndicator
   m_TagString: Untagged
@@ -2875,21 +2873,6 @@ RectTransform:
   m_AnchoredPosition: {x: -50, y: 50}
   m_SizeDelta: {x: 175, y: 75}
   m_Pivot: {x: 1, y: 0}
---- !u!114 &1430724082
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1430724080}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 402cd0e894c2cee4480f3df64bf87fba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconSpacing: -20
-  activeColor: {r: 1, g: 1, b: 1, a: 1}
-  depletedColor: {r: 1, g: 1, b: 1, a: 0.3}
 --- !u!114 &1430724083
 MonoBehaviour:
   m_ObjectHideFlags: 0

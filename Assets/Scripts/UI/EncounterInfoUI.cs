@@ -6,10 +6,12 @@ public class EncounterInfoUI : MonoBehaviour {
 
     private void Awake() {
         gameObject.SetActive(false);
+        EnemyManager.OnEncounterInfoChanged += UpdateDisplay;
     }
 
-    private void OnEnable() { EnemyManager.OnEncounterInfoChanged += UpdateDisplay; }
-    private void OnDisable() { EnemyManager.OnEncounterInfoChanged -= UpdateDisplay; }
+    private void OnDestroy() {
+        EnemyManager.OnEncounterInfoChanged -= UpdateDisplay;
+    }
 
     private void UpdateDisplay(string text) {
         if (string.IsNullOrEmpty(text)) {
