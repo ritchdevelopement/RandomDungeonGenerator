@@ -22,16 +22,8 @@ public class WeaponController : MonoBehaviour {
 
     public static WeaponController Instance { get; private set; }
     public static WeaponData CurrentWeapon { get; private set; }
-    public static int CurrentAmmo { get; private set; }
-    public static int MaxAmmo { get; private set; }
-    public static Sprite WeaponSprite {
-        get {
-            if (CurrentWeapon == null || CurrentWeapon.weaponPrefab == null) { return null; }
-            SpriteRenderer spriteRenderer = CurrentWeapon.weaponPrefab.GetComponent<SpriteRenderer>();
-            return spriteRenderer != null ? spriteRenderer.sprite : null;
-        }
-    }
-    public static event System.Action OnWeaponChanged;
+    public static float PrimaryCooldownFraction { get; private set; }
+    public static float SecondaryCooldownFraction { get; private set; }
 
     private void Awake() {
         Instance = this;
@@ -53,22 +45,8 @@ public class WeaponController : MonoBehaviour {
 
     public void Equip(WeaponData weapon) {
         CurrentWeapon = weapon;
-        MaxAmmo = weapon.maxAmmo;
-        CurrentAmmo = weapon.maxAmmo;
         primaryCooldownRemaining = 0f;
         secondaryCooldownRemaining = 0f;
-        OnWeaponChanged?.Invoke();
-    }
-
-    public void ReturnAmmo() {
-        CurrentAmmo = Mathf.Min(CurrentAmmo + 1, MaxAmmo);
-        OnWeaponChanged?.Invoke();
-    }
-
-    public void AddMaxAmmo(int amount) {
-        MaxAmmo += amount;
-        CurrentAmmo = Mathf.Min(CurrentAmmo + amount, MaxAmmo);
-        OnWeaponChanged?.Invoke();
     }
 
     public void EnablePiercing() {
@@ -84,15 +62,13 @@ public class WeaponController : MonoBehaviour {
     }
 
     private bool CanUsePrimary() {
-        return Input.GetMouseButtonDown(0)
-            && CurrentAmmo > 0
+        return Input.GetMouseButton(0)
             && primaryCooldownRemaining <= 0f
             && Time.timeScale > 0f;
     }
 
     private bool CanUseSecondary() {
-        return Input.GetMouseButtonDown(1)
-            && CurrentAmmo > 0
+        return Input.GetMouseButton(1)
             && secondaryCooldownRemaining <= 0f
             && Time.timeScale > 0f;
     }
@@ -102,14 +78,12 @@ public class WeaponController : MonoBehaviour {
 
         Vector2 throwDirection = GetDirectionToMouse();
 
-        int projectileCount = Mathf.Min(1 + extraProjectiles, CurrentAmmo);
+        int projectileCount = 1 + extraProjectiles;
         float totalSpread = (projectileCount - 1) * ProjectileSpreadAngle;
         for (int i = 0; i < projectileCount; i++) {
             float angleOffset = -totalSpread / 2f + i * ProjectileSpreadAngle;
             SpawnProjectile(throwDirection, angleOffset);
         }
-
-        CurrentAmmo -= projectileCount;
     }
 
     private void SpawnProjectile(Vector2 baseDirection, float angleOffset) {
@@ -163,6 +137,13 @@ public class WeaponController : MonoBehaviour {
     private void TickCooldowns() {
         primaryCooldownRemaining = Mathf.Max(0f, primaryCooldownRemaining - Time.deltaTime);
         secondaryCooldownRemaining = Mathf.Max(0f, secondaryCooldownRemaining - Time.deltaTime);
+
+        PrimaryCooldownFraction = CurrentWeapon != null && CurrentWeapon.primaryCooldown > 0f
+            ? primaryCooldownRemaining / CurrentWeapon.primaryCooldown
+            : 0f;
+        SecondaryCooldownFraction = CurrentWeapon != null && CurrentWeapon.meleeCooldown > 0f
+            ? secondaryCooldownRemaining / CurrentWeapon.meleeCooldown
+            : 0f;
     }
 
     private IEnumerator DrawSlashArc(Vector2 direction, Vector2 center) {

@@ -4,7 +4,6 @@ using UnityEngine;
 public class WeaponData : ScriptableObject {
     [Header("General")]
     public string weaponName;
-    public int maxAmmo;
     public GameObject weaponPrefab;
 
     [Header("Primary \u2014 Throw")]

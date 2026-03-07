@@ -19,24 +19,7 @@ public class PerkManager : MonoBehaviour {
     private readonly HashSet<PerkData> chosenUniquePerks = new HashSet<PerkData>();
 
     private void Awake() {
-        if (Instance == null) {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        } else {
-            Destroy(gameObject);
-        }
-    }
-
-    private void OnEnable() {
-        PlayerController.OnDeath += ResetUniquePerks;
-    }
-
-    private void OnDisable() {
-        PlayerController.OnDeath -= ResetUniquePerks;
-    }
-
-    private void ResetUniquePerks() {
-        chosenUniquePerks.Clear();
+        Instance = this;
     }
 
     public void ShowPerkSelectionUI(Room room) {
@@ -125,9 +108,6 @@ public class PerkManager : MonoBehaviour {
             break;
             case PerkType.DashCooldown:
             PlayerController.Instance.ReduceDashCooldown(perk.value);
-            break;
-            case PerkType.MaxAmmo:
-            WeaponController.Instance.AddMaxAmmo((int) perk.value);
             break;
             case PerkType.Piercing:
             WeaponController.Instance.EnablePiercing();

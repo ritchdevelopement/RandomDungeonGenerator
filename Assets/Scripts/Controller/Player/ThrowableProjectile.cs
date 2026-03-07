@@ -71,7 +71,6 @@ public class ThrowableProjectile : MonoBehaviour {
         if (stuckEnemy != null) {
             stuckEnemy.OnDeath -= DetachFromEnemy;
         }
-        WeaponController.Instance.ReturnAmmo();
         Destroy(gameObject);
     }
 
